@@ -18,6 +18,13 @@ mvn clean verify
 docker compose up --build
 ```
 
+If you previously started the PostgreSQL volume before the service databases were added, reset the local volume once:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 ## Default Ports
 
 | Component | Port |
@@ -32,3 +39,15 @@ docker compose up --build
 | RabbitMQ | 5672 |
 | RabbitMQ Management UI | 15672 |
 | Redis | 6379 |
+
+## Local Databases
+
+| Service | Database |
+| --- | --- |
+| Auth Service | `openefms_auth` |
+| Fraud Detection Service | `openefms_fraud` |
+| Rule Management Service | `openefms_rules` |
+| List Management Service | `openefms_lists` |
+| Case Management Service | `openefms_cases` |
+
+See [Database Providers](database-providers.md) for the provider strategy.

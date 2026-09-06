@@ -12,5 +12,6 @@ The boundaries below are placeholders for discussion before implementation.
 | Case Management Service | Case creation, assignment, investigation workflow, and status history. |
 | Common Models | Shared generic primitives only. |
 | Common Events | Shared event contract primitives only. |
+| Common Persistence | Shared persistence dependencies and conventions only. |
 
 Keep shared modules small. Business logic should live in the owning service.
