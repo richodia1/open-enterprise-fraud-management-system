@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: openefms-postgres
+    environment:
+      POSTGRES_DB: openefms
+      POSTGRES_USER: openefms
+      POSTGRES_PASSWORD: openefms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: openefms-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7-alpine
+    container_name: openefms-redis
+    ports:
+      - "6379:6379"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: openefms-api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - fraud-detection-service
+      - rule-management-service
+      - list-management-service
+      - case-management-service
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: openefms-auth-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
+      - redis
+
+  fraud-detection-service:
+    build:
+      context: .
+      dockerfile: services/fraud-detection-service/Dockerfile
+    container_name: openefms-fraud-detection-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+
+  rule-management-service:
+    build:
+      context: .
+      dockerfile: services/rule-management-service/Dockerfile
+    container_name: openefms-rule-management-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+
+  list-management-service:
+    build:
+      context: .
+      dockerfile: services/list-management-service/Dockerfile
+    container_name: openefms-list-management-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+
+  case-management-service:
+    build:
+      context: .
+      dockerfile: services/case-management-service/Dockerfile
+    container_name: openefms-case-management-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data:

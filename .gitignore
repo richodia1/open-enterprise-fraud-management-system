@@ -1,0 +1,14 @@
+.DS_Store
+target/
+*.class
+*.log
+*.iml
+.idea/
+.vscode/
+.project
+.classpath
+.settings/
+.env
+.env.*
+!.env.example
+docker-data/
