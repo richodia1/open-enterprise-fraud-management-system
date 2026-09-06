@@ -3,13 +3,19 @@ services:
     image: postgres:16-alpine
     container_name: openefms-postgres
     environment:
-      POSTGRES_DB: openefms
-      POSTGRES_USER: openefms
-      POSTGRES_PASSWORD: openefms
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      POSTGRES_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${OEFMS_DATASOURCE_USERNAME:-openefms} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
@@ -45,9 +51,17 @@ services:
     container_name: openefms-auth-service
     ports:
       - "8085:8085"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_auth
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   fraud-detection-service:
     build:
@@ -56,10 +70,19 @@ services:
     container_name: openefms-fraud-detection-service
     ports:
       - "8081:8081"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_fraud
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - postgres
-      - rabbitmq
-      - redis
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
 
   rule-management-service:
     build:
@@ -68,8 +91,15 @@ services:
     container_name: openefms-rule-management-service
     ports:
       - "8082:8082"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_rules
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   list-management-service:
     build:
@@ -78,8 +108,15 @@ services:
     container_name: openefms-list-management-service
     ports:
       - "8083:8083"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_lists
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   case-management-service:
     build:
@@ -88,8 +125,15 @@ services:
     container_name: openefms-case-management-service
     ports:
       - "8084:8084"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_cases
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:

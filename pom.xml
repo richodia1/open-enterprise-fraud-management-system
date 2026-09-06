@@ -22,6 +22,7 @@
     <modules>
         <module>shared/common-models</module>
         <module>shared/common-events</module>
+        <module>shared/common-persistence</module>
         <module>services/auth-service</module>
         <module>services/fraud-detection-service</module>
         <module>services/rule-management-service</module>

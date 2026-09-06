@@ -43,7 +43,8 @@ open-enterprise-fraud-management-system/
 │   └── case-management-service/
 ├── shared/
 │   ├── common-models/
-│   └── common-events/
+│   ├── common-events/
+│   └── common-persistence/
 ├── infrastructure/
 │   ├── postgres/
 │   ├── rabbitmq/
@@ -58,6 +59,7 @@ open-enterprise-fraud-management-system/
 - Spring Boot 4.1.1
 - Spring Cloud 2025.1.3
 - Maven multi-module build
+- PostgreSQL 16 for local database testing
 - Docker Compose for local infrastructure
 
 ## First Build Target
