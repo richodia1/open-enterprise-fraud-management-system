@@ -15,6 +15,7 @@ OEFMS should remain adaptable across database providers, but PostgreSQL is the d
 | --- | --- |
 | Auth Service | `openefms_auth` |
 | Fraud Detection Service | `openefms_fraud` |
+| Explainable AI Service | `openefms_explainable_ai` |
 | Rule Management Service | `openefms_rules` |
 | List Management Service | `openefms_lists` |
 | Case Management Service | `openefms_cases` |

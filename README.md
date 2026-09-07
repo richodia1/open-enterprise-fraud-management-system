@@ -42,6 +42,7 @@ open-enterprise-fraud-management-system/
 │   ├── configuration-management-service/
 │   ├── ingestion-management-service/
 │   ├── fraud-detection-service/
+│   ├── explainable-ai-service/
 │   ├── rule-management-service/
 │   ├── list-management-service/
 │   ├── case-management-service/
@@ -101,10 +102,18 @@ Auth Service validates identity and access
 Ingestion Management Service receives and normalises events
         |
         v
-Fraud Detection Service
+Fraud Detection Service produces a preliminary risk decision
         |
         v
-PASS / HOLD / BLOCK / ESCALATE
+Explainable AI Service builds reason and evidence support
+        |
+        v
+Case Management Service presents the explanation to investigators
+        |
+        v
+Investigator confirms, rejects, or escalates the fraud outcome
 ```
 
 No entities, controllers, repositories, fraud rules, or DTOs have been added yet.
+
+See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.

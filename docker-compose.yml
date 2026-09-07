@@ -44,6 +44,7 @@ services:
       - configuration-management-service
       - ingestion-management-service
       - fraud-detection-service
+      - explainable-ai-service
       - rule-management-service
       - list-management-service
       - case-management-service
@@ -135,6 +136,25 @@ services:
       rabbitmq:
         condition: service_started
       redis:
+        condition: service_started
+
+  explainable-ai-service:
+    build:
+      context: .
+      dockerfile: services/explainable-ai-service/Dockerfile
+    container_name: openefms-explainable-ai-service
+    ports:
+      - "8094:8094"
+    environment:
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_explainable_ai
+      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_started
 
   rule-management-service:

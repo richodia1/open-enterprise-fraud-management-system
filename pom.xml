@@ -29,6 +29,7 @@
         <module>services/configuration-management-service</module>
         <module>services/ingestion-management-service</module>
         <module>services/fraud-detection-service</module>
+        <module>services/explainable-ai-service</module>
         <module>services/rule-management-service</module>
         <module>services/list-management-service</module>
         <module>services/case-management-service</module>
