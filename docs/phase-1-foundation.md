@@ -46,6 +46,7 @@ Use one branch per focused foundation change.
 - Define stable request, response, and event names before building persistence.
 - Keep contract versioning in mind from the first API and event models.
 - Record major architectural choices in documentation before implementation spreads across services.
+- Initial shared API and event shapes are tracked in [Service Contracts](service-contracts.md).
 
 ### Local Infrastructure
 
