@@ -65,6 +65,10 @@ services:
       OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
       OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
       OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      OEFMS_FRAUD_DECISION_MODE: ${OEFMS_FRAUD_DECISION_MODE:-rules}
+      OEFMS_FRAUD_ML_PROVIDER: ${OEFMS_FRAUD_ML_PROVIDER:-disabled}
+      OEFMS_FRAUD_ML_MODEL_NAME: ${OEFMS_FRAUD_ML_MODEL_NAME:-xgboost-baseline}
+      OEFMS_FRAUD_ML_SCORE_THRESHOLD: ${OEFMS_FRAUD_ML_SCORE_THRESHOLD:-0.80}
     depends_on:
       postgres:
         condition: service_healthy

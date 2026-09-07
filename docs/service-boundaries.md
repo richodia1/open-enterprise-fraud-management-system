@@ -10,7 +10,7 @@ The boundaries below are placeholders for discussion before implementation.
 | Administration Service | Administrative operations, operational settings, tenant administration, and back-office workflows. |
 | Configuration Management Service | Runtime configuration, feature flags, service settings, and fraud platform policy configuration. |
 | Ingestion Management Service | Transaction, customer, account, channel, and event ingestion from banking and payment systems. |
-| Fraud Detection Service | Fraud-check orchestration, risk decisioning, scoring, and decision publication. |
+| Fraud Detection Service | Fraud-check orchestration, configurable rule/ML/hybrid decisioning, risk scoring, and decision publication. |
 | Rule Management Service | Fraud/AML rule configuration and lifecycle management. |
 | List Management Service | Watchlist, blacklist, whitelist, sanctions, and internal list management. |
 | Case Management Service | Case creation, assignment, investigation workflow, and status history. |

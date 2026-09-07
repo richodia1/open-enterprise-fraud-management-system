@@ -53,6 +53,8 @@ open-enterprise-fraud-management-system/
 │   ├── common-models/
 │   ├── common-events/
 │   └── common-persistence/
+├── data/
+├── ml/
 ├── infrastructure/
 │   ├── postgres/
 │   ├── rabbitmq/
@@ -69,6 +71,18 @@ open-enterprise-fraud-management-system/
 - Maven multi-module build
 - PostgreSQL 16 for local database testing
 - Docker Compose for local infrastructure
+
+## Fraud Decision Modes
+
+The Fraud Detection Service is prepared for configurable decisioning:
+
+```text
+OEFMS_FRAUD_DECISION_MODE=rules
+```
+
+Planned values are `rules`, `ml`, and `hybrid`. The default is `rules` until ML model training, validation, model governance, and serving are implemented.
+
+See [ML and AI Strategy](docs/ml-ai-strategy.md) for the dataset and model direction.
 
 ## First Build Target
 
