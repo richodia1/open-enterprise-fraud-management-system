@@ -1,6 +1,93 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: auth-service
+              uri: "${OEFMS_GATEWAY_AUTH_SERVICE_URL:http://localhost:8085}"
+              predicates:
+                - Path=/auth/**,/oauth2/**,/.well-known/**,/userinfo,/login,/login/**
+            - id: identity-service
+              uri: "${OEFMS_GATEWAY_IDENTITY_SERVICE_URL:http://localhost:8087}"
+              predicates:
+                - Path=/api/identity/**
+              filters:
+                - StripPrefix=2
+            - id: administration-service
+              uri: "${OEFMS_GATEWAY_ADMINISTRATION_SERVICE_URL:http://localhost:8086}"
+              predicates:
+                - Path=/api/admin/**
+              filters:
+                - StripPrefix=2
+            - id: configuration-management-service
+              uri: "${OEFMS_GATEWAY_CONFIGURATION_SERVICE_URL:http://localhost:8088}"
+              predicates:
+                - Path=/api/configuration/**
+              filters:
+                - StripPrefix=2
+            - id: ingestion-management-service
+              uri: "${OEFMS_GATEWAY_INGESTION_SERVICE_URL:http://localhost:8089}"
+              predicates:
+                - Path=/api/ingestion/**
+              filters:
+                - StripPrefix=2
+            - id: fraud-detection-service
+              uri: "${OEFMS_GATEWAY_FRAUD_SERVICE_URL:http://localhost:8081}"
+              predicates:
+                - Path=/api/fraud/**
+              filters:
+                - StripPrefix=2
+            - id: explainable-ai-service
+              uri: "${OEFMS_GATEWAY_EXPLAINABLE_AI_SERVICE_URL:http://localhost:8094}"
+              predicates:
+                - Path=/api/explanations/**
+              filters:
+                - StripPrefix=2
+            - id: rule-management-service
+              uri: "${OEFMS_GATEWAY_RULE_SERVICE_URL:http://localhost:8082}"
+              predicates:
+                - Path=/api/rules/**
+              filters:
+                - StripPrefix=2
+            - id: list-management-service
+              uri: "${OEFMS_GATEWAY_LIST_SERVICE_URL:http://localhost:8083}"
+              predicates:
+                - Path=/api/lists/**
+              filters:
+                - StripPrefix=2
+            - id: case-management-service
+              uri: "${OEFMS_GATEWAY_CASE_SERVICE_URL:http://localhost:8084}"
+              predicates:
+                - Path=/api/cases/**
+              filters:
+                - StripPrefix=2
+            - id: audit-logging-service
+              uri: "${OEFMS_GATEWAY_AUDIT_SERVICE_URL:http://localhost:8090}"
+              predicates:
+                - Path=/api/audit/**
+              filters:
+                - StripPrefix=2
+            - id: notification-management-service
+              uri: "${OEFMS_GATEWAY_NOTIFICATION_SERVICE_URL:http://localhost:8091}"
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=2
+            - id: report-management-service
+              uri: "${OEFMS_GATEWAY_REPORT_SERVICE_URL:http://localhost:8092}"
+              predicates:
+                - Path=/api/reports/**
+              filters:
+                - StripPrefix=2
+            - id: gdpr-service
+              uri: "${OEFMS_GATEWAY_GDPR_SERVICE_URL:http://localhost:8093}"
+              predicates:
+                - Path=/api/gdpr/**
+              filters:
+                - StripPrefix=2
 
 server:
   port: 8080
@@ -10,3 +97,13 @@ management:
     web:
       exposure:
         include: health,info
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-}]"
+
+oefms:
+  gateway:
+    security:
+      enabled: "${OEFMS_GATEWAY_SECURITY_ENABLED:false}"
+      jwk-set-uri: "${OEFMS_GATEWAY_AUTH_JWK_SET_URI:http://localhost:8085/oauth2/jwks}"

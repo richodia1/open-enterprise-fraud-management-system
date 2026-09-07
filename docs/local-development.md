@@ -62,6 +62,7 @@ docker compose up --build
 | Component | URL | Username | Password |
 | --- | --- | --- | --- |
 | RabbitMQ Management UI | `http://localhost:15672` | `openefms` | `openefms` |
+| API Gateway Routes | `http://localhost:8080/gateway/routes` | n/a | n/a |
 | Auth Service Bootstrap User | `http://localhost:8085/auth/foundation` | `oefms-admin` | `openefms-admin` |
 
 ## Local Databases

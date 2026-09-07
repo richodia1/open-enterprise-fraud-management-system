@@ -125,3 +125,5 @@ No entities, controllers, repositories, fraud rules, or DTOs have been added yet
 See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.
 
 See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
+
+See [API Gateway](docs/api-gateway.md) for the first route map, request correlation, and security integration points.

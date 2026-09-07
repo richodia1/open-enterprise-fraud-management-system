@@ -23,6 +23,31 @@ PostgreSQL is the default local database provider for v0.1.
 
 Database-backed services set their own `OEFMS_DATASOURCE_URL` in `docker-compose.yml` so each service can point to its own database.
 
+## Gateway Variables
+
+Gateway variables belong to the API Gateway and define edge routing, correlation, and optional JWT verification.
+
+The defaults below are for direct local JVM execution. Docker Compose and `.env.example` use service DNS names for the gateway container.
+
+| Variable | Purpose | Local Default |
+| --- | --- | --- |
+| `OEFMS_GATEWAY_AUTH_SERVICE_URL` | Auth Service base URL. | `http://localhost:8085` |
+| `OEFMS_GATEWAY_IDENTITY_SERVICE_URL` | Identity Service base URL. | `http://localhost:8087` |
+| `OEFMS_GATEWAY_ADMINISTRATION_SERVICE_URL` | Administration Service base URL. | `http://localhost:8086` |
+| `OEFMS_GATEWAY_CONFIGURATION_SERVICE_URL` | Configuration Management Service base URL. | `http://localhost:8088` |
+| `OEFMS_GATEWAY_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
+| `OEFMS_GATEWAY_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
+| `OEFMS_GATEWAY_EXPLAINABLE_AI_SERVICE_URL` | Explainable AI Service base URL. | `http://localhost:8094` |
+| `OEFMS_GATEWAY_RULE_SERVICE_URL` | Rule Management Service base URL. | `http://localhost:8082` |
+| `OEFMS_GATEWAY_LIST_SERVICE_URL` | List Management Service base URL. | `http://localhost:8083` |
+| `OEFMS_GATEWAY_CASE_SERVICE_URL` | Case Management Service base URL. | `http://localhost:8084` |
+| `OEFMS_GATEWAY_AUDIT_SERVICE_URL` | Audit Logging Service base URL. | `http://localhost:8090` |
+| `OEFMS_GATEWAY_NOTIFICATION_SERVICE_URL` | Notification Management Service base URL. | `http://localhost:8091` |
+| `OEFMS_GATEWAY_REPORT_SERVICE_URL` | Report Management Service base URL. | `http://localhost:8092` |
+| `OEFMS_GATEWAY_GDPR_SERVICE_URL` | GDPR Service base URL. | `http://localhost:8093` |
+| `OEFMS_GATEWAY_SECURITY_ENABLED` | Enables JWT verification for `/api/**` routes. | `false` |
+| `OEFMS_GATEWAY_AUTH_JWK_SET_URI` | JWK Set URI used when gateway security is enabled. | `http://localhost:8085/oauth2/jwks` |
+
 ## Auth Variables
 
 Auth variables belong to the Auth Service and are currently used for local bootstrap configuration only.
