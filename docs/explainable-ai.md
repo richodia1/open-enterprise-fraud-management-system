@@ -1,0 +1,43 @@
+# Explainable AI
+
+The Explainable AI Service is a decision-support boundary for fraud investigators and operational users.
+
+It should not be the final authority that labels a transaction as fraud. Its role is to explain the evidence behind a fraud decision so a human user can understand what happened before confirming, rejecting, or escalating the case.
+
+## Intended Flow
+
+```text
+Ingestion Management Service
+    |
+    v
+Fraud Detection Service
+    |
+    v
+Explainable AI Service
+    |
+    v
+Case Management Service
+    |
+    v
+Investigator final decision
+```
+
+## Future Responsibilities
+
+- Explain matched fraud rules in plain language.
+- Summarise model signals that contributed to a risk score.
+- Show feature contributions such as amount, velocity, location, channel, device, beneficiary, account age, and previous behaviour.
+- Highlight missing or low-quality data that may reduce confidence.
+- Produce an evidence pack for case review.
+- Publish explanation events for audit logging.
+- Support multiple explanation methods over time, including rule-based narratives, feature contribution summaries, counterfactual hints, and model-specific explainability techniques.
+
+## Important Boundary
+
+Fraud Detection Service owns risk scoring and decision orchestration.
+
+Explainable AI Service owns reasoning support and explanation generation.
+
+Case Management Service owns the investigator workflow and final user action.
+
+This separation keeps the platform auditable and makes it easier for financial institutions to adopt different AI or model-serving stacks later.

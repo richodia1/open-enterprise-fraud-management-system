@@ -43,6 +43,7 @@ docker compose up --build
 | Notification Management Service | 8091 |
 | Report Management Service | 8092 |
 | GDPR Service | 8093 |
+| Explainable AI Service | 8094 |
 | PostgreSQL | 5432 |
 | RabbitMQ | 5672 |
 | RabbitMQ Management UI | 15672 |
@@ -54,6 +55,7 @@ docker compose up --build
 | --- | --- |
 | Auth Service | `openefms_auth` |
 | Fraud Detection Service | `openefms_fraud` |
+| Explainable AI Service | `openefms_explainable_ai` |
 | Rule Management Service | `openefms_rules` |
 | List Management Service | `openefms_lists` |
 | Case Management Service | `openefms_cases` |
