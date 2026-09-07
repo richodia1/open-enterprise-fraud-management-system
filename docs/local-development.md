@@ -12,13 +12,21 @@
 mvn clean verify
 ```
 
+## Check Local Configuration
+
+```bash
+./scripts/check-local-config.sh
+```
+
 ## Run Local Stack
 
 ```bash
 docker compose up --build
 ```
 
-If you previously started the PostgreSQL volume before the service databases were added, reset the local volume once:
+The stack uses health checks for PostgreSQL, RabbitMQ, and Redis. See [Platform Configuration](platform-configuration.md) for local environment variables and service ownership rules.
+
+If you previously started local infrastructure before database, RabbitMQ, or Redis settings changed, reset the local volumes once:
 
 ```bash
 docker compose down -v
@@ -48,6 +56,12 @@ docker compose up --build
 | RabbitMQ | 5672 |
 | RabbitMQ Management UI | 15672 |
 | Redis | 6379 |
+
+## Local Infrastructure Credentials
+
+| Component | URL | Username | Password |
+| --- | --- | --- | --- |
+| RabbitMQ Management UI | `http://localhost:15672` | `openefms` | `openefms` |
 
 ## Local Databases
 

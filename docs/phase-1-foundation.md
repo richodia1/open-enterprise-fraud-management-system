@@ -53,6 +53,7 @@ Use one branch per focused foundation change.
 - RabbitMQ is the default local broker.
 - Redis remains available for future caching, idempotency, or rate-limiting support.
 - Service configuration must remain environment-driven so deployments can swap provider details.
+- Shared runtime environment rules are tracked in [Platform Configuration](platform-configuration.md).
 
 ### Auth And Gateway
 

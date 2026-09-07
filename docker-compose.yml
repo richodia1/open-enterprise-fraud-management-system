@@ -1,3 +1,9 @@
+x-postgres-service-environment: &postgres-service-environment
+  OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
+  OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
+  OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
+  OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -20,15 +26,33 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: openefms-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${OEFMS_RABBITMQ_USERNAME:-openefms}
+      RABBITMQ_DEFAULT_PASS: ${OEFMS_RABBITMQ_PASSWORD:-openefms}
+      RABBITMQ_DEFAULT_VHOST: ${OEFMS_RABBITMQ_VHOST:-openefms}
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: openefms-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api-gateway:
     build:
@@ -61,16 +85,13 @@ services:
     ports:
       - "8085:8085"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_auth
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
   identity-service:
     build:
@@ -80,7 +101,8 @@ services:
     ports:
       - "8087:8087"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   administration-service:
     build:
@@ -90,7 +112,8 @@ services:
     ports:
       - "8086:8086"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   configuration-management-service:
     build:
@@ -100,7 +123,8 @@ services:
     ports:
       - "8088:8088"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   ingestion-management-service:
     build:
@@ -110,8 +134,10 @@ services:
     ports:
       - "8089:8089"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   fraud-detection-service:
     build:
@@ -121,11 +147,8 @@ services:
     ports:
       - "8081:8081"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_fraud
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       OEFMS_FRAUD_DECISION_MODE: ${OEFMS_FRAUD_DECISION_MODE:-rules}
       OEFMS_FRAUD_ML_PROVIDER: ${OEFMS_FRAUD_ML_PROVIDER:-disabled}
       OEFMS_FRAUD_ML_MODEL_NAME: ${OEFMS_FRAUD_ML_MODEL_NAME:-xgboost-baseline}
@@ -134,9 +157,9 @@ services:
       postgres:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
   explainable-ai-service:
     build:
@@ -146,16 +169,13 @@ services:
     ports:
       - "8094:8094"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_explainable_ai
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   rule-management-service:
     build:
@@ -165,11 +185,8 @@ services:
     ports:
       - "8082:8082"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_rules
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:
         condition: service_healthy
@@ -182,11 +199,8 @@ services:
     ports:
       - "8083:8083"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_lists
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:
         condition: service_healthy
@@ -199,11 +213,8 @@ services:
     ports:
       - "8084:8084"
     environment:
+      <<: *postgres-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_cases
-      OEFMS_DATASOURCE_USERNAME: ${OEFMS_DATASOURCE_USERNAME:-openefms}
-      OEFMS_DATASOURCE_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
-      OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
-      OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       postgres:
         condition: service_healthy
@@ -216,8 +227,10 @@ services:
     ports:
       - "8090:8090"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   notification-management-service:
     build:
@@ -227,7 +240,8 @@ services:
     ports:
       - "8091:8091"
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   report-management-service:
     build:
@@ -237,7 +251,8 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   gdpr-service:
     build:
@@ -247,7 +262,10 @@ services:
     ports:
       - "8093:8093"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:
+  rabbitmq-data:
+  redis-data:
