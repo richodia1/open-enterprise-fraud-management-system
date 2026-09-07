@@ -28,6 +28,14 @@ docker compose up --build
 | List Management Service | 8083 |
 | Case Management Service | 8084 |
 | Auth Service | 8085 |
+| Administration Service | 8086 |
+| Identity Service | 8087 |
+| Configuration Management Service | 8088 |
+| Ingestion Management Service | 8089 |
+| Audit Logging Service | 8090 |
+| Notification Management Service | 8091 |
+| Report Management Service | 8092 |
+| GDPR Service | 8093 |
 | PostgreSQL | 5432 |
 | RabbitMQ | 5672 |
 | RabbitMQ Management UI | 15672 |

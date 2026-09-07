@@ -33,10 +33,18 @@ services:
       - "8080:8080"
     depends_on:
       - auth-service
+      - identity-service
+      - administration-service
+      - configuration-management-service
+      - ingestion-management-service
       - fraud-detection-service
       - rule-management-service
       - list-management-service
       - case-management-service
+      - audit-logging-service
+      - notification-management-service
+      - report-management-service
+      - gdpr-service
 
   auth-service:
     build:
@@ -48,6 +56,47 @@ services:
     depends_on:
       - postgres
       - redis
+
+  identity-service:
+    build:
+      context: .
+      dockerfile: services/identity-service/Dockerfile
+    container_name: openefms-identity-service
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+
+  administration-service:
+    build:
+      context: .
+      dockerfile: services/administration-service/Dockerfile
+    container_name: openefms-administration-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      - postgres
+
+  configuration-management-service:
+    build:
+      context: .
+      dockerfile: services/configuration-management-service/Dockerfile
+    container_name: openefms-configuration-management-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      - postgres
+
+  ingestion-management-service:
+    build:
+      context: .
+      dockerfile: services/ingestion-management-service/Dockerfile
+    container_name: openefms-ingestion-management-service
+    ports:
+      - "8089:8089"
+    depends_on:
+      - postgres
+      - rabbitmq
 
   fraud-detection-service:
     build:
@@ -88,6 +137,47 @@ services:
     container_name: openefms-case-management-service
     ports:
       - "8084:8084"
+    depends_on:
+      - postgres
+
+  audit-logging-service:
+    build:
+      context: .
+      dockerfile: services/audit-logging-service/Dockerfile
+    container_name: openefms-audit-logging-service
+    ports:
+      - "8090:8090"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  notification-management-service:
+    build:
+      context: .
+      dockerfile: services/notification-management-service/Dockerfile
+    container_name: openefms-notification-management-service
+    ports:
+      - "8091:8091"
+    depends_on:
+      - rabbitmq
+
+  report-management-service:
+    build:
+      context: .
+      dockerfile: services/report-management-service/Dockerfile
+    container_name: openefms-report-management-service
+    ports:
+      - "8092:8092"
+    depends_on:
+      - postgres
+
+  gdpr-service:
+    build:
+      context: .
+      dockerfile: services/gdpr-service/Dockerfile
+    container_name: openefms-gdpr-service
+    ports:
+      - "8093:8093"
     depends_on:
       - postgres
 

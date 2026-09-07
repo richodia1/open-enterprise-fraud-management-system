@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: audit-logging-service
+
+server:
+  port: 8090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

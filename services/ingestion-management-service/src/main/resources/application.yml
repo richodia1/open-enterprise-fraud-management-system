@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ingestion-management-service
+
+server:
+  port: 8089
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
