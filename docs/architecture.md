@@ -6,6 +6,8 @@ The repository contains multiple deployable Spring Boot services and small share
 
 PostgreSQL is the default local test database for v0.1. The service datasource settings are environment-driven so future deployments can adopt other database providers by supplying the proper JDBC URL, driver, dialect, and migration location.
 
+Fraud decisioning should support configurable rule-based, ML-based, and hybrid modes. The default mode is rule-based until trained models, validation, explainability, and model governance are added.
+
 ## High-Level Direction
 
 ```text

@@ -25,3 +25,12 @@ management:
     web:
       exposure:
         include: health,info
+
+oefms:
+  fraud:
+    decision:
+      mode: "${OEFMS_FRAUD_DECISION_MODE:rules}"
+      ml:
+        provider: "${OEFMS_FRAUD_ML_PROVIDER:disabled}"
+        model-name: "${OEFMS_FRAUD_ML_MODEL_NAME:xgboost-baseline}"
+        score-threshold: "${OEFMS_FRAUD_ML_SCORE_THRESHOLD:0.80}"

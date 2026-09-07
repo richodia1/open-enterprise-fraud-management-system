@@ -12,3 +12,13 @@ target/
 .env.*
 !.env.example
 docker-data/
+data/raw/
+data/interim/
+data/processed/
+data/external/
+ml/artifacts/
+*.parquet
+*.pkl
+*.joblib
+*.xgb
+*.ubj

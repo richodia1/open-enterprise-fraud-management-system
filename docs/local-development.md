@@ -61,3 +61,13 @@ docker compose up --build
 | Case Management Service | `openefms_cases` |
 
 See [Database Providers](database-providers.md) for the provider strategy.
+
+## Fraud Decision Mode
+
+The Fraud Detection Service defaults to rule-based decisioning:
+
+```bash
+OEFMS_FRAUD_DECISION_MODE=rules
+```
+
+Future supported values are `rules`, `ml`, and `hybrid`. See [ML and AI Strategy](ml-ai-strategy.md).
