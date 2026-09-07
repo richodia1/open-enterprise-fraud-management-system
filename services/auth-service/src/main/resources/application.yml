@@ -25,3 +25,24 @@ management:
     web:
       exposure:
         include: health,info
+
+oefms:
+  auth:
+    issuer: "${OEFMS_AUTH_ISSUER:http://localhost:8085}"
+    bootstrap:
+      user:
+        username: "${OEFMS_AUTH_BOOTSTRAP_USERNAME:oefms-admin}"
+        password: "${OEFMS_AUTH_BOOTSTRAP_PASSWORD:openefms-admin}"
+        roles: "${OEFMS_AUTH_BOOTSTRAP_ROLES:PLATFORM_ADMIN,FRAUD_ANALYST}"
+        permissions: "${OEFMS_AUTH_BOOTSTRAP_PERMISSIONS:oefms.read,oefms.write,fraud.decision.read,fraud.case.write}"
+      client:
+        client-id: "${OEFMS_AUTH_CLIENT_ID:oefms-platform}"
+        client-secret: "${OEFMS_AUTH_CLIENT_SECRET:openefms-platform-secret}"
+        client-name: "${OEFMS_AUTH_CLIENT_NAME:OEFMS Platform Client}"
+        redirect-uris: "${OEFMS_AUTH_CLIENT_REDIRECT_URIS:http://127.0.0.1:8080/login/oauth2/code/oefms-platform}"
+        post-logout-redirect-uris: "${OEFMS_AUTH_CLIENT_POST_LOGOUT_REDIRECT_URIS:http://127.0.0.1:8080/}"
+        scopes: "${OEFMS_AUTH_CLIENT_SCOPES:openid,profile,oefms.read,oefms.write,fraud.decision.read,fraud.case.write}"
+        access-token-ttl: "${OEFMS_AUTH_CLIENT_ACCESS_TOKEN_TTL:PT15M}"
+        refresh-token-ttl: "${OEFMS_AUTH_CLIENT_REFRESH_TOKEN_TTL:PT8H}"
+        require-proof-key: "${OEFMS_AUTH_CLIENT_REQUIRE_PROOF_KEY:true}"
+        require-authorization-consent: "${OEFMS_AUTH_CLIENT_REQUIRE_AUTHORIZATION_CONSENT:true}"

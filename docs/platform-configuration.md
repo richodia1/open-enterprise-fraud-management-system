@@ -23,6 +23,28 @@ PostgreSQL is the default local database provider for v0.1.
 
 Database-backed services set their own `OEFMS_DATASOURCE_URL` in `docker-compose.yml` so each service can point to its own database.
 
+## Auth Variables
+
+Auth variables belong to the Auth Service and are currently used for local bootstrap configuration only.
+
+| Variable | Purpose | Local Default |
+| --- | --- | --- |
+| `OEFMS_AUTH_ISSUER` | Authorization server issuer URL. | `http://localhost:8085` |
+| `OEFMS_AUTH_BOOTSTRAP_USERNAME` | Local bootstrap username. | `oefms-admin` |
+| `OEFMS_AUTH_BOOTSTRAP_PASSWORD` | Local bootstrap password. | `openefms-admin` |
+| `OEFMS_AUTH_BOOTSTRAP_ROLES` | Comma-separated local bootstrap roles. | `PLATFORM_ADMIN,FRAUD_ANALYST` |
+| `OEFMS_AUTH_BOOTSTRAP_PERMISSIONS` | Comma-separated local bootstrap permissions. | `oefms.read,oefms.write,fraud.decision.read,fraud.case.write` |
+| `OEFMS_AUTH_CLIENT_ID` | Local bootstrap OAuth2 client id. | `oefms-platform` |
+| `OEFMS_AUTH_CLIENT_SECRET` | Local bootstrap OAuth2 client secret. | `openefms-platform-secret` |
+| `OEFMS_AUTH_CLIENT_NAME` | Local bootstrap OAuth2 client name. | `OEFMS Platform Client` |
+| `OEFMS_AUTH_CLIENT_REDIRECT_URIS` | Comma-separated authorization-code redirect URIs. | `http://127.0.0.1:8080/login/oauth2/code/oefms-platform` |
+| `OEFMS_AUTH_CLIENT_POST_LOGOUT_REDIRECT_URIS` | Comma-separated post-logout redirect URIs. | `http://127.0.0.1:8080/` |
+| `OEFMS_AUTH_CLIENT_SCOPES` | Comma-separated OAuth2/OIDC scopes. | `openid,profile,oefms.read,oefms.write,fraud.decision.read,fraud.case.write` |
+| `OEFMS_AUTH_CLIENT_ACCESS_TOKEN_TTL` | Local access token lifetime. | `PT15M` |
+| `OEFMS_AUTH_CLIENT_REFRESH_TOKEN_TTL` | Local refresh token lifetime. | `PT8H` |
+| `OEFMS_AUTH_CLIENT_REQUIRE_PROOF_KEY` | Requires PKCE for supported flows. | `true` |
+| `OEFMS_AUTH_CLIENT_REQUIRE_AUTHORIZATION_CONSENT` | Requires user consent for authorization-code flows. | `true` |
+
 ## RabbitMQ Variables
 
 RabbitMQ is the default local broker for asynchronous events.
