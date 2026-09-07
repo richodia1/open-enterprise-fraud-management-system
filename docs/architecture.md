@@ -17,6 +17,7 @@ API Gateway
     +-- Configuration Management Service
     +-- Ingestion Management Service
     +-- Fraud Detection Service
+    +-- Explainable AI Service
     +-- Rule Management Service
     +-- List Management Service
     +-- Case Management Service
@@ -25,6 +26,8 @@ API Gateway
     +-- Report Management Service
     +-- GDPR Service
 ```
+
+Fraud decisions should be traceable. The Explainable AI Service is intended to produce investigator-facing decision support from rule hits, model signals, feature contributions, historical context, and audit trails. It should explain why a transaction is risky before a user finally confirms or rejects a fraud outcome.
 
 Future modules may include ML scoring, graph intelligence, device intelligence, and external integration adapters.
 

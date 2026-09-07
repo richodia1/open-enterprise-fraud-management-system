@@ -11,6 +11,7 @@ The boundaries below are placeholders for discussion before implementation.
 | Configuration Management Service | Runtime configuration, feature flags, service settings, and fraud platform policy configuration. |
 | Ingestion Management Service | Transaction, customer, account, channel, and event ingestion from banking and payment systems. |
 | Fraud Detection Service | Fraud-check orchestration, risk decisioning, scoring, and decision publication. |
+| Explainable AI Service | Decision-support explanations, evidence summaries, feature/rule contribution narratives, and investigator-facing reasoning packs before final fraud confirmation. |
 | Rule Management Service | Fraud/AML rule configuration and lifecycle management. |
 | List Management Service | Watchlist, blacklist, whitelist, sanctions, and internal list management. |
 | Case Management Service | Case creation, assignment, investigation workflow, and status history. |
