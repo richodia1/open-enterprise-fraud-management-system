@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: gdpr-service
+
+server:
+  port: 8093
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

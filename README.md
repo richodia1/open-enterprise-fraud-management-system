@@ -37,10 +37,18 @@ open-enterprise-fraud-management-system/
 ├── api-gateway/
 ├── services/
 │   ├── auth-service/
+│   ├── identity-service/
+│   ├── administration-service/
+│   ├── configuration-management-service/
+│   ├── ingestion-management-service/
 │   ├── fraud-detection-service/
 │   ├── rule-management-service/
 │   ├── list-management-service/
-│   └── case-management-service/
+│   ├── case-management-service/
+│   ├── audit-logging-service/
+│   ├── notification-management-service/
+│   ├── report-management-service/
+│   └── gdpr-service/
 ├── shared/
 │   ├── common-models/
 │   ├── common-events/
@@ -74,6 +82,9 @@ API Gateway
         |
         v
 Auth Service validates identity and access
+        |
+        v
+Ingestion Management Service receives and normalises events
         |
         v
 Fraud Detection Service

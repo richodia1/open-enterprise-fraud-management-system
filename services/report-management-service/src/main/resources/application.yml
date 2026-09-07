@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: report-management-service
+
+server:
+  port: 8092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

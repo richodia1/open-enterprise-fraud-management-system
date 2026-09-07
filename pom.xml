@@ -24,10 +24,18 @@
         <module>shared/common-events</module>
         <module>shared/common-persistence</module>
         <module>services/auth-service</module>
+        <module>services/identity-service</module>
+        <module>services/administration-service</module>
+        <module>services/configuration-management-service</module>
+        <module>services/ingestion-management-service</module>
         <module>services/fraud-detection-service</module>
         <module>services/rule-management-service</module>
         <module>services/list-management-service</module>
         <module>services/case-management-service</module>
+        <module>services/audit-logging-service</module>
+        <module>services/notification-management-service</module>
+        <module>services/report-management-service</module>
+        <module>services/gdpr-service</module>
         <module>api-gateway</module>
     </modules>
 
