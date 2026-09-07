@@ -24,3 +24,5 @@ The boundaries below are placeholders for discussion before implementation.
 | Common Persistence | Shared persistence dependencies and conventions only. |
 
 Keep shared modules small. Business logic should live in the owning service.
+
+See [Service Contracts](service-contracts.md) for the initial shared API and event shapes.

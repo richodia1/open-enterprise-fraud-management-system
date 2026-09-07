@@ -77,7 +77,7 @@ open-enterprise-fraud-management-system/
 
 Phase 1 is the active foundation phase. It focuses on service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first fraud decision spine before deeper domain implementation.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md) and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 

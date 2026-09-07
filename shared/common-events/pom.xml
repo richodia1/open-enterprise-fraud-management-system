@@ -13,4 +13,12 @@
 
     <artifactId>common-events</artifactId>
     <name>Common Events</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openefms</groupId>
+            <artifactId>common-models</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
