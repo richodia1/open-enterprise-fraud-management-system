@@ -8,6 +8,8 @@ PostgreSQL is the default local test database for v0.1. The service datasource s
 
 Fraud decisioning should support configurable rule-based, ML-based, and hybrid modes. The default mode is rule-based until trained models, validation, explainability, and model governance are added.
 
+The active implementation sequence is tracked in [Phase 1 Foundation](phase-1-foundation.md).
+
 ## High-Level Direction
 
 ```text
