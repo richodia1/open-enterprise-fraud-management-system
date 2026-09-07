@@ -123,3 +123,5 @@ Investigator confirms, rejects, or escalates the fraud outcome
 No entities, controllers, repositories, fraud rules, or DTOs have been added yet.
 
 See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.
+
+See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
