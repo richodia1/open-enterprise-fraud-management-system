@@ -4,6 +4,18 @@ x-postgres-service-environment: &postgres-service-environment
   OEFMS_DATASOURCE_DRIVER: org.postgresql.Driver
   OEFMS_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
 
+x-rabbitmq-service-environment: &rabbitmq-service-environment
+  OEFMS_RABBITMQ_HOST: rabbitmq
+  OEFMS_RABBITMQ_PORT: 5672
+  OEFMS_RABBITMQ_USERNAME: ${OEFMS_RABBITMQ_USERNAME:-openefms}
+  OEFMS_RABBITMQ_PASSWORD: ${OEFMS_RABBITMQ_PASSWORD:-openefms}
+  OEFMS_RABBITMQ_VHOST: ${OEFMS_RABBITMQ_VHOST:-openefms}
+  OEFMS_RABBITMQ_EXCHANGE: ${OEFMS_RABBITMQ_EXCHANGE:-oefms.events}
+  OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE: ${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:-oefms.events.dlx}
+
+x-postgres-rabbitmq-service-environment: &postgres-rabbitmq-service-environment
+  <<: [*postgres-service-environment, *rabbitmq-service-environment]
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -148,6 +160,8 @@ services:
     container_name: openefms-ingestion-management-service
     ports:
       - "8089:8089"
+    environment:
+      <<: *rabbitmq-service-environment
     depends_on:
       postgres:
         condition: service_healthy
@@ -162,7 +176,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      <<: *postgres-service-environment
+      <<: *postgres-rabbitmq-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_fraud
       OEFMS_FRAUD_DECISION_MODE: ${OEFMS_FRAUD_DECISION_MODE:-rules}
       OEFMS_FRAUD_ML_PROVIDER: ${OEFMS_FRAUD_ML_PROVIDER:-disabled}
@@ -184,7 +198,7 @@ services:
     ports:
       - "8094:8094"
     environment:
-      <<: *postgres-service-environment
+      <<: *postgres-rabbitmq-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_explainable_ai
     depends_on:
       postgres:
@@ -228,10 +242,12 @@ services:
     ports:
       - "8084:8084"
     environment:
-      <<: *postgres-service-environment
+      <<: *postgres-rabbitmq-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_cases
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   audit-logging-service:
@@ -241,6 +257,8 @@ services:
     container_name: openefms-audit-logging-service
     ports:
       - "8090:8090"
+    environment:
+      <<: *rabbitmq-service-environment
     depends_on:
       postgres:
         condition: service_healthy
@@ -254,6 +272,8 @@ services:
     container_name: openefms-notification-management-service
     ports:
       - "8091:8091"
+    environment:
+      <<: *rabbitmq-service-environment
     depends_on:
       rabbitmq:
         condition: service_healthy

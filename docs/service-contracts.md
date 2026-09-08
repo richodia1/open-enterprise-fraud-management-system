@@ -7,7 +7,7 @@ The contracts live in shared modules:
 | Module | Purpose |
 | --- | --- |
 | `shared/common-models` | API/data contracts used by services. |
-| `shared/common-events` | Event envelope, metadata, event type names, and typed event payloads. |
+| `shared/common-events` | Event envelope, metadata, event type names, typed event payloads, and RabbitMQ naming conventions. |
 
 These modules should stay small. Do not add repositories, JPA annotations, service logic, or institution-specific behavior to shared contracts.
 
@@ -22,6 +22,7 @@ These modules should stay small. Do not add repositories, JPA annotations, servi
 | `org.openefms.common.models.casefile` | Case creation request and priority. |
 | `org.openefms.common.models.audit` | Audit event record and audit action. |
 | `org.openefms.common.events` | Generic event envelope, metadata, and event type constants. |
+| `org.openefms.common.events.rabbitmq` | RabbitMQ exchange, queue, routing-key, binding, and header conventions. |
 
 ## Initial Flow Contracts
 
@@ -81,6 +82,8 @@ Initial event names are exposed through `EventTypes`.
 | `AUDIT_EVENT_RECORDED` | `audit.event.recorded` |
 
 Use `EventMetadata.eventVersion` for versioning instead of embedding a version suffix in the event name.
+
+See [RabbitMQ Event Spine](rabbitmq-event-spine.md) for the first broker exchange, queue, routing-key, binding, and header conventions.
 
 ## Contract Rules
 
