@@ -77,7 +77,7 @@ open-enterprise-fraud-management-system/
 
 Phase 1 is the active foundation phase. It focuses on service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first fraud decision spine before deeper domain implementation.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
@@ -127,3 +127,5 @@ See [Explainable AI](docs/explainable-ai.md) for the planned decision-support bo
 See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
 
 See [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md) for the first broker exchange, queue, routing-key, binding, and header conventions.
+
+See [Fraud Detection Core](docs/fraud-detection-core.md) for the first rule-mode decision endpoint and orchestration path.

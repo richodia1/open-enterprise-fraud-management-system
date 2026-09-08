@@ -1,0 +1,91 @@
+# Fraud Detection Core
+
+Fraud Detection Core is the first Phase 1 implementation of a preliminary fraud-check path.
+
+It is intentionally small: no persistence entities, repositories, external rule engine, ML runtime, RabbitMQ listener, or production fraud policy has been added yet.
+
+## HTTP Decision Endpoint
+
+Fraud Detection Service exposes:
+
+```text
+POST /api/v1/fraud/decisions
+```
+
+Request body:
+
+```text
+TransactionIngestionRequest
+```
+
+Response body:
+
+```text
+FraudDecisionResponse
+```
+
+The endpoint uses the shared transaction and fraud contracts in `common-models`.
+
+## Default Decision Mode
+
+The default mode is:
+
+```text
+OEFMS_FRAUD_DECISION_MODE=rules
+```
+
+In Phase 1, only `rules` mode is active. `ml` and `hybrid` remain configuration-ready but return `501 Not Implemented` until model serving, validation, explainability, and governance are implemented.
+
+## Baseline Rule Indicators
+
+The first baseline rule engine produces deterministic `RuleHit` entries from:
+
+| Rule Code | Purpose |
+| --- | --- |
+| `HIGH_VALUE_AMOUNT` | Amount is at or above the high-value threshold. |
+| `CRITICAL_VALUE_AMOUNT` | Amount is at or above the critical-value threshold. |
+| `VELOCITY_REVIEW_THRESHOLD` | Recent transaction count is at or above the review threshold. |
+| `VELOCITY_BLOCK_THRESHOLD` | Recent transaction count is at or above the block threshold. |
+| `CROSS_BORDER_PARTIES` | Originator and beneficiary country codes differ. |
+| `HIGH_RISK_HINT` | Input attributes carry an upstream high-risk hint. |
+| `UNKNOWN_TRANSACTION_CHANNEL` | Transaction arrived through the generic `OTHER` channel. |
+
+Velocity can be supplied through any of these request attributes:
+
+```text
+velocityCount
+recentTransactionCount
+transactionsInLastHour
+```
+
+High-risk hints can be supplied through:
+
+```text
+riskHint=high
+highRisk=true
+```
+
+## Score And Outcome
+
+Rule contributions are summed and capped at `1.00`.
+
+| Score Range | Risk Band | Outcome |
+| --- | --- | --- |
+| Below review threshold | `LOW` | `APPROVE` |
+| At or above review threshold | `MEDIUM` | `REVIEW` |
+| At or above block threshold | `HIGH` | `BLOCK` |
+| At or above escalation threshold | `CRITICAL` | `ESCALATE` |
+
+Thresholds are environment-driven and documented in [Platform Configuration](platform-configuration.md).
+
+## Event Boundary
+
+The orchestration layer can turn an `EventEnvelope<TransactionReceivedEvent>` into a transport-ready `FraudDecisionMessage`.
+
+That message includes:
+
+- Exchange: `oefms.events`
+- Routing key: `fraud.decision.produced`
+- Payload: `EventEnvelope<FraudDecisionProducedEvent>`
+
+This prepares the RabbitMQ publisher branch without adding broker listener or publishing infrastructure in this branch.

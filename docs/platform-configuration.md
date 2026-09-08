@@ -72,6 +72,13 @@ Fraud decision variables belong to the Fraud Detection Service.
 | Variable | Purpose | Local Default |
 | --- | --- | --- |
 | `OEFMS_FRAUD_DECISION_MODE` | Selects rule, ML, or hybrid decisioning. | `rules` |
+| `OEFMS_FRAUD_RULE_HIGH_VALUE_AMOUNT_THRESHOLD` | Rule-mode high-value amount threshold. | `10000.00` |
+| `OEFMS_FRAUD_RULE_CRITICAL_VALUE_AMOUNT_THRESHOLD` | Rule-mode critical-value amount threshold. | `100000.00` |
+| `OEFMS_FRAUD_RULE_VELOCITY_REVIEW_COUNT` | Rule-mode recent transaction count that contributes to review. | `5` |
+| `OEFMS_FRAUD_RULE_VELOCITY_BLOCK_COUNT` | Rule-mode recent transaction count that contributes to block/escalation. | `10` |
+| `OEFMS_FRAUD_RULE_REVIEW_SCORE_THRESHOLD` | Score at which rule mode returns `REVIEW`. | `0.35` |
+| `OEFMS_FRAUD_RULE_BLOCK_SCORE_THRESHOLD` | Score at which rule mode returns `BLOCK`. | `0.70` |
+| `OEFMS_FRAUD_RULE_ESCALATE_SCORE_THRESHOLD` | Score at which rule mode returns `ESCALATE`. | `0.90` |
 | `OEFMS_FRAUD_ML_PROVIDER` | Future model provider boundary. | `disabled` |
 | `OEFMS_FRAUD_ML_MODEL_NAME` | Future deployed model name. | `xgboost-baseline` |
 | `OEFMS_FRAUD_ML_SCORE_THRESHOLD` | Future model score threshold. | `0.80` |
