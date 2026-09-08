@@ -54,6 +54,10 @@ RabbitMQ is the default local broker for asynchronous events.
 | `OEFMS_RABBITMQ_USERNAME` | Local RabbitMQ username. | `openefms` |
 | `OEFMS_RABBITMQ_PASSWORD` | Local RabbitMQ password. | `openefms` |
 | `OEFMS_RABBITMQ_VHOST` | Local RabbitMQ virtual host. | `openefms` |
+| `OEFMS_RABBITMQ_HOST` | RabbitMQ host used by event-facing services. | `localhost` |
+| `OEFMS_RABBITMQ_PORT` | RabbitMQ AMQP port used by event-facing services. | `5672` |
+| `OEFMS_RABBITMQ_EXCHANGE` | Domain event exchange. | `oefms.events` |
+| `OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE` | Domain event dead-letter exchange. | `oefms.events.dlx` |
 
 The RabbitMQ Management UI runs on:
 

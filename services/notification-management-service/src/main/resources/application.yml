@@ -1,6 +1,12 @@
 spring:
   application:
     name: notification-management-service
+  rabbitmq:
+    host: "${OEFMS_RABBITMQ_HOST:localhost}"
+    port: "${OEFMS_RABBITMQ_PORT:5672}"
+    username: "${OEFMS_RABBITMQ_USERNAME:openefms}"
+    password: "${OEFMS_RABBITMQ_PASSWORD:openefms}"
+    virtual-host: "${OEFMS_RABBITMQ_VHOST:openefms}"
 
 server:
   port: 8091
@@ -10,3 +16,8 @@ management:
     web:
       exposure:
         include: health,info
+
+oefms:
+  rabbitmq:
+    exchange: "${OEFMS_RABBITMQ_EXCHANGE:oefms.events}"
+    dead-letter-exchange: "${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:oefms.events.dlx}"
