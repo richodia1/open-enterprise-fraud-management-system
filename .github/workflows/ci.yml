@@ -23,3 +23,6 @@ jobs:
 
       - name: Build
         run: mvn clean verify
+
+      - name: Local smoke checks
+        run: ./scripts/smoke-local.sh --skip-build

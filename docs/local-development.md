@@ -18,6 +18,34 @@ mvn clean verify
 ./scripts/check-local-config.sh
 ```
 
+## Run Local Smoke Checks
+
+Run the CI-friendly smoke checks:
+
+```bash
+./scripts/smoke-local.sh --skip-build
+```
+
+Run Maven verification and the static smoke checks together:
+
+```bash
+./scripts/smoke-local.sh
+```
+
+Probe a local stack that is already running:
+
+```bash
+./scripts/smoke-local.sh --skip-build --live
+```
+
+Start the core Phase 1 services and then probe them:
+
+```bash
+./scripts/smoke-local.sh --skip-build --start-stack
+```
+
+The live smoke path checks Auth, Ingestion Management, Fraud Detection, Explainable AI, and Case Management health endpoints, then posts a low-risk transaction to the Fraud Detection Service decision endpoint.
+
 ## Run Local Stack
 
 ```bash
