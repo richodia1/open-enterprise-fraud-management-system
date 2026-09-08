@@ -38,6 +38,7 @@ Use one branch per focused foundation change.
 - Keep branches short-lived and PR-sized.
 - Require `mvn clean verify` before merge.
 - Keep `docker compose config` valid after every infrastructure change.
+- Run local smoke checks before larger integration branches merge.
 - Review license, README, security notes, and contribution guidance before any future public release.
 
 ### Architecture And Contracts
@@ -55,6 +56,7 @@ Use one branch per focused foundation change.
 - Redis remains available for future caching, idempotency, or rate-limiting support.
 - Service configuration must remain environment-driven so deployments can swap provider details.
 - Shared runtime environment rules are tracked in [Platform Configuration](platform-configuration.md).
+- Local validation is tracked in [Local Smoke Tests](local-smoke-tests.md).
 
 ### Auth And Gateway
 
