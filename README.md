@@ -126,6 +126,8 @@ See [Explainable AI](docs/explainable-ai.md) for the planned decision-support bo
 
 See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
 
+See [API Gateway](docs/api-gateway.md) for the first route map, request correlation, and security integration points.
+
 See [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md) for the first broker exchange, queue, routing-key, binding, and header conventions.
 
 See [Fraud Detection Core](docs/fraud-detection-core.md) for the first rule-mode decision endpoint and orchestration path.

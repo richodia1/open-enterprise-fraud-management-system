@@ -12,7 +12,7 @@ health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
 fraud_service_url="${OEFMS_SMOKE_FRAUD_SERVICE_URL:-http://localhost:8081}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
-gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-}"
+gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
 
 core_services=(
   postgres
@@ -41,7 +41,7 @@ Environment:
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
-  OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Optional gateway path for the fraud decision probe.
+  OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -195,11 +195,7 @@ run_live_checks() {
 
   if [ "$gateway_checks" = true ]; then
     wait_for_http "API Gateway" "${gateway_url}/actuator/health"
-    if [ -n "$gateway_fraud_decision_path" ]; then
-      probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
-    else
-      log "Skipping gateway fraud decision probe because OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH is not set"
-    fi
+    probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
   fi
 }
 
