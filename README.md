@@ -6,7 +6,7 @@ OEFMS v0.1 is the initial foundation of the project and is being developed colla
 
 The project aims to provide an open and adaptable architecture that can be extended for different financial institutions, transaction types, fraud scenarios, regulatory environments, and technology stacks.
 
-OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, RabbitMQ conventions, and the first rule-mode Fraud Detection slice.
+OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, and the first rule-mode Fraud Detection slice.
 
 ## GitHub Repository Description
 
@@ -75,9 +75,11 @@ open-enterprise-fraud-management-system/
 
 ## Current Roadmap
 
-Phase 1 is the active foundation phase. It focuses on service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first fraud decision spine before deeper domain implementation.
+Phase 1 established the platform foundation: service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first rule-mode fraud decision spine.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
+Phase 2 is the next implementation phase. It focuses on the first end-to-end domain workflow: transaction ingestion, RabbitMQ event publication, fraud decision consumption, explainable decision support, case handoff, and audit logging.
+
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
