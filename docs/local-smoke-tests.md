@@ -33,16 +33,26 @@ To start the core Phase 1 services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
+When `--gateway` is also supplied, the script starts and probes `api-gateway` as well.
+
 The core live checks cover:
 
 | Component | Probe |
 | --- | --- |
 | Auth Service | `GET /actuator/health` |
 | Ingestion Management Service | `GET /actuator/health` |
+| Ingestion Management Service | `POST /api/v1/ingestion/transactions` |
 | Fraud Detection Service | `GET /actuator/health` |
 | Explainable AI Service | `GET /actuator/health` |
 | Case Management Service | `GET /actuator/health` |
 | Fraud Detection Service | `POST /api/v1/fraud/decisions` |
+
+The ingestion probe posts a low-risk synthetic transaction and expects:
+
+```text
+status=RECEIVED
+eventType=transaction.received
+```
 
 The fraud decision probe posts a low-risk synthetic transaction and expects:
 
@@ -54,7 +64,7 @@ ruleHitCount=0
 
 ## Gateway Probe
 
-Gateway health and the Gateway fraud decision route can be included with:
+Gateway health, transaction ingestion, and the Gateway fraud decision route can be included with:
 
 ```bash
 ./scripts/smoke-local.sh --skip-build --live --gateway
@@ -73,8 +83,10 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | --- | --- | --- |
 | `MAVEN_CMD` | Maven executable used by the script. | `mvn` |
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
+| `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
+| `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |

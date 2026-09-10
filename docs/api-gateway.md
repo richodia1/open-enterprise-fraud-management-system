@@ -35,7 +35,7 @@ It returns route ids, public path patterns, the correlation header name, and whe
 | `/api/identity/**` | Identity Service |
 | `/api/admin/**` | Administration Service |
 | `/api/configuration/**` | Configuration Management Service |
-| `/api/ingestion/**` | Ingestion Management Service |
+| `/api/v1/ingestion/**` | Ingestion Management Service |
 | `/api/v1/fraud/**` | Fraud Detection Service |
 | `/api/explanations/**` | Explainable AI Service |
 | `/api/rules/**` | Rule Management Service |
@@ -52,9 +52,10 @@ Most scaffolded business-service routes strip the first two path segments before
 /api/rules/actuator/health -> /actuator/health
 ```
 
-Fraud Detection Core currently keeps its versioned service path end to end:
+Ingestion Management and Fraud Detection Core keep their versioned service paths end to end:
 
 ```text
+/api/v1/ingestion/transactions -> /api/v1/ingestion/transactions
 /api/v1/fraud/decisions -> /api/v1/fraud/decisions
 ```
 

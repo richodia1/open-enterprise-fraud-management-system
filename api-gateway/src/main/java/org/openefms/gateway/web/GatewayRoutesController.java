@@ -15,7 +15,7 @@ class GatewayRoutesController {
             new GatewayRouteSummary("identity-service", "/api/identity/**", "Identity Service"),
             new GatewayRouteSummary("administration-service", "/api/admin/**", "Administration Service"),
             new GatewayRouteSummary("configuration-management-service", "/api/configuration/**", "Configuration Management Service"),
-            new GatewayRouteSummary("ingestion-management-service", "/api/ingestion/**", "Ingestion Management Service"),
+            new GatewayRouteSummary("ingestion-management-service", "/api/v1/ingestion/**", "Ingestion Management Service"),
             new GatewayRouteSummary("fraud-detection-service", "/api/v1/fraud/**", "Fraud Detection Service"),
             new GatewayRouteSummary("explainable-ai-service", "/api/explanations/**", "Explainable AI Service"),
             new GatewayRouteSummary("rule-management-service", "/api/rules/**", "Rule Management Service"),
