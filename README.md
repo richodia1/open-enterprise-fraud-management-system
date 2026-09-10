@@ -6,7 +6,7 @@ OEFMS v0.1 is the initial foundation of the project and is being developed colla
 
 The project aims to provide an open and adaptable architecture that can be extended for different financial institutions, transaction types, fraud scenarios, regulatory environments, and technology stacks.
 
-This scaffold is intentionally empty of business logic. It only defines the project layout, Spring Boot service shells, shared library modules, Docker build boundaries, and local infrastructure.
+OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, RabbitMQ conventions, and the first rule-mode Fraud Detection slice.
 
 ## GitHub Repository Description
 
@@ -77,7 +77,7 @@ open-enterprise-fraud-management-system/
 
 Phase 1 is the active foundation phase. It focuses on service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first fraud decision spine before deeper domain implementation.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
@@ -120,10 +120,30 @@ Case Management Service presents the explanation to investigators
 Investigator confirms, rejects, or escalates the fraud outcome
 ```
 
-No entities, controllers, repositories, fraud rules, or DTOs have been added yet.
+No domain persistence entities, repositories, production fraud policy, full RabbitMQ workflow, or frontend analyst console has been added yet.
 
 See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.
 
 See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
 
 See [API Gateway](docs/api-gateway.md) for the first route map, request correlation, and security integration points.
+
+See [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md) for the first broker exchange, queue, routing-key, binding, and header conventions.
+
+See [Fraud Detection Core](docs/fraud-detection-core.md) for the first rule-mode decision endpoint and orchestration path.
+
+## Local Smoke Checks
+
+CI runs the static local smoke checks after the Maven build:
+
+```bash
+./scripts/smoke-local.sh --skip-build
+```
+
+For a running local stack, add live health and decision probes:
+
+```bash
+./scripts/smoke-local.sh --skip-build --live
+```
+
+See [Local Smoke Tests](docs/local-smoke-tests.md) for live stack and optional gateway probes.

@@ -37,9 +37,7 @@ spring:
             - id: fraud-detection-service
               uri: "${OEFMS_GATEWAY_FRAUD_SERVICE_URL:http://localhost:8081}"
               predicates:
-                - Path=/api/fraud/**
-              filters:
-                - StripPrefix=2
+                - Path=/api/v1/fraud/**
             - id: explainable-ai-service
               uri: "${OEFMS_GATEWAY_EXPLAINABLE_AI_SERVICE_URL:http://localhost:8094}"
               predicates:

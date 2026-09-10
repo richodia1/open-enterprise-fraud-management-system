@@ -16,6 +16,12 @@ spring:
   flyway:
     enabled: "${OEFMS_FLYWAY_ENABLED:true}"
     locations: "${OEFMS_FLYWAY_LOCATIONS:classpath:db/migration/common,classpath:db/migration/postgresql}"
+  rabbitmq:
+    host: "${OEFMS_RABBITMQ_HOST:localhost}"
+    port: "${OEFMS_RABBITMQ_PORT:5672}"
+    username: "${OEFMS_RABBITMQ_USERNAME:openefms}"
+    password: "${OEFMS_RABBITMQ_PASSWORD:openefms}"
+    virtual-host: "${OEFMS_RABBITMQ_VHOST:openefms}"
 
 server:
   port: 8081
@@ -27,9 +33,20 @@ management:
         include: health,info
 
 oefms:
+  rabbitmq:
+    exchange: "${OEFMS_RABBITMQ_EXCHANGE:oefms.events}"
+    dead-letter-exchange: "${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:oefms.events.dlx}"
   fraud:
     decision:
       mode: "${OEFMS_FRAUD_DECISION_MODE:rules}"
+      rules:
+        high-value-amount-threshold: "${OEFMS_FRAUD_RULE_HIGH_VALUE_AMOUNT_THRESHOLD:10000.00}"
+        critical-value-amount-threshold: "${OEFMS_FRAUD_RULE_CRITICAL_VALUE_AMOUNT_THRESHOLD:100000.00}"
+        velocity-review-count: "${OEFMS_FRAUD_RULE_VELOCITY_REVIEW_COUNT:5}"
+        velocity-block-count: "${OEFMS_FRAUD_RULE_VELOCITY_BLOCK_COUNT:10}"
+        review-score-threshold: "${OEFMS_FRAUD_RULE_REVIEW_SCORE_THRESHOLD:0.35}"
+        block-score-threshold: "${OEFMS_FRAUD_RULE_BLOCK_SCORE_THRESHOLD:0.70}"
+        escalate-score-threshold: "${OEFMS_FRAUD_RULE_ESCALATE_SCORE_THRESHOLD:0.90}"
       ml:
         provider: "${OEFMS_FRAUD_ML_PROVIDER:disabled}"
         model-name: "${OEFMS_FRAUD_ML_MODEL_NAME:xgboost-baseline}"
