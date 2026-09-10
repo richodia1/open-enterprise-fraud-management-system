@@ -79,7 +79,7 @@ Phase 1 established the platform foundation: service contracts, Auth, API Gatewa
 
 Phase 2 is the next implementation phase. It focuses on the first end-to-end domain workflow: transaction ingestion, RabbitMQ event publication, fraud decision consumption, explainable decision support, case handoff, and audit logging.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 

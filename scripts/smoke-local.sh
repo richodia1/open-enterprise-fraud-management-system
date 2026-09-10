@@ -10,8 +10,10 @@ env_file="${OEFMS_SMOKE_ENV_FILE:-.env.example}"
 maven_cmd="${MAVEN_CMD:-mvn}"
 health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
+ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}"
 fraud_service_url="${OEFMS_SMOKE_FRAUD_SERVICE_URL:-http://localhost:8081}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
+gateway_ingestion_path="${OEFMS_SMOKE_GATEWAY_INGESTION_PATH:-/api/v1/ingestion/transactions}"
 gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
 
 core_services=(
@@ -39,8 +41,10 @@ Options:
 Environment:
   MAVEN_CMD                                 Maven executable. Default: mvn
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
+  OEFMS_SMOKE_INGESTION_SERVICE_URL        Ingestion service URL. Default: http://localhost:8089
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
+  OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
   OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
@@ -108,7 +112,7 @@ wait_for_http() {
   log "${name} is healthy"
 }
 
-decision_payload() {
+transaction_payload() {
   cat <<'JSON'
 {
   "transactionId": "118f3bd4-b208-44ff-b1ff-447c78d80d02",
@@ -145,6 +149,22 @@ decision_payload() {
 JSON
 }
 
+probe_transaction_ingestion() {
+  local url="$1"
+  local response
+
+  log "Posting smoke transaction to ${url}"
+  response="$(curl -fsS \
+    -H 'Content-Type: application/json' \
+    -H 'X-Correlation-Id: smoke-correlation-1' \
+    -d "$(transaction_payload)" \
+    "$url")"
+
+  printf '%s' "$response" | grep -q '"status":"RECEIVED"' || fail "Ingestion response did not acknowledge the smoke transaction"
+  printf '%s' "$response" | grep -q '"eventType":"transaction.received"' || fail "Ingestion response did not prepare a transaction.received event"
+  log "Transaction ingestion probe passed"
+}
+
 probe_fraud_decision() {
   local url="$1"
   local response
@@ -152,7 +172,7 @@ probe_fraud_decision() {
   log "Posting smoke transaction to ${url}"
   response="$(curl -fsS \
     -H 'Content-Type: application/json' \
-    -d "$(decision_payload)" \
+    -d "$(transaction_payload)" \
     "$url")"
 
   printf '%s' "$response" | grep -q '"mode":"RULES"' || fail "Fraud decision response did not use RULES mode"
@@ -181,20 +201,27 @@ run_live_checks() {
   require_command curl
 
   if [ "$start_stack" = true ]; then
+    local services_to_start=("${core_services[@]}")
+    if [ "$gateway_checks" = true ]; then
+      services_to_start+=(api-gateway)
+    fi
+
     docker info >/dev/null 2>&1 || fail "Docker daemon is not running; start Docker before using --start-stack"
-    log "Starting core Phase 1 services"
-    compose up -d --build "${core_services[@]}"
+    log "Starting local smoke-test services"
+    compose up -d --build "${services_to_start[@]}"
   fi
 
   wait_for_http "Auth Service" "${OEFMS_SMOKE_AUTH_SERVICE_URL:-http://localhost:8085}/actuator/health"
-  wait_for_http "Ingestion Management Service" "${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}/actuator/health"
+  wait_for_http "Ingestion Management Service" "${ingestion_service_url}/actuator/health"
   wait_for_http "Fraud Detection Service" "${fraud_service_url}/actuator/health"
   wait_for_http "Explainable AI Service" "${OEFMS_SMOKE_EXPLAINABLE_AI_SERVICE_URL:-http://localhost:8094}/actuator/health"
   wait_for_http "Case Management Service" "${OEFMS_SMOKE_CASE_SERVICE_URL:-http://localhost:8084}/actuator/health"
+  probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
 
   if [ "$gateway_checks" = true ]; then
     wait_for_http "API Gateway" "${gateway_url}/actuator/health"
+    probe_transaction_ingestion "${gateway_url}${gateway_ingestion_path}"
     probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
   fi
 }

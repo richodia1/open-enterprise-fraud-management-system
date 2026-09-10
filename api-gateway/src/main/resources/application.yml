@@ -31,9 +31,7 @@ spring:
             - id: ingestion-management-service
               uri: "${OEFMS_GATEWAY_INGESTION_SERVICE_URL:http://localhost:8089}"
               predicates:
-                - Path=/api/ingestion/**
-              filters:
-                - StripPrefix=2
+                - Path=/api/v1/ingestion/**
             - id: fraud-detection-service
               uri: "${OEFMS_GATEWAY_FRAUD_SERVICE_URL:http://localhost:8081}"
               predicates:
