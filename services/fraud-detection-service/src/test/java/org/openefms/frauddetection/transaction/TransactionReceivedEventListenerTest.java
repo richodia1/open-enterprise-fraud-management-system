@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.EventTypes;
+import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.fraud.DecisionOutcome;
@@ -28,9 +29,11 @@ import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.openefms.common.models.transaction.TransactionParty;
 import org.openefms.common.models.transaction.TransactionType;
 import org.openefms.frauddetection.decision.FraudDecisionMessage;
+import org.openefms.frauddetection.decision.FraudDecisionMessageSink;
 import org.openefms.frauddetection.decision.FraudDecisionOrchestrator;
 import org.openefms.frauddetection.decision.FraudDecisionProperties;
 import org.openefms.frauddetection.decision.RuleBasedFraudDecisionEngine;
+import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
 
 class TransactionReceivedEventListenerTest {
     private static final Clock FIXED_CLOCK =
@@ -105,6 +108,7 @@ class TransactionReceivedEventListenerTest {
     private FraudDecisionOrchestrator rulesOrchestrator() {
         return new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("rules", null, null),
+                new FraudRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
                 new RuleBasedFraudDecisionEngine(),
                 FIXED_CLOCK);
     }

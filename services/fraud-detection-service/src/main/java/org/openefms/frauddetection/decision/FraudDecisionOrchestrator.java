@@ -10,12 +10,12 @@ import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.EventTypes;
 import org.openefms.common.events.fraud.FraudDecisionProducedEvent;
-import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqTopology;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.FraudDecisionResponse;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
+import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,14 +24,17 @@ public class FraudDecisionOrchestrator {
     private static final String SOURCE_SERVICE = "fraud-detection-service";
 
     private final FraudDecisionProperties properties;
+    private final FraudRabbitMqProperties rabbitMqProperties;
     private final RuleBasedFraudDecisionEngine ruleBasedEngine;
     private final Clock clock;
 
     public FraudDecisionOrchestrator(
             FraudDecisionProperties properties,
+            FraudRabbitMqProperties rabbitMqProperties,
             RuleBasedFraudDecisionEngine ruleBasedEngine,
             Clock clock) {
         this.properties = properties;
+        this.rabbitMqProperties = rabbitMqProperties;
         this.ruleBasedEngine = ruleBasedEngine;
         this.clock = clock;
     }
@@ -53,7 +56,7 @@ public class FraudDecisionOrchestrator {
                 decisionMetadata(transactionEvent.metadata()),
                 new FraudDecisionProducedEvent(decision));
 
-        return new FraudDecisionMessage(RabbitMqExchanges.DOMAIN_EVENTS, routingKey, envelope);
+        return new FraudDecisionMessage(rabbitMqProperties.exchange(), routingKey, envelope);
     }
 
     private EventMetadata decisionMetadata(EventMetadata sourceMetadata) {

@@ -5,7 +5,7 @@ import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.fraud.FraudDecisionProducedEvent;
 
 /**
- * Transport-ready decision message for a future RabbitMQ publisher.
+ * Transport-ready decision message for RabbitMQ publication.
  */
 public record FraudDecisionMessage(
         String exchangeName,

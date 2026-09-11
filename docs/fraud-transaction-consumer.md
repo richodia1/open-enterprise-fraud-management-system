@@ -31,7 +31,7 @@ FraudDecisionOrchestrator
 FraudDecisionMessageSink
 ```
 
-The current sink logs that a `FraudDecisionProducedEvent` message has been prepared. It does not publish the decision event yet.
+The current sink publishes a `FraudDecisionProducedEvent` message to the shared RabbitMQ event exchange.
 
 ## Requeue Behaviour
 
@@ -43,6 +43,15 @@ OEFMS_RABBITMQ_DEFAULT_REQUEUE_REJECTED=false
 
 That prevents invalid messages from being immediately requeued forever.
 
-## Next Branch
+## Published Event
 
-`feature/fraud-decision-events` should replace or extend the current sink with a RabbitMQ publisher that sends `fraud.decision.produced` messages to the shared event exchange with the same header convention used by ingestion.
+The listener hands the scored transaction to the fraud decision publisher. The publisher sends:
+
+| Field | Value |
+| --- | --- |
+| Exchange | `oefms.events` |
+| Routing key | `fraud.decision.produced` |
+| Payload | `EventEnvelope<FraudDecisionProducedEvent>` |
+| Delivery mode | Persistent |
+
+The publisher copies event id, event type, event version, source service, tenant, correlation id, causation id, and trace id into RabbitMQ headers.

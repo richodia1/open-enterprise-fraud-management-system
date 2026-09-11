@@ -103,7 +103,8 @@ The first consumer:
 - Binds the fraud queue to `transaction.received`.
 - Validates event type and event version before processing.
 - Runs the existing rule-mode decision orchestrator.
-- Prepares a `FraudDecisionProducedEvent` message for the next publishing branch.
-- Does not publish the decision event yet.
+- Publishes a `FraudDecisionProducedEvent` message to the shared event exchange.
+- Preserves correlation metadata and uses the source transaction event id as causation id.
+- Copies the shared event metadata into broker headers.
 
 Service-specific retry policies, idempotency storage, dead-letter inspection workflows, and outbox-backed publication should be added in later implementation branches.
