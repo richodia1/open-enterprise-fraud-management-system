@@ -25,4 +25,16 @@ class TransactionIngestionErrorHandler {
         problem.setTitle("Transaction ingestion request body is invalid");
         return ResponseEntity.badRequest().body(problem);
     }
+
+    @ExceptionHandler(TransactionEventPublicationException.class)
+    ResponseEntity<ProblemDetail> handlePublicationFailure(TransactionEventPublicationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Transaction was accepted by the API layer but could not be published to the event broker.");
+        problem.setTitle("Transaction event publication failed");
+        problem.setProperty("eventType", exception.eventType());
+        problem.setProperty("exchange", exception.exchangeName());
+        problem.setProperty("routingKey", exception.routingKey());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problem);
+    }
 }

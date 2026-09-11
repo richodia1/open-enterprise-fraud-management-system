@@ -9,12 +9,12 @@ import java.util.UUID;
 import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.EventTypes;
-import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqTopology;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.transaction.TransactionAmount;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.openefms.common.models.transaction.TransactionParty;
+import org.openefms.ingestionmanagement.messaging.IngestionRabbitMqProperties;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,10 +25,18 @@ class TransactionIngestionService {
     private static final String SOURCE_SERVICE = "ingestion-management-service";
 
     private final TransactionIngestionRequestValidator validator;
+    private final TransactionEventPublisher publisher;
+    private final IngestionRabbitMqProperties rabbitMqProperties;
     private final Clock clock;
 
-    TransactionIngestionService(TransactionIngestionRequestValidator validator, Clock clock) {
+    TransactionIngestionService(
+            TransactionIngestionRequestValidator validator,
+            TransactionEventPublisher publisher,
+            IngestionRabbitMqProperties rabbitMqProperties,
+            Clock clock) {
         this.validator = validator;
+        this.publisher = publisher;
+        this.rabbitMqProperties = rabbitMqProperties;
         this.clock = clock;
     }
 
@@ -46,9 +54,10 @@ class TransactionIngestionService {
                 new TransactionReceivedEvent(normalisedRequest));
 
         TransactionIngestionMessage message = new TransactionIngestionMessage(
-                RabbitMqExchanges.DOMAIN_EVENTS,
+                rabbitMqProperties.exchange(),
                 RabbitMqTopology.routingKeyFor(EventTypes.TRANSACTION_RECEIVED),
                 envelope);
+        publisher.publish(message);
 
         return new TransactionIngestionResult(response(normalisedRequest, resolvedCorrelationId, acceptedAt), message);
     }
@@ -89,7 +98,7 @@ class TransactionIngestionService {
                 EventTypes.TRANSACTION_RECEIVED,
                 correlationId,
                 acceptedAt,
-                Map.of("eventPublication", "prepared"));
+                Map.of("eventPublication", "published"));
     }
 
     private TransactionIngestionRequest normalise(TransactionIngestionRequest request) {

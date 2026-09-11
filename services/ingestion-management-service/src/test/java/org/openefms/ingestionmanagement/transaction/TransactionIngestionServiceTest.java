@@ -23,6 +23,7 @@ import org.openefms.common.models.transaction.TransactionDirection;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.openefms.common.models.transaction.TransactionParty;
 import org.openefms.common.models.transaction.TransactionType;
+import org.openefms.ingestionmanagement.messaging.IngestionRabbitMqProperties;
 
 class TransactionIngestionServiceTest {
     private static final Clock FIXED_CLOCK =
@@ -31,7 +32,8 @@ class TransactionIngestionServiceTest {
 
     @Test
     void receivesValidTransactionsAndPreparesTransportMessage() {
-        TransactionIngestionService service = service();
+        CapturingTransactionEventPublisher publisher = new CapturingTransactionEventPublisher();
+        TransactionIngestionService service = service(publisher);
 
         TransactionIngestionResult result = service.receive(validTransaction(), " correlation-1 ", " trace-1 ");
 
@@ -42,8 +44,10 @@ class TransactionIngestionServiceTest {
         assertEquals(EventTypes.TRANSACTION_RECEIVED, result.response().eventType());
         assertEquals("correlation-1", result.response().correlationId());
         assertEquals(OffsetDateTime.parse("2026-09-11T09:00:00Z"), result.response().acceptedAt());
-        assertEquals("prepared", result.response().attributes().get("eventPublication"));
+        assertEquals("published", result.response().attributes().get("eventPublication"));
 
+        assertEquals(1, publisher.publishCount());
+        assertEquals(result.message(), publisher.lastMessage());
         assertEquals(RabbitMqExchanges.DOMAIN_EVENTS, result.message().exchangeName());
         assertEquals(RabbitMqRoutingKeys.TRANSACTION_RECEIVED, result.message().routingKey());
         assertEquals(EventTypes.TRANSACTION_RECEIVED, result.message().envelope().metadata().eventType());
@@ -59,7 +63,7 @@ class TransactionIngestionServiceTest {
 
     @Test
     void createsCorrelationIdWhenOneIsNotSupplied() {
-        TransactionIngestionService service = service();
+        TransactionIngestionService service = service(new CapturingTransactionEventPublisher());
 
         TransactionIngestionResult result = service.receive(validTransaction(), null, null);
 
@@ -70,7 +74,8 @@ class TransactionIngestionServiceTest {
 
     @Test
     void rejectsInvalidTransactions() {
-        TransactionIngestionService service = service();
+        CapturingTransactionEventPublisher publisher = new CapturingTransactionEventPublisher();
+        TransactionIngestionService service = service(publisher);
         TransactionIngestionRequest invalidTransaction = new TransactionIngestionRequest(
                 TRANSACTION_ID,
                 "EXT-001",
@@ -93,10 +98,15 @@ class TransactionIngestionServiceTest {
         assertTrue(exception.errors().contains("amount.currency must be a three-letter ISO 4217 code"));
         assertTrue(exception.errors().contains("originator must include at least one reference"));
         assertTrue(exception.errors().contains("originator.countryCode must be a two-letter ISO 3166 country code"));
+        assertEquals(0, publisher.publishCount());
     }
 
-    private TransactionIngestionService service() {
-        return new TransactionIngestionService(new TransactionIngestionRequestValidator(), FIXED_CLOCK);
+    private TransactionIngestionService service(TransactionEventPublisher publisher) {
+        return new TransactionIngestionService(
+                new TransactionIngestionRequestValidator(),
+                publisher,
+                new IngestionRabbitMqProperties(null, null),
+                FIXED_CLOCK);
     }
 
     private TransactionIngestionRequest validTransaction() {
@@ -116,5 +126,24 @@ class TransactionIngestionServiceTest {
 
     private TransactionParty party(String reference, String countryCode) {
         return new TransactionParty(reference, reference, reference, reference + "-hash", "BANK", countryCode, Map.of());
+    }
+
+    private static final class CapturingTransactionEventPublisher implements TransactionEventPublisher {
+        private TransactionIngestionMessage lastMessage;
+        private int publishCount;
+
+        @Override
+        public void publish(TransactionIngestionMessage message) {
+            this.lastMessage = message;
+            this.publishCount++;
+        }
+
+        private TransactionIngestionMessage lastMessage() {
+            return lastMessage;
+        }
+
+        private int publishCount() {
+            return publishCount;
+        }
     }
 }

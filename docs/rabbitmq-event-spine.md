@@ -82,6 +82,16 @@ Consumers should:
 - Own their queue and service-specific retry policy.
 - Keep broker listeners thin and delegate business decisions to service-owned application code.
 
-## Current Scope
+## Current Implementation
 
-Phase 1 only defines names, bindings, headers, and runtime configuration. The concrete RabbitMQ publishers, listeners, topology declaration beans, retry policies, and dead-letter handling should be added in service-specific implementation branches.
+The Ingestion Management Service now publishes `transaction.received` events to the `oefms.events` exchange after transaction requests pass validation.
+
+The first publisher:
+
+- Uses Spring AMQP and `RabbitTemplate`.
+- Serialises event envelopes as JSON.
+- Marks domain events as persistent messages.
+- Copies event metadata into broker headers.
+- Returns `503 Service Unavailable` if the event cannot be published.
+
+Consumer listeners, service-specific retry policies, dead-letter handling, and outbox-backed publication should be added in later implementation branches.

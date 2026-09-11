@@ -126,6 +126,7 @@ The first event path can start simple, but it should leave room for stronger rel
 - Make consumers idempotent around event ID or business transaction ID.
 - Prefer explicit retry/dead-letter behavior when consumers become stateful.
 - Add an outbox pattern before relying on database writes and message publishing as one business action.
+- Treat direct request-path publication as an early Phase 2 step, not the final reliability model.
 
 ## ML And Explainability Direction
 
