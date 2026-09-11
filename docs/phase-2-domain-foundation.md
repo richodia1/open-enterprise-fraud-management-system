@@ -74,7 +74,8 @@ Use one branch per focused change.
 
 ### Fraud Detection Service
 
-- Consume transaction-received events.
+- Consume transaction-received events from `oefms.fraud-detection.transaction-received`.
+- Validate the event type and supported event version before scoring.
 - Run the configured decision mode.
 - Keep `rules` as the default mode.
 - Preserve future `ml` and `hybrid` modes behind configuration.

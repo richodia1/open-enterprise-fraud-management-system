@@ -22,6 +22,9 @@ spring:
     username: "${OEFMS_RABBITMQ_USERNAME:openefms}"
     password: "${OEFMS_RABBITMQ_PASSWORD:openefms}"
     virtual-host: "${OEFMS_RABBITMQ_VHOST:openefms}"
+    listener:
+      simple:
+        default-requeue-rejected: "${OEFMS_RABBITMQ_DEFAULT_REQUEUE_REJECTED:false}"
 
 server:
   port: 8081

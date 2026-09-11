@@ -2,7 +2,7 @@
 
 Fraud Detection Core is the first Phase 1 implementation of a preliminary fraud-check path.
 
-It is intentionally small: no persistence entities, repositories, external rule engine, ML runtime, RabbitMQ listener, or production fraud policy has been added yet.
+It is intentionally small: no persistence entities, repositories, external rule engine, ML runtime, RabbitMQ fraud-decision publisher, or production fraud policy has been added yet.
 
 ## HTTP Decision Endpoint
 
@@ -88,4 +88,6 @@ That message includes:
 - Routing key: `fraud.decision.produced`
 - Payload: `EventEnvelope<FraudDecisionProducedEvent>`
 
-This prepares the RabbitMQ publisher branch without adding broker listener or publishing infrastructure in this branch.
+Fraud Detection Service now has a RabbitMQ listener for `transaction.received` events. The listener validates the event type and version, delegates scoring to the same orchestration layer as the HTTP endpoint, and hands the prepared decision message to a local sink.
+
+Actual broker publication of `fraud.decision.produced` remains reserved for the next implementation branch.
