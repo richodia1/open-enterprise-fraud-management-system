@@ -119,4 +119,16 @@ The first explanation consumer:
 - Publishes `explanation.prepared` to the shared event exchange.
 - Preserves correlation metadata and uses the source fraud decision event id as causation id.
 
+The Case Management Service now consumes `explanation.prepared` events from `oefms.case-management.explanation-prepared`.
+
+The first case workflow:
+
+- Creates `alert.created` for reviewable explanations.
+- Creates `case.created` linked to the alert.
+- Publishes `audit.event.recorded` for alert and case creation.
+- Skips alert/case creation for low-risk approvals.
+- Preserves correlation metadata across the generated workflow events.
+
+The Audit Logging Service now consumes `audit.event.recorded` events from `oefms.audit-logging.audit-event-recorded` and records them to logs until audit persistence is introduced.
+
 Service-specific retry policies, idempotency storage, dead-letter inspection workflows, and outbox-backed publication should be added in later implementation branches.

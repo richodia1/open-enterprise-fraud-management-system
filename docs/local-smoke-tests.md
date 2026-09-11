@@ -1,6 +1,6 @@
 # Local Smoke Tests
 
-Phase 1 local smoke tests provide a fast confidence check for contributors before they raise a pull request.
+Local smoke tests provide a fast confidence check for contributors before they raise a pull request.
 
 ## Static Smoke Checks
 
@@ -27,7 +27,7 @@ To probe a stack that is already running:
 ./scripts/smoke-local.sh --skip-build --live
 ```
 
-To start the core Phase 1 services and then probe them:
+To start the core services and then probe them:
 
 ```bash
 ./scripts/smoke-local.sh --skip-build --start-stack
@@ -45,6 +45,7 @@ The core live checks cover:
 | Fraud Detection Service | `GET /actuator/health` |
 | Explainable AI Service | `GET /actuator/health` |
 | Case Management Service | `GET /actuator/health` |
+| Audit Logging Service | `GET /actuator/health` |
 | Fraud Detection Service | `POST /api/v1/fraud/decisions` |
 
 The ingestion probe posts a low-risk synthetic transaction and expects:
@@ -87,6 +88,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
 | `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
+| `OEFMS_SMOKE_AUDIT_SERVICE_URL` | Audit Logging Service base URL. | `http://localhost:8090` |
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
 | `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
