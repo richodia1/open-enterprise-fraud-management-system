@@ -26,6 +26,12 @@ Run the CI-friendly smoke checks:
 ./scripts/smoke-local.sh --skip-build
 ```
 
+The smoke script also runs the sample ML dataset preparation probe by default. Disable it only when diagnosing a local Python installation:
+
+```bash
+OEFMS_SMOKE_ML_DATASET_CHECKS=false ./scripts/smoke-local.sh --skip-build
+```
+
 Run Maven verification and the static smoke checks together:
 
 ```bash
@@ -45,6 +51,16 @@ Start the core services and then probe them:
 ```
 
 The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog.
+
+## Prepare ML Dataset Sample
+
+Run:
+
+```bash
+./scripts/prepare-ml-dataset.sh oefms_synthetic_sample
+```
+
+The script writes ignored outputs under `data/interim/`, `data/processed/`, and `ml/artifacts/`. See [ML Dataset Foundation](ml-dataset-foundation.md).
 
 ## Run Local Stack
 

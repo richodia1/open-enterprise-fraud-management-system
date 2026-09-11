@@ -63,6 +63,7 @@ Use one branch per focused change.
 | 9 | `feature/ml-runtime-contract` | Define the ML scoring contract and runtime switch without enabling production ML by default. |
 | 10 | `feature/transaction-persistence-foundation` | Persist received transaction receipts in the owning Ingestion Management schema. |
 | 11 | `feature/fraud-decision-persistence-foundation` | Persist fraud decision summaries in the owning Fraud Detection schema. |
+| 12 | `feature/ml-dataset-foundation` | Track fraud dataset references and add the first reproducible feature-matrix preparation path. |
 
 ## Service Responsibilities
 
@@ -84,6 +85,13 @@ Use one branch per focused change.
 - Route `ml` and `hybrid` modes through the ML scoring contract while keeping the default runtime disabled.
 - Publish `FraudDecisionProducedEvent` with outcome, score, risk band, rule hits, model signals, and evidence references.
 - Persist a durable fraud decision summary for traceability and later investigation views.
+
+### ML Dataset Workspace
+
+- Track external dataset references and source mappings without committing raw data.
+- Standardize local raw datasets into a transaction-like interim schema.
+- Generate a feature matrix suitable for tabular baselines such as logistic regression, random forest, and XGBoost.
+- Emit a manifest that connects dataset lineage to the Java `MlScoringClient` runtime contract.
 
 ### Rule Management Service
 

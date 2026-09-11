@@ -7,6 +7,7 @@ Local smoke tests provide a fast confidence check for contributors before they r
 The default script checks:
 
 - Docker Compose configuration using `.env.example`.
+- The sample ML dataset preparation path.
 - The full Maven build unless `--skip-build` is passed.
 
 ```bash
@@ -121,6 +122,8 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `MAVEN_CMD` | Maven executable used by the script. | `mvn` |
+| `PYTHON_CMD` | Python executable used by the dataset preparation probe. | `python3` |
+| `OEFMS_SMOKE_ML_DATASET_CHECKS` | Runs the sample ML dataset preparation probe. | `true` |
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
 | `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |

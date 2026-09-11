@@ -4,6 +4,8 @@ OEFMS now has a Java-side ML scoring contract for Fraud Detection.
 
 This branch does not add a trained model, Python runtime, model server, or production ML decisioning. It defines the contracts and runtime boundary so contributors can later plug in XGBoost, LightGBM, CatBoost, or another scorer without changing the fraud decision API.
 
+Dataset preparation is now tracked separately from runtime scoring. See [ML Dataset Foundation](ml-dataset-foundation.md) for the catalog, sample dataset, feature matrix, and manifest path that will feed future trained scorers.
+
 ## Runtime Status Endpoint
 
 Fraud Detection Service exposes:

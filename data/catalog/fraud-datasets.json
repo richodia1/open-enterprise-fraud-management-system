@@ -1,0 +1,236 @@
+{
+  "catalogVersion": "2026-09-11",
+  "defaultDatasetId": "oefms_synthetic_sample",
+  "datasets": [
+    {
+      "id": "oefms_synthetic_sample",
+      "name": "OEFMS Synthetic Transaction Sample",
+      "taskType": "transaction_fraud",
+      "status": "repository_sample",
+      "source": {
+        "type": "repository",
+        "url": "data/samples/oefms-synthetic-transactions.csv",
+        "license": "Apache-2.0"
+      },
+      "local": {
+        "rawPath": "data/samples/oefms-synthetic-transactions.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "transaction_id": "transaction_id",
+          "external_reference": "external_reference",
+          "tenant_id": "tenant_id",
+          "transaction_type": "transaction_type",
+          "channel": "channel",
+          "direction": "direction",
+          "amount": "amount",
+          "currency": "currency",
+          "originator_country": "originator_country",
+          "beneficiary_country": "beneficiary_country",
+          "initiated_at": "initiated_at",
+          "label": "is_fraud"
+        },
+        "defaults": {}
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    },
+    {
+      "id": "paysim_synthetic_financial",
+      "name": "PaySim Synthetic Financial Dataset",
+      "taskType": "transaction_fraud",
+      "status": "external_download_required",
+      "source": {
+        "type": "kaggle_dataset",
+        "url": "https://www.kaggle.com/datasets/ealaxi/paysim1",
+        "licenseReviewRequired": true
+      },
+      "local": {
+        "rawPath": "data/raw/paysim/PS_20174392719_1491204439457_log.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "transaction_type": "type",
+          "amount": "amount",
+          "initiated_at": "step",
+          "label": "isFraud"
+        },
+        "transforms": {
+          "initiated_at": "hour_step_to_timestamp"
+        },
+        "defaults": {
+          "tenant_id": "paysim-synthetic",
+          "currency": "USD",
+          "channel": "API",
+          "direction": "OUTBOUND",
+          "originator_country": "UNKNOWN",
+          "beneficiary_country": "UNKNOWN"
+        }
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    },
+    {
+      "id": "credit_card_fraud_detection",
+      "name": "Credit Card Fraud Detection",
+      "taskType": "card_transaction_fraud",
+      "status": "external_download_required",
+      "source": {
+        "type": "kaggle_dataset",
+        "url": "https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud",
+        "licenseReviewRequired": true
+      },
+      "local": {
+        "rawPath": "data/raw/credit-card-fraud/creditcard.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "amount": "Amount",
+          "initiated_at": "Time",
+          "label": "Class"
+        },
+        "transforms": {
+          "initiated_at": "seconds_offset_to_timestamp"
+        },
+        "defaults": {
+          "tenant_id": "credit-card-fraud",
+          "transaction_type": "CARD_PAYMENT",
+          "channel": "CARD",
+          "direction": "OUTBOUND",
+          "currency": "EUR",
+          "originator_country": "UNKNOWN",
+          "beneficiary_country": "UNKNOWN"
+        },
+        "passthroughFeaturePrefixes": [
+          "V"
+        ]
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    },
+    {
+      "id": "ieee_cis_fraud_detection",
+      "name": "IEEE-CIS Fraud Detection",
+      "taskType": "transaction_identity_fraud",
+      "status": "external_download_required",
+      "source": {
+        "type": "kaggle_competition",
+        "url": "https://www.kaggle.com/competitions/ieee-fraud-detection",
+        "licenseReviewRequired": true
+      },
+      "local": {
+        "rawPath": "data/raw/ieee-cis/train_transaction.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "transaction_id": "TransactionID",
+          "amount": "TransactionAmt",
+          "initiated_at": "TransactionDT",
+          "label": "isFraud"
+        },
+        "transforms": {
+          "initiated_at": "seconds_offset_to_timestamp"
+        },
+        "defaults": {
+          "tenant_id": "ieee-cis",
+          "transaction_type": "CARD_NOT_PRESENT",
+          "channel": "WEB",
+          "direction": "OUTBOUND",
+          "currency": "USD",
+          "originator_country": "UNKNOWN",
+          "beneficiary_country": "UNKNOWN"
+        }
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    },
+    {
+      "id": "bank_account_fraud_neurips_2022",
+      "name": "Bank Account Fraud Dataset Suite",
+      "taskType": "account_opening_fraud",
+      "status": "external_download_required",
+      "source": {
+        "type": "research_dataset",
+        "url": "https://github.com/feedzai/bank-account-fraud",
+        "paperUrl": "https://papers.nips.cc/paper_files/paper/2022/hash/126b93dcc2683fdaea4bb6d3be3727e0-Abstract-Datasets_and_Benchmarks.html",
+        "licenseReviewRequired": true
+      },
+      "local": {
+        "rawPath": "data/raw/bank-account-fraud/Base.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "amount": "income",
+          "label": "fraud_bool"
+        },
+        "defaults": {
+          "tenant_id": "baf-neurips-2022",
+          "transaction_type": "ACCOUNT_OPENING",
+          "channel": "WEB",
+          "direction": "INBOUND",
+          "currency": "USD",
+          "originator_country": "UNKNOWN",
+          "beneficiary_country": "UNKNOWN"
+        }
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    },
+    {
+      "id": "fifar_alert_review",
+      "name": "Financial Fraud Alert Review Dataset",
+      "taskType": "human_in_the_loop_alert_review",
+      "status": "external_download_required",
+      "source": {
+        "type": "research_dataset",
+        "url": "https://github.com/feedzai/fifar-dataset",
+        "paperUrl": "https://arxiv.org/abs/2312.13218",
+        "licenseReviewRequired": true
+      },
+      "local": {
+        "rawPath": "data/external/fifar/fifar-alert-review.csv"
+      },
+      "schema": {
+        "columnMap": {
+          "label": "fraud_bool"
+        },
+        "defaults": {
+          "tenant_id": "fifar",
+          "transaction_type": "ALERT_REVIEW",
+          "channel": "ANALYST_REVIEW",
+          "direction": "INBOUND",
+          "amount": "0",
+          "currency": "USD",
+          "originator_country": "UNKNOWN",
+          "beneficiary_country": "UNKNOWN"
+        }
+      },
+      "split": {
+        "strategy": "ordered",
+        "trainRatio": 0.7,
+        "validationRatio": 0.15,
+        "testRatio": 0.15
+      }
+    }
+  ]
+}

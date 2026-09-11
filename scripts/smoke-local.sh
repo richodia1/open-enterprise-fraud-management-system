@@ -8,6 +8,8 @@ gateway_checks=false
 
 env_file="${OEFMS_SMOKE_ENV_FILE:-.env.example}"
 maven_cmd="${MAVEN_CMD:-mvn}"
+python_cmd="${PYTHON_CMD:-python3}"
+ml_dataset_checks="${OEFMS_SMOKE_ML_DATASET_CHECKS:-true}"
 health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
 ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}"
@@ -48,6 +50,8 @@ Options:
 
 Environment:
   MAVEN_CMD                                 Maven executable. Default: mvn
+  PYTHON_CMD                                Python executable. Default: python3
+  OEFMS_SMOKE_ML_DATASET_CHECKS            Run the sample ML dataset pipeline. Default: true
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
   OEFMS_SMOKE_INGESTION_SERVICE_URL        Ingestion service URL. Default: http://localhost:8089
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
@@ -256,6 +260,7 @@ run_static_checks() {
   [ -f "$env_file" ] || fail "Environment file not found: $env_file"
   log "Validating Docker Compose config with ${env_file}"
   compose config >/dev/null
+  run_ml_dataset_checks
 
   if [ "$build_project" = true ]; then
     require_command "$maven_cmd"
@@ -264,6 +269,28 @@ run_static_checks() {
   else
     log "Skipping Maven verification"
   fi
+}
+
+run_ml_dataset_checks() {
+  if [ "$ml_dataset_checks" != true ]; then
+    log "Skipping ML dataset preparation checks"
+    return
+  fi
+
+  require_command "$python_cmd"
+  log "Preparing sample ML dataset"
+  "$python_cmd" ml/pipelines/prepare_tabular_dataset.py \
+    --dataset-id oefms_synthetic_sample \
+    --interim-output data/interim/oefms-smoke-standard-transactions.csv \
+    --processed-output data/processed/oefms-smoke-feature-matrix.csv \
+    --manifest-output ml/artifacts/smoke-dataset-prep/manifest.json \
+    >/dev/null
+
+  [ -s data/processed/oefms-smoke-feature-matrix.csv ] || fail "ML feature matrix was not created"
+  grep -q 'is_cross_border' data/processed/oefms-smoke-feature-matrix.csv || fail "ML feature matrix did not include engineered features"
+  grep -q '"scoreRequest": "org.openefms.common.models.ml.MlScoreRequest"' ml/artifacts/smoke-dataset-prep/manifest.json \
+    || fail "ML manifest did not reference the Java scoring contract"
+  log "ML dataset preparation probe passed"
 }
 
 run_live_checks() {
