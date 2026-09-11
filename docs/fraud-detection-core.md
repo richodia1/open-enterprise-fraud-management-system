@@ -78,6 +78,8 @@ Rule contributions are summed and capped at `1.00`.
 
 Thresholds are environment-driven and documented in [Platform Configuration](platform-configuration.md).
 
+Rule Management now exposes matching baseline rule definitions through `GET /api/v1/rules`. Fraud Detection does not read the Rule Management catalog yet; dynamic rule lookup will be added after the API contract has settled.
+
 ## Event Boundary
 
 The orchestration layer can turn an `EventEnvelope<TransactionReceivedEvent>` into a transport-ready `FraudDecisionMessage`.

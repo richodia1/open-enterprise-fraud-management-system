@@ -44,7 +44,7 @@ Start the core services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
-The live smoke path checks Auth, Ingestion Management, Fraud Detection, Explainable AI, Case Management, and Audit Logging health endpoints, then posts a low-risk transaction to the Fraud Detection Service decision endpoint.
+The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints, then posts a low-risk transaction to the Fraud Detection Service decision endpoint and reads the baseline rule catalog.
 
 ## Run Local Stack
 
