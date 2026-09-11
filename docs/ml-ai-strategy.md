@@ -88,6 +88,8 @@ The manifest records the dataset id, source reference, generated outputs, label 
 
 See [ML Dataset Foundation](ml-dataset-foundation.md) for the detailed contributor workflow.
 
+See [XGBoost Baseline Results](ml-xgboost-baseline-results.md) for the first local full-dataset BAF training summary.
+
 ## Recommended First Experiments
 
 Start with tabular gradient-boosting models before deep learning.
