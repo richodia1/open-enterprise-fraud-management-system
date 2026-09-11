@@ -22,6 +22,11 @@ import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.fraud.DecisionOutcome;
+import org.openefms.common.models.fraud.DecisionMode;
+import org.openefms.common.models.ml.MlRuntimeState;
+import org.openefms.common.models.ml.MlRuntimeStatus;
+import org.openefms.common.models.ml.MlScoreRequest;
+import org.openefms.common.models.ml.MlScoreResponse;
 import org.openefms.common.models.transaction.TransactionAmount;
 import org.openefms.common.models.transaction.TransactionChannel;
 import org.openefms.common.models.transaction.TransactionDirection;
@@ -33,6 +38,8 @@ import org.openefms.frauddetection.decision.FraudDecisionMessageSink;
 import org.openefms.frauddetection.decision.FraudDecisionOrchestrator;
 import org.openefms.frauddetection.decision.FraudDecisionProperties;
 import org.openefms.frauddetection.decision.RuleBasedFraudDecisionEngine;
+import org.openefms.frauddetection.ml.MlScoringClient;
+import org.openefms.frauddetection.ml.MlScoringUnavailableException;
 import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
 
 class TransactionReceivedEventListenerTest {
@@ -110,6 +117,7 @@ class TransactionReceivedEventListenerTest {
                 new FraudDecisionProperties("rules", null, null),
                 new FraudRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
                 new RuleBasedFraudDecisionEngine(),
+                unavailableMlScoringClient(),
                 FIXED_CLOCK);
     }
 
@@ -159,5 +167,29 @@ class TransactionReceivedEventListenerTest {
         public void accept(FraudDecisionMessage message) {
             messages.add(message);
         }
+    }
+
+    private MlScoringClient unavailableMlScoringClient() {
+        return new MlScoringClient() {
+            @Override
+            public MlRuntimeStatus status() {
+                return new MlRuntimeStatus(
+                        "disabled",
+                        "xgboost-baseline",
+                        MlRuntimeState.DISABLED,
+                        List.of(DecisionMode.ML, DecisionMode.HYBRID),
+                        "ML scoring is disabled by configuration.",
+                        OffsetDateTime.now(FIXED_CLOCK),
+                        Map.of());
+            }
+
+            @Override
+            public MlScoreResponse score(MlScoreRequest request) {
+                throw new MlScoringUnavailableException(
+                        "disabled",
+                        "xgboost-baseline",
+                        "ML scoring is disabled by configuration.");
+            }
+        };
     }
 }

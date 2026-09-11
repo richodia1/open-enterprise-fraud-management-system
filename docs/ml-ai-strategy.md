@@ -6,7 +6,7 @@ The first production-safe posture is rule-based decisioning, because it is deter
 
 ## Decision Modes
 
-The Fraud Detection Service exposes the planned decision mode through configuration:
+The Fraud Detection Service exposes the configured decision mode through configuration:
 
 ```yaml
 oefms:
@@ -19,13 +19,15 @@ oefms:
         score-threshold: "${OEFMS_FRAUD_ML_SCORE_THRESHOLD:0.80}"
 ```
 
-Planned modes:
+Supported configured modes:
 
 | Mode | Purpose |
 | --- | --- |
 | `rules` | Use deterministic configured rules only. This is the default while the project has no trained model runtime. |
 | `ml` | Use a trained ML model as the primary risk-scoring mechanism. |
 | `hybrid` | Combine rule hits and ML score so institutions can keep hard policy rules while using ML for pattern detection. |
+
+`ml` and `hybrid` now route through the Java `MlScoringClient` contract. The default runtime reports `DISABLED` or `CONTRACT_ONLY` through `GET /api/v1/fraud/ml/runtime` and refuses live scoring until a production scorer adapter is registered.
 
 ## Dataset Shortlist
 
@@ -74,3 +76,5 @@ Recommended future options:
 - Feed rule hits, model score, feature contributions, and supporting evidence into Explainable AI and Case Management workflows.
 
 This keeps the project open to multiple AI stacks while preserving a stable Java service contract.
+
+See [ML Runtime Contract](ml-runtime-contract.md) for the shared request/response contracts and Fraud Detection runtime behavior.

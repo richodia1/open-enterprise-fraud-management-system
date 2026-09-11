@@ -23,12 +23,19 @@ import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.models.fraud.RuleHit;
+import org.openefms.common.models.ml.MlFeatureContribution;
+import org.openefms.common.models.ml.MlRuntimeState;
+import org.openefms.common.models.ml.MlRuntimeStatus;
+import org.openefms.common.models.ml.MlScoreRequest;
+import org.openefms.common.models.ml.MlScoreResponse;
 import org.openefms.common.models.transaction.TransactionAmount;
 import org.openefms.common.models.transaction.TransactionChannel;
 import org.openefms.common.models.transaction.TransactionDirection;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.openefms.common.models.transaction.TransactionParty;
 import org.openefms.common.models.transaction.TransactionType;
+import org.openefms.frauddetection.ml.MlScoringClient;
+import org.openefms.frauddetection.ml.MlScoringUnavailableException;
 import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
 
 class FraudDecisionOrchestratorTest {
@@ -80,15 +87,16 @@ class FraudDecisionOrchestratorTest {
     }
 
     @Test
-    void rejectsMlModeUntilModelServingIsImplemented() {
+    void rejectsMlModeWhenNoScoringRuntimeIsAvailable() {
         FraudDecisionOrchestrator orchestrator = new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("ml", null, null),
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
+                unavailableMlScoringClient(),
                 FIXED_CLOCK);
 
-        UnsupportedFraudDecisionModeException exception = assertThrows(
-                UnsupportedFraudDecisionModeException.class,
+        MlScoringUnavailableException exception = assertThrows(
+                MlScoringUnavailableException.class,
                 () -> orchestrator.decide(transaction(
                         new BigDecimal("25.00"),
                         TransactionChannel.MOBILE,
@@ -96,7 +104,91 @@ class FraudDecisionOrchestratorTest {
                         "GB",
                         Map.of())));
 
-        assertEquals(DecisionMode.ML, exception.mode());
+        assertEquals("disabled", exception.provider());
+        assertEquals("xgboost-baseline", exception.modelName());
+    }
+
+    @Test
+    void usesMlScoringContractWhenRuntimeClientIsAvailable() {
+        CapturingMlScoringClient scoringClient = new CapturingMlScoringClient(new MlScoreResponse(
+                "xgboost-baseline",
+                "2026.09.11",
+                new BigDecimal("0.62"),
+                RiskBand.MEDIUM,
+                DecisionOutcome.REVIEW,
+                List.of(new MlFeatureContribution(
+                        "amount",
+                        "25000.00",
+                        new BigDecimal("0.31"),
+                        "Amount contributed to the model score.")),
+                OffsetDateTime.parse("2026-09-08T08:59:55Z"),
+                Map.of("dataset", "synthetic-baseline")));
+        FraudDecisionOrchestrator orchestrator = new FraudDecisionOrchestrator(
+                new FraudDecisionProperties("ml", null, null),
+                rabbitMqProperties(),
+                new RuleBasedFraudDecisionEngine(),
+                scoringClient,
+                FIXED_CLOCK);
+
+        var response = orchestrator.decide(transaction(
+                new BigDecimal("25000.00"),
+                TransactionChannel.MOBILE,
+                "GB",
+                "GB",
+                Map.of()));
+
+        assertEquals(DecisionMode.ML, response.mode());
+        assertEquals(DecisionOutcome.REVIEW, response.outcome());
+        assertEquals(new BigDecimal("0.62"), response.riskScore().value());
+        assertEquals(RiskBand.MEDIUM, response.riskScore().band());
+        assertTrue(response.ruleHits().isEmpty());
+        assertEquals(1, response.modelSignals().size());
+        assertEquals("xgboost-baseline", response.modelSignals().getFirst().modelName());
+        assertEquals("2026.09.11", response.modelSignals().getFirst().modelVersion());
+        assertEquals("25000.00", scoringClient.lastRequest().features().get("amount"));
+        assertEquals("GBP", scoringClient.lastRequest().features().get("currency"));
+        assertEquals("synthetic-baseline", response.attributes().get("dataset"));
+    }
+
+    @Test
+    void combinesRulesAndMlSignalsInHybridMode() {
+        CapturingMlScoringClient scoringClient = new CapturingMlScoringClient(new MlScoreResponse(
+                "xgboost-baseline",
+                "2026.09.11",
+                new BigDecimal("0.82"),
+                RiskBand.HIGH,
+                DecisionOutcome.BLOCK,
+                List.of(new MlFeatureContribution(
+                        "beneficiaryCountryCode",
+                        "NG",
+                        new BigDecimal("0.44"),
+                        "Destination country contributed to the model score.")),
+                OffsetDateTime.parse("2026-09-08T08:59:55Z"),
+                Map.of()));
+        FraudDecisionOrchestrator orchestrator = new FraudDecisionOrchestrator(
+                new FraudDecisionProperties("hybrid", null, null),
+                rabbitMqProperties(),
+                new RuleBasedFraudDecisionEngine(),
+                scoringClient,
+                FIXED_CLOCK);
+
+        var response = orchestrator.decide(transaction(
+                new BigDecimal("25000.00"),
+                TransactionChannel.MOBILE,
+                "GB",
+                "NG",
+                Map.of()));
+
+        assertEquals(DecisionMode.HYBRID, response.mode());
+        assertEquals(DecisionOutcome.BLOCK, response.outcome());
+        assertEquals(new BigDecimal("0.82"), response.riskScore().value());
+        assertEquals(RiskBand.HIGH, response.riskScore().band());
+        assertTrue(ruleCodes(response.ruleHits()).contains("HIGH_VALUE_AMOUNT"));
+        assertTrue(ruleCodes(response.ruleHits()).contains("CROSS_BORDER_PARTIES"));
+        assertEquals(1, response.modelSignals().size());
+        assertEquals("max-rule-or-ml-score", response.attributes().get("decisionStrategy"));
+        assertEquals("0.50", response.attributes().get("ruleScore"));
+        assertEquals("0.82", response.attributes().get("mlScore"));
     }
 
     @Test
@@ -137,6 +229,7 @@ class FraudDecisionOrchestratorTest {
                 new FraudDecisionProperties("rules", null, null),
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
+                unavailableMlScoringClient(),
                 FIXED_CLOCK);
     }
 
@@ -170,5 +263,60 @@ class FraudDecisionOrchestratorTest {
 
     private List<String> ruleCodes(List<RuleHit> ruleHits) {
         return ruleHits.stream().map(RuleHit::ruleCode).toList();
+    }
+
+    private MlScoringClient unavailableMlScoringClient() {
+        return new MlScoringClient() {
+            @Override
+            public MlRuntimeStatus status() {
+                return new MlRuntimeStatus(
+                        "disabled",
+                        "xgboost-baseline",
+                        MlRuntimeState.DISABLED,
+                        List.of(DecisionMode.ML, DecisionMode.HYBRID),
+                        "ML scoring is disabled by configuration.",
+                        OffsetDateTime.now(FIXED_CLOCK),
+                        Map.of());
+            }
+
+            @Override
+            public MlScoreResponse score(MlScoreRequest request) {
+                throw new MlScoringUnavailableException(
+                        "disabled",
+                        "xgboost-baseline",
+                        "ML scoring is disabled by configuration.");
+            }
+        };
+    }
+
+    private static final class CapturingMlScoringClient implements MlScoringClient {
+        private final MlScoreResponse response;
+        private MlScoreRequest lastRequest;
+
+        private CapturingMlScoringClient(MlScoreResponse response) {
+            this.response = response;
+        }
+
+        @Override
+        public MlRuntimeStatus status() {
+            return new MlRuntimeStatus(
+                    response.modelName(),
+                    response.modelName(),
+                    MlRuntimeState.READY,
+                    List.of(DecisionMode.ML, DecisionMode.HYBRID),
+                    "Test scorer is ready.",
+                    OffsetDateTime.now(FIXED_CLOCK),
+                    Map.of());
+        }
+
+        @Override
+        public MlScoreResponse score(MlScoreRequest request) {
+            this.lastRequest = request;
+            return response;
+        }
+
+        private MlScoreRequest lastRequest() {
+            return lastRequest;
+        }
     }
 }

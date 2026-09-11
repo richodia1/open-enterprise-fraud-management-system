@@ -1,8 +1,8 @@
 # Fraud Detection Core
 
-Fraud Detection Core is the first Phase 1 implementation of a preliminary fraud-check path.
+Fraud Detection Core is the first implementation of a preliminary fraud-check path.
 
-It is intentionally small: no persistence entities, repositories, external rule engine, ML runtime, outbox, idempotency store, or production fraud policy has been added yet.
+It is intentionally small: no persistence entities, repositories, external rule engine, production ML scorer, outbox, idempotency store, or production fraud policy has been added yet.
 
 ## HTTP Decision Endpoint
 
@@ -34,7 +34,7 @@ The default mode is:
 OEFMS_FRAUD_DECISION_MODE=rules
 ```
 
-In Phase 1, only `rules` mode is active. `ml` and `hybrid` remain configuration-ready but return `501 Not Implemented` until model serving, validation, explainability, and governance are implemented.
+`rules` mode is the default and fully runnable. `ml` and `hybrid` are routed through the `MlScoringClient` contract, but the default runtime returns `501 Not Implemented` until a production scorer adapter, validation, explainability, and governance are implemented.
 
 ## Baseline Rule Indicators
 
@@ -79,6 +79,20 @@ Rule contributions are summed and capped at `1.00`.
 Thresholds are environment-driven and documented in [Platform Configuration](platform-configuration.md).
 
 Rule Management now exposes matching baseline rule definitions through `GET /api/v1/rules`. Fraud Detection does not read the Rule Management catalog yet; dynamic rule lookup will be added after the API contract has settled.
+
+## ML Runtime Boundary
+
+Fraud Detection Service exposes:
+
+```text
+GET /api/v1/fraud/ml/runtime
+```
+
+This reports the configured ML provider, model name, runtime state, supported modes, and score threshold.
+
+Current local defaults report `DISABLED`. If a provider name is configured without a scorer implementation, the service reports `CONTRACT_ONLY`.
+
+See [ML Runtime Contract](ml-runtime-contract.md) for the request/response contracts and future adapter expectations.
 
 ## Event Boundary
 

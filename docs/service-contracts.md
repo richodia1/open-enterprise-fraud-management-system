@@ -1,6 +1,6 @@
 # Service Contracts
 
-Phase 1 contracts define the first API and event shapes without adding persistence entities or service workflows.
+OEFMS contracts define the first shared API, event, rule, and ML shapes without adding persistence entities or service-specific business workflows.
 
 The contracts live in shared modules:
 
@@ -18,6 +18,7 @@ These modules should stay small. Do not add repositories, JPA annotations, servi
 | `org.openefms.common.models.transaction` | Transaction ingestion request, parties, amount, channel, direction, and type. |
 | `org.openefms.common.models.fraud` | Fraud decision response, risk score, risk band, decision mode, decision outcome, rule hits, and model signals. |
 | `org.openefms.common.models.rule` | Configurable fraud rule definitions, categories, and lifecycle status. |
+| `org.openefms.common.models.ml` | ML scoring requests, scoring responses, feature contributions, and runtime status. |
 | `org.openefms.common.models.explanation` | Explanation request, explanation response, and evidence items. |
 | `org.openefms.common.models.alert` | Alert creation request and priority. |
 | `org.openefms.common.models.casefile` | Case creation request and priority. |
@@ -101,3 +102,5 @@ Explainable AI Service now uses the explanation contracts to build deterministic
 Case Management Service now uses the alert, case, and audit contracts to create the first review handoff from `ExplanationPreparedEvent`.
 
 Rule Management Service now exposes `FraudRuleDefinition` contracts for the first configurable rule catalog. Fraud Detection still uses its local baseline rules until a later branch wires dynamic rule lookup into the decision engine.
+
+Fraud Detection Service now exposes an `MlScoringClient` boundary backed by shared ML contracts. The default runtime is contract-only and does not enable unvalidated ML scoring.

@@ -57,6 +57,7 @@ Ingestion Management, Fraud Detection Core, and Rule Management keep their versi
 ```text
 /api/v1/ingestion/transactions -> /api/v1/ingestion/transactions
 /api/v1/fraud/decisions -> /api/v1/fraud/decisions
+/api/v1/fraud/ml/runtime -> /api/v1/fraud/ml/runtime
 /api/v1/rules -> /api/v1/rules
 ```
 
