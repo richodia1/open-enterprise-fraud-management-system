@@ -57,7 +57,7 @@ Environment:
   OEFMS_SMOKE_TRANSACTION_ID               Transaction id used by live probes. Default: fixed smoke UUID
   OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
   OEFMS_SMOKE_GATEWAY_INGESTION_RECEIPT_PATH Gateway ingestion receipt path. Default: /api/v1/ingestion/transactions/<smoke id>
-  OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
+  OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path and decision-record base. Default: /api/v1/fraud/decisions
   OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH      Gateway ML runtime path. Default: /api/v1/fraud/ml/runtime
   OEFMS_SMOKE_GATEWAY_RULE_PATH            Gateway rule catalog path. Default: /api/v1/rules
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
@@ -195,6 +195,7 @@ probe_transaction_receipt() {
 probe_fraud_decision() {
   local url="$1"
   local response
+  local decision_id
 
   log "Posting smoke transaction to ${url}"
   response="$(curl -fsS \
@@ -205,7 +206,23 @@ probe_fraud_decision() {
   printf '%s' "$response" | grep -q '"mode":"RULES"' || fail "Fraud decision response did not use RULES mode"
   printf '%s' "$response" | grep -q '"outcome":"APPROVE"' || fail "Fraud decision response did not approve the low-risk smoke transaction"
   printf '%s' "$response" | grep -q '"ruleHitCount":"0"' || fail "Fraud decision response did not report zero rule hits"
+  decision_id="$(printf '%s' "$response" | sed -n 's/.*"decisionId":"\([^"]*\)".*/\1/p')"
+  [ -n "$decision_id" ] || fail "Fraud decision response did not include a decision id"
   log "Fraud decision probe passed"
+  probe_fraud_decision_record "${url}/${decision_id}"
+}
+
+probe_fraud_decision_record() {
+  local url="$1"
+  local response
+
+  log "Reading persisted fraud decision record from ${url}"
+  response="$(curl -fsS "$url")"
+
+  printf '%s' "$response" | grep -q '"outcome":"APPROVE"' || fail "Persisted fraud decision did not retain the outcome"
+  printf '%s' "$response" | grep -q '"riskBand":"LOW"' || fail "Persisted fraud decision did not retain the risk band"
+  printf '%s' "$response" | grep -q "\"transactionId\":\"${smoke_transaction_id}\"" || fail "Persisted fraud decision did not retain the transaction id"
+  log "Fraud decision record probe passed"
 }
 
 probe_ml_runtime() {

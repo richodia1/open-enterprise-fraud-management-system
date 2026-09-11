@@ -2,7 +2,7 @@
 
 Fraud Detection Core is the first implementation of a preliminary fraud-check path.
 
-It is intentionally small: no persistence entities, repositories, external rule engine, production ML scorer, outbox, idempotency store, or production fraud policy has been added yet.
+It is intentionally small: the service now stores a durable decision summary, but no external rule engine, production ML scorer, outbox, idempotency store, or production fraud policy has been added yet.
 
 ## HTTP Decision Endpoint
 
@@ -24,7 +24,19 @@ Response body:
 FraudDecisionResponse
 ```
 
-The endpoint uses the shared transaction and fraud contracts in `common-models`.
+The endpoint uses the shared transaction and fraud contracts in `common-models`. Successful decisions are stored in the service-owned `fraud_decisions` table.
+
+## Decision Record Reads
+
+Fraud Detection Service exposes the first decision-history reads:
+
+```text
+GET /api/v1/fraud/decisions/{decisionId}
+GET /api/v1/fraud/decisions?transactionId={transactionId}
+GET /api/v1/fraud/decisions?tenantId={tenantId}
+```
+
+These endpoints return a persisted `FraudDecisionRecord` with transaction identity, tenant, mode, outcome, score, risk band, evidence summary, event metadata, and decision attributes.
 
 ## Default Decision Mode
 
@@ -104,6 +116,6 @@ That message includes:
 - Routing key: `fraud.decision.produced`
 - Payload: `EventEnvelope<FraudDecisionProducedEvent>`
 
-Fraud Detection Service now has a RabbitMQ listener for `transaction.received` events. The listener validates the event type and version, delegates scoring to the same orchestration layer as the HTTP endpoint, and hands the prepared decision message to a RabbitMQ publisher.
+Fraud Detection Service now has a RabbitMQ listener for `transaction.received` events. The listener validates the event type and version, delegates scoring to the same orchestration layer as the HTTP endpoint, stores the decision record, and hands the prepared decision message to a RabbitMQ publisher.
 
 The publisher emits `fraud.decision.produced` with persistent delivery and the shared broker header contract.

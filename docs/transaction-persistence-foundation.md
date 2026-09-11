@@ -55,7 +55,6 @@ The API returns the shared receipt representation used by the service layer. The
 
 ## Next Persistence Candidates
 
-- Fraud Detection Service decision records.
 - Explainable AI explanation records.
 - Case Management case and alert records.
 - Audit Logging append-only event records.

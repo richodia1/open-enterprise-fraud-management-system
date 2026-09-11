@@ -41,6 +41,8 @@ public class FraudDecisionOrchestrator {
     private final FraudRabbitMqProperties rabbitMqProperties;
     private final RuleBasedFraudDecisionEngine ruleBasedEngine;
     private final MlScoringClient mlScoringClient;
+    private final FraudDecisionRepository decisionRepository;
+    private final FraudDecisionRecordMapper decisionRecordMapper;
     private final Clock clock;
 
     public FraudDecisionOrchestrator(
@@ -48,16 +50,44 @@ public class FraudDecisionOrchestrator {
             FraudRabbitMqProperties rabbitMqProperties,
             RuleBasedFraudDecisionEngine ruleBasedEngine,
             MlScoringClient mlScoringClient,
+            FraudDecisionRepository decisionRepository,
+            FraudDecisionRecordMapper decisionRecordMapper,
             Clock clock) {
         this.properties = properties;
         this.rabbitMqProperties = rabbitMqProperties;
         this.ruleBasedEngine = ruleBasedEngine;
         this.mlScoringClient = mlScoringClient;
+        this.decisionRepository = decisionRepository;
+        this.decisionRecordMapper = decisionRecordMapper;
         this.clock = clock;
     }
 
     public FraudDecisionResponse decide(TransactionIngestionRequest transaction) {
         Objects.requireNonNull(transaction, "transaction must not be null");
+        FraudDecisionResponse decision = score(transaction);
+        decisionRepository.save(decisionRecordMapper.fromDecision(decision));
+        return decision;
+    }
+
+    public FraudDecisionRecord decision(UUID decisionId) {
+        return decisionRepository.findByDecisionId(decisionId)
+                .orElseThrow(() -> new FraudDecisionRecordNotFoundException(decisionId));
+    }
+
+    public List<FraudDecisionRecord> decisionsForTransaction(UUID transactionId) {
+        Objects.requireNonNull(transactionId, "transactionId must not be null");
+        return decisionRepository.findByTransactionId(transactionId);
+    }
+
+    public List<FraudDecisionRecord> decisionsForTenant(String tenantId) {
+        String normalisedTenantId = tenantId == null ? "" : tenantId.trim();
+        if (normalisedTenantId.isBlank()) {
+            throw new InvalidFraudDecisionQueryException(List.of("tenantId must not be blank"));
+        }
+        return decisionRepository.findByTenantId(normalisedTenantId);
+    }
+
+    private FraudDecisionResponse score(TransactionIngestionRequest transaction) {
         DecisionMode activeMode = properties.activeMode();
         return switch (activeMode) {
             case RULES -> rulesDecision(transaction);
@@ -72,10 +102,12 @@ public class FraudDecisionOrchestrator {
 
     public FraudDecisionMessage decide(EventEnvelope<TransactionReceivedEvent> transactionEvent) {
         Objects.requireNonNull(transactionEvent, "transactionEvent must not be null");
-        FraudDecisionResponse decision = decide(transactionEvent.payload().transaction());
+        FraudDecisionResponse decision = score(transactionEvent.payload().transaction());
+        EventMetadata metadata = decisionMetadata(transactionEvent.metadata());
+        decisionRepository.save(decisionRecordMapper.fromDecision(decision, metadata));
         String routingKey = RabbitMqTopology.routingKeyFor(EventTypes.FRAUD_DECISION_PRODUCED);
         EventEnvelope<FraudDecisionProducedEvent> envelope = new EventEnvelope<>(
-                decisionMetadata(transactionEvent.metadata()),
+                metadata,
                 new FraudDecisionProducedEvent(decision));
 
         return new FraudDecisionMessage(rabbitMqProperties.exchange(), routingKey, envelope);
