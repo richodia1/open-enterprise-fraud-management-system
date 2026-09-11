@@ -6,7 +6,7 @@ OEFMS v0.1 is the initial foundation of the project and is being developed colla
 
 The project aims to provide an open and adaptable architecture that can be extended for different financial institutions, transaction types, fraud scenarios, regulatory environments, and technology stacks.
 
-OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion with a service-owned receipt store, persisted rule-mode fraud decisions, explainable decision support, the first case, alert, and audit event handoff, an in-memory rule-management catalog, an ML runtime contract, and the first ML dataset preparation foundation.
+OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion with a service-owned receipt store, persisted rule-mode fraud decisions, explainable decision support, the first case, alert, and audit event handoff, an in-memory rule-management catalog, an ML runtime contract, the first ML dataset preparation foundation, and an optional XGBoost baseline experiment path.
 
 ## GitHub Repository Description
 
@@ -92,6 +92,29 @@ OEFMS_FRAUD_DECISION_MODE=rules
 Configured values are `rules`, `ml`, and `hybrid`. The default is `rules`; `ml` and `hybrid` require a production `MlScoringClient` adapter before they can score live transactions.
 
 See [ML and AI Strategy](docs/ml-ai-strategy.md) for the dataset and model direction.
+
+## ML Research Baseline
+
+The preferred first academic dataset is the Bank Account Fraud Dataset Suite `Base.csv`. Keep the raw file local at:
+
+```text
+data/raw/bank-account-fraud/Base.csv
+```
+
+Prepare the feature matrix:
+
+```bash
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
+```
+
+Optionally train the XGBoost baseline after installing the Python ML stack:
+
+```bash
+python3 -m pip install -r ml/requirements.txt
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py
+```
+
+Training outputs stay under ignored `ml/artifacts/`.
 
 ## First Build Target
 

@@ -39,12 +39,26 @@ data/samples/oefms-synthetic-transactions.csv
 
 It is intentionally tiny and exists only to demonstrate the dataset preparation flow in CI.
 
+For the first academic ML baseline, download the Bank Account Fraud Dataset Suite and place `Base.csv` at:
+
+```text
+data/raw/bank-account-fraud/Base.csv
+```
+
+The BAF raw file must remain local because the dataset is large and separately licensed.
+
 ## Preparation Flow
 
 Run:
 
 ```bash
 ./scripts/prepare-ml-dataset.sh oefms_synthetic_sample
+```
+
+Run the BAF preparation locally with:
+
+```bash
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
 ```
 
 Outputs are generated under ignored folders:

@@ -290,7 +290,45 @@ run_ml_dataset_checks() {
   grep -q 'is_cross_border' data/processed/oefms-smoke-feature-matrix.csv || fail "ML feature matrix did not include engineered features"
   grep -q '"scoreRequest": "org.openefms.common.models.ml.MlScoreRequest"' ml/artifacts/smoke-dataset-prep/manifest.json \
     || fail "ML manifest did not reference the Java scoring contract"
+  "$python_cmd" ml/experiments/xgboost-baseline/train_xgboost_baseline.py \
+    --validate-only \
+    --feature-matrix data/processed/oefms-smoke-feature-matrix.csv \
+    --manifest ml/artifacts/smoke-dataset-prep/manifest.json \
+    >/dev/null
+  run_baf_feature_mapping_check
   log "ML dataset preparation probe passed"
+}
+
+run_baf_feature_mapping_check() {
+  local temp_dir
+  local baf_raw
+
+  temp_dir="$(mktemp -d)"
+  baf_raw="${temp_dir}/baf-smoke.csv"
+  cat > "$baf_raw" <<'CSV'
+fraud_bool,income,name_email_similarity,prev_address_months_count,current_address_months_count,customer_age,days_since_request,intended_balcon_amount,payment_type,zip_count_4w,velocity_6h,velocity_24h,velocity_4w,bank_branch_count_8w,date_of_birth_distinct_emails_4w,employment_status,credit_risk_score,email_is_free,housing_status,phone_home_valid,phone_mobile_valid,bank_months_count,has_other_cards,proposed_credit_limit,foreign_request,source,session_length_in_minutes,device_os,keep_alive_session,device_distinct_emails_8w,device_fraud_count,month
+0,0.3,0.98,-1,25,40,0.01,102.45,AA,1059,13096.03,7850.95,6742.08,5,5,CB,163,1,BC,0,1,9,0,1500.0,0,INTERNET,16.22,linux,1,1,0,0
+1,0.9,0.10,4,1,20,0.20,9000.00,AB,22,99999.00,88888.00,77777.00,1,12,CA,47,0,BA,1,1,0,1,200.0,1,TELEAPP,2.30,windows,0,2,1,7
+CSV
+
+  "$python_cmd" ml/pipelines/prepare_tabular_dataset.py \
+    --dataset-id bank_account_fraud_neurips_2022 \
+    --raw "$baf_raw" \
+    --interim-output data/interim/baf-smoke-standard-transactions.csv \
+    --processed-output data/processed/baf-smoke-feature-matrix.csv \
+    --manifest-output ml/artifacts/baf-smoke-dataset-prep/manifest.json \
+    >/dev/null
+
+  grep -q 'raw__credit_risk_score' data/processed/baf-smoke-feature-matrix.csv \
+    || fail "BAF feature matrix did not include credit_risk_score"
+  grep -q 'raw__velocity_6h' data/processed/baf-smoke-feature-matrix.csv \
+    || fail "BAF feature matrix did not include velocity_6h"
+  grep -q 'raw__payment_type__AA' data/processed/baf-smoke-feature-matrix.csv \
+    || fail "BAF feature matrix did not include payment_type one-hot features"
+  grep -q '"rawCategoricalFeatureColumns"' ml/artifacts/baf-smoke-dataset-prep/manifest.json \
+    || fail "BAF manifest did not describe raw categorical features"
+
+  rm -rf "$temp_dir"
 }
 
 run_live_checks() {

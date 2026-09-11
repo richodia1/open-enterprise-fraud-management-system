@@ -47,6 +47,8 @@ data/catalog/fraud-datasets.json
 | Bank Account Fraud Dataset Suite | Bank account opening fraud, bias, imbalance, and temporal evaluation. | A privacy-preserving synthetic tabular fraud suite published with NeurIPS 2022. Source: https://papers.nips.cc/paper_files/paper/2022/hash/126b93dcc2683fdaea4bb6d3be3727e0-Abstract-Datasets_and_Benchmarks.html |
 | Financial Fraud Alert Review Dataset | Human review and investigator decision-support research. | Useful later for human-in-the-loop fraud operations and learning-to-defer experiments. Source: https://springernature.figshare.com/articles/dataset/Financial_Fraud_Alert_Review_Dataset/28351172 |
 
+The first serious OEFMS academic experiment should use the Bank Account Fraud Dataset Suite `Base.csv` file because it has meaningful tabular features that can be explained to investigators. The catalog maps numeric features such as `credit_risk_score`, `velocity_6h`, `customer_age`, and `device_fraud_count`, plus categorical features such as `payment_type`, `employment_status`, `housing_status`, `source`, and `device_os`.
+
 ## Dataset Preparation Foundation
 
 The first dataset manipulation path is:
@@ -69,6 +71,13 @@ Run the committed synthetic sample:
 
 ```bash
 ./scripts/prepare-ml-dataset.sh oefms_synthetic_sample
+```
+
+Run the BAF baseline preparation after placing `Base.csv` under `data/raw/bank-account-fraud/`:
+
+```bash
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py --validate-only
 ```
 
 The standardized output normalizes different dataset shapes into transaction-like fields such as transaction id, tenant id, type, channel, direction, amount, countries, timestamp, label, and source lineage.

@@ -64,6 +64,7 @@ Use one branch per focused change.
 | 10 | `feature/transaction-persistence-foundation` | Persist received transaction receipts in the owning Ingestion Management schema. |
 | 11 | `feature/fraud-decision-persistence-foundation` | Persist fraud decision summaries in the owning Fraud Detection schema. |
 | 12 | `feature/ml-dataset-foundation` | Track fraud dataset references and add the first reproducible feature-matrix preparation path. |
+| 13 | `feature/xgboost-baseline-experiment` | Preserve BAF model features and add the first optional XGBoost training/evaluation script. |
 
 ## Service Responsibilities
 
@@ -159,7 +160,7 @@ The first event path can start simple, but it should leave room for stronger rel
 
 ML should not be rushed into the live service path.
 
-Phase 2 can define the runtime contract for ML scoring, but production use should wait until datasets, training scripts, validation metrics, model cards, explainability output, and deployment controls exist.
+Phase 2 can define the runtime contract for ML scoring, but production use should wait until datasets, training scripts, validation metrics, model cards, explainability output, and deployment controls exist. The first optional XGBoost baseline trains outside the Java runtime and writes local artifacts only.
 
 The expected decision modes remain:
 

@@ -1,19 +1,19 @@
 # XGBoost Baseline Experiment
 
-This folder references the first planned tabular ML experiment. It does not commit trained model artifacts.
+This folder contains the first reproducible tabular ML experiment for OEFMS. It trains an XGBoost binary classifier from the prepared feature matrix and writes local, ignored model artifacts for research and runtime handoff.
 
 ## Dataset Input
 
-Run the dataset preparation pipeline first:
+For the academic baseline, use the Bank Account Fraud Dataset Suite `Base.csv` file:
 
 ```bash
-./scripts/prepare-ml-dataset.sh oefms_synthetic_sample
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
 ```
 
-For an external dataset, download it locally under the ignored `data/raw/` or `data/external/` folder shown in `data/catalog/fraud-datasets.json`, then pass the catalog id:
+For a quick local check, limit the preparation size:
 
 ```bash
-./scripts/prepare-ml-dataset.sh paysim_synthetic_financial
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022 --limit 10000
 ```
 
 The pipeline writes:
@@ -24,7 +24,47 @@ data/processed/oefms-feature-matrix.csv
 ml/artifacts/dataset-prep/manifest.json
 ```
 
-The XGBoost experiment should train from `data/processed/oefms-feature-matrix.csv` and copy the manifest into the final model card or model registry metadata.
+The BAF mapping keeps core explainable columns such as `credit_risk_score`, `velocity_6h`, `customer_age`, `payment_type`, `employment_status`, `housing_status`, `source`, and `device_os` as model-ready `raw__...` features.
+
+## Training
+
+Install the optional Python training stack:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r ml/requirements.txt
+```
+
+Validate the prepared feature matrix without importing ML dependencies:
+
+```bash
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py --validate-only
+```
+
+Train the baseline:
+
+```bash
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py
+```
+
+Outputs are written under the ignored folder:
+
+```text
+ml/artifacts/xgboost-baseline/
+  xgboost-baseline.ubj
+  metrics.json
+  feature-columns.json
+  feature-importance.csv
+  feature-contributions-sample.csv
+  model-card.md
+```
+
+The training script automatically sets `scale_pos_weight` from the training split class imbalance and evaluates validation/test data with PR-AUC, ROC-AUC, precision, recall, F1, false-positive rate, and recall at the configured minimum precision.
+
+## Explainability
+
+The generated `feature-contributions-sample.csv` uses XGBoost contribution values to show the highest-impact features per scored record. A later production scorer adapter should map those contribution records into `MlFeatureContribution` values for investigator-facing explanations.
 
 ## Runtime Reference
 

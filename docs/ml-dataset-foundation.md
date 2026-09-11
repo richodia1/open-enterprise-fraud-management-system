@@ -96,10 +96,28 @@ The processed CSV adds model-ready features:
 - `is_cross_border`
 - one-hot encoded transaction type, channel, direction, currency, country, and amount bucket columns
 - optional raw passthrough columns for datasets such as Credit Card Fraud `V*` fields
+- explicit raw numeric columns for BAF such as `raw__credit_risk_score`, `raw__velocity_6h`, `raw__customer_age`, and `raw__device_fraud_count`
+- explicit raw categorical one-hot columns for BAF such as `raw__payment_type__AA`, `raw__employment_status__CB`, and `raw__device_os__LINUX`
 - `split`
 - `label`
 
 The first split strategy is ordered train/validation/test. A later branch can add time-aware splitting, leakage checks, class-imbalance sampling, and model evaluation reports.
+
+## Bank Account Fraud Baseline
+
+The preferred single academic dataset for the first paper path is the Bank Account Fraud Dataset Suite `Base.csv` file. Place it locally at:
+
+```text
+data/raw/bank-account-fraud/Base.csv
+```
+
+Then prepare it with:
+
+```bash
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
+```
+
+The catalog keeps the raw data out of Git while preserving BAF modelling signals in the generated feature matrix. This gives XGBoost meaningful, explainable inputs instead of relying only on generic amount and default transaction fields.
 
 ## Manifest Link To Java
 
@@ -123,5 +141,5 @@ The first XGBoost branch should:
 - train only on `split=train`
 - tune class imbalance using the positive-to-negative label ratio
 - evaluate on validation and test splits using PR-AUC, ROC-AUC, precision, recall, F1, and recall at fixed precision
-- write a model card that copies the dataset manifest reference
+- write a model card, metrics JSON, feature importance CSV, and contribution samples under `ml/artifacts/xgboost-baseline/`
 - keep trained artifacts under ignored `ml/artifacts/` or a governed registry

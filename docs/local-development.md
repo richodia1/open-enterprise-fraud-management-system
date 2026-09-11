@@ -62,6 +62,15 @@ Run:
 
 The script writes ignored outputs under `data/interim/`, `data/processed/`, and `ml/artifacts/`. See [ML Dataset Foundation](ml-dataset-foundation.md).
 
+For the Bank Account Fraud baseline, place `Base.csv` under `data/raw/bank-account-fraud/`, then run:
+
+```bash
+./scripts/prepare-ml-dataset.sh bank_account_fraud_neurips_2022
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py --validate-only
+```
+
+Install `ml/requirements.txt` only when you want to train the local XGBoost model.
+
 ## Run Local Stack
 
 ```bash
