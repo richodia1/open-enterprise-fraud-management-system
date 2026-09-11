@@ -94,3 +94,5 @@ See [RabbitMQ Event Spine](rabbitmq-event-spine.md) for the first broker exchang
 - Add new shared fields only when more than one service needs them.
 - Keep service-owned workflow decisions inside the owning service.
 - Treat ML fields as decision-support signals until trained models, validation, governance, and serving are implemented.
+
+Explainable AI Service now uses the explanation contracts to build deterministic decision-support evidence from `FraudDecisionProducedEvent` before publishing `ExplanationPreparedEvent`.

@@ -22,6 +22,22 @@ Case Management Service
 Investigator final decision
 ```
 
+## Current Implementation
+
+The service now consumes `fraud.decision.produced` events and prepares an investigator-facing explanation pack.
+
+The first implementation is deterministic decision support:
+
+- Converts rule hits into `RULE` evidence items.
+- Converts model signals into `MODEL_SIGNAL` evidence items when present.
+- Adds baseline evidence when no elevated rule or model evidence is present.
+- Preserves tenant, correlation, causation, and trace metadata.
+- Publishes `explanation.prepared` for downstream case and audit workflows.
+
+This is not production ML explainability yet. It is the first clear explanation boundary that later SHAP, counterfactual, model-card, and feature-contribution work can extend.
+
+See [Explanation Decision Support](explanation-decision-support.md) for implementation details.
+
 ## Future Responsibilities
 
 - Explain matched fraud rules in plain language.

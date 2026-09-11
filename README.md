@@ -6,7 +6,7 @@ OEFMS v0.1 is the initial foundation of the project and is being developed colla
 
 The project aims to provide an open and adaptable architecture that can be extended for different financial institutions, transaction types, fraud scenarios, regulatory environments, and technology stacks.
 
-OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion, event publication, and the first rule-mode Fraud Detection event slice.
+OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion, rule-mode fraud decisions, and the first explainable decision-support slice.
 
 ## GitHub Repository Description
 
@@ -79,7 +79,7 @@ Phase 1 established the platform foundation: service contracts, Auth, API Gatewa
 
 Phase 2 is the next implementation phase. It focuses on the first end-to-end domain workflow: transaction ingestion, RabbitMQ event publication, fraud decision consumption, explainable decision support, case handoff, and audit logging.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Explanation Decision Support](docs/explanation-decision-support.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
@@ -137,6 +137,8 @@ See [Fraud Detection Core](docs/fraud-detection-core.md) for the first rule-mode
 See [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md) for the first RabbitMQ listener in Fraud Detection Service.
 
 See [Fraud Decision Events](docs/fraud-decision-events.md) for publishing rule-mode fraud decisions to RabbitMQ.
+
+See [Explanation Decision Support](docs/explanation-decision-support.md) for the first explanation consumer and event publisher.
 
 ## Local Smoke Checks
 

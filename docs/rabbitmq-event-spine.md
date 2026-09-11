@@ -107,4 +107,16 @@ The first consumer:
 - Preserves correlation metadata and uses the source transaction event id as causation id.
 - Copies the shared event metadata into broker headers.
 
+The Explainable AI Service now consumes `fraud.decision.produced` events from `oefms.explainable-ai.fraud-decision-produced`.
+
+The first explanation consumer:
+
+- Uses Spring AMQP and a JSON message converter.
+- Declares its durable queue and shared dead-letter queue.
+- Binds the explainable AI queue to `fraud.decision.produced`.
+- Validates event type and event version before processing.
+- Builds a deterministic `ExplanationResponse` from rule hits and model signals.
+- Publishes `explanation.prepared` to the shared event exchange.
+- Preserves correlation metadata and uses the source fraud decision event id as causation id.
+
 Service-specific retry policies, idempotency storage, dead-letter inspection workflows, and outbox-backed publication should be added in later implementation branches.
