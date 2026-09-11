@@ -54,6 +54,8 @@ status=RECEIVED
 eventType=transaction.received
 ```
 
+Because ingestion now publishes to RabbitMQ, this probe requires the broker to be reachable.
+
 The fraud decision probe posts a low-risk synthetic transaction and expects:
 
 ```text

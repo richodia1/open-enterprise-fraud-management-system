@@ -2,7 +2,7 @@
 
 The Ingestion Management Service owns the first external transaction intake boundary.
 
-This branch adds request validation and prepares a transport-ready `TransactionReceivedEvent`. It does not publish to RabbitMQ, write to a database, or trigger downstream fraud processing yet.
+The service validates incoming transaction requests and publishes a `TransactionReceivedEvent` through RabbitMQ. It does not write to a database or trigger downstream fraud processing directly.
 
 ## Endpoint
 
@@ -71,7 +71,7 @@ Successful requests return `202 Accepted`.
   "correlationId": "correlation-1",
   "acceptedAt": "2026-09-11T09:00:00Z",
   "attributes": {
-    "eventPublication": "prepared"
+    "eventPublication": "published"
   }
 }
 ```
@@ -93,9 +93,9 @@ The first validation layer requires:
 
 When party details are supplied, the service validates that each party has at least one reference and that country codes use a two-letter ISO 3166 format.
 
-## Event Preparation
+## Event Publication
 
-The service prepares this event envelope for the next RabbitMQ publisher branch:
+The service publishes this event envelope:
 
 ```text
 EventEnvelope<TransactionReceivedEvent>
@@ -109,3 +109,12 @@ The prepared message uses:
 | Routing key | `transaction.received` |
 | Source service | `ingestion-management-service` |
 | Event version | `1` |
+
+RabbitMQ publishing is part of the request path for this early implementation. If the broker is unavailable, the API returns `503 Service Unavailable` so callers know the event was not accepted into the event spine.
+
+The exchange names are environment-driven:
+
+| Variable | Default |
+| --- | --- |
+| `OEFMS_RABBITMQ_EXCHANGE` | `oefms.events` |
+| `OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE` | `oefms.events.dlx` |
