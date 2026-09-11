@@ -51,6 +51,7 @@ CATEGORICAL_COLUMNS = [
     "amount_bucket",
 ]
 PASSTHROUGH_EXCLUDE = set(STANDARD_COLUMNS)
+TRAINING_EXCLUDE_COLUMNS = {"transaction_id", "tenant_id", "split", "label"}
 
 
 def main() -> int:
@@ -160,19 +161,24 @@ def standardize_rows(dataset: dict[str, Any], raw_rows: list[dict[str, str]]) ->
                     defaults=defaults,
                     transforms=transforms,
                 )
-        preserve_passthrough_features(standard_row, row, schema.get("passthroughFeaturePrefixes", []))
+        preserve_additional_features(standard_row, row, schema)
         standard_row["label"] = normalize_label(standard_row["label"])
         standard_rows.append(standard_row)
     return standard_rows
 
 
-def preserve_passthrough_features(
+def preserve_additional_features(
     standard_row: dict[str, str],
     raw_row: dict[str, str],
-    prefixes: list[str],
+    schema: dict[str, Any],
 ) -> None:
+    configured_columns = set(schema.get("numericFeatureColumns", []))
+    configured_columns.update(schema.get("categoricalFeatureColumns", []))
+    configured_columns.update(schema.get("passthroughFeatureColumns", []))
+    prefixes = schema.get("passthroughFeaturePrefixes", [])
+
     for column, value in raw_row.items():
-        if any(column.startswith(prefix) for prefix in prefixes):
+        if column in configured_columns or any(column.startswith(prefix) for prefix in prefixes):
             standard_row[column] = value
 
 
@@ -247,7 +253,12 @@ def engineer_features(
         if column != "amount_bucket"
     }
     category_values["amount_bucket"] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
-    passthrough_columns = passthrough_columns_from(dataset, standard_rows)
+    raw_numeric_columns = numeric_feature_columns_from(dataset, standard_rows)
+    raw_categorical_columns = categorical_feature_columns_from(dataset, standard_rows)
+    raw_category_values = {
+        column: sorted({safe_token(row.get(column, "")) for row in standard_rows if row.get(column)})
+        for column in raw_categorical_columns
+    }
 
     feature_columns = [
         "transaction_id",
@@ -262,7 +273,10 @@ def engineer_features(
     for column in CATEGORICAL_COLUMNS:
         for value in category_values.get(column, []):
             feature_columns.append(f"{column}__{value}")
-    feature_columns.extend(passthrough_columns)
+    feature_columns.extend(f"raw__{column}" for column in raw_numeric_columns)
+    for column in raw_categorical_columns:
+        for value in raw_category_values.get(column, []):
+            feature_columns.append(f"raw__{column}__{value}")
     feature_columns.append("label")
 
     splits = assign_splits(dataset, len(standard_rows))
@@ -288,8 +302,13 @@ def engineer_features(
             for value in category_values.get(column, []):
                 feature_row[f"{column}__{value}"] = "1" if active_value == value else "0"
 
-        for column in passthrough_columns:
-            feature_row[column] = normalize_numeric(row.get(column.removeprefix("raw__"), ""))
+        for column in raw_numeric_columns:
+            feature_row[f"raw__{column}"] = normalize_numeric(row.get(column, ""))
+
+        for column in raw_categorical_columns:
+            active_value = safe_token(row.get(column, ""))
+            for value in raw_category_values.get(column, []):
+                feature_row[f"raw__{column}__{value}"] = "1" if active_value == value else "0"
 
         feature_row["label"] = row["label"]
         feature_rows.append(feature_row)
@@ -297,19 +316,45 @@ def engineer_features(
     return feature_rows, feature_columns
 
 
-def passthrough_columns_from(dataset: dict[str, Any], rows: list[dict[str, str]]) -> list[str]:
-    prefixes = dataset["schema"].get("passthroughFeaturePrefixes", [])
+def numeric_feature_columns_from(dataset: dict[str, Any], rows: list[dict[str, str]]) -> list[str]:
+    schema = dataset["schema"]
+    columns = list(schema.get("numericFeatureColumns", []))
+    columns.extend(prefixed_feature_columns_from(schema, rows))
+    return available_feature_columns(columns, rows)
+
+
+def categorical_feature_columns_from(dataset: dict[str, Any], rows: list[dict[str, str]]) -> list[str]:
+    return available_feature_columns(dataset["schema"].get("categoricalFeatureColumns", []), rows)
+
+
+def prefixed_feature_columns_from(schema: dict[str, Any], rows: list[dict[str, str]]) -> list[str]:
+    prefixes = schema.get("passthroughFeaturePrefixes", [])
     if not prefixes or not rows:
         return []
 
     source_columns = sorted(rows[0].keys())
-    passthrough = []
+    columns = []
     for column in source_columns:
         if column in PASSTHROUGH_EXCLUDE:
             continue
         if any(column.startswith(prefix) for prefix in prefixes):
-            passthrough.append(f"raw__{column}")
-    return passthrough
+            columns.append(column)
+    return columns
+
+
+def available_feature_columns(columns: list[str], rows: list[dict[str, str]]) -> list[str]:
+    if not rows:
+        return []
+
+    available = []
+    seen = set()
+    source_columns = rows[0].keys()
+    for column in columns:
+        if column in seen or column in PASSTHROUGH_EXCLUDE or column not in source_columns:
+            continue
+        available.append(column)
+        seen.add(column)
+    return available
 
 
 def assign_splits(dataset: dict[str, Any], row_count: int) -> list[str]:
@@ -349,6 +394,12 @@ def build_manifest(
 ) -> dict[str, Any]:
     labels = Counter(row["label"] for row in standard_rows)
     splits = Counter(assign_splits(dataset, len(standard_rows)))
+    raw_numeric_columns = numeric_feature_columns_from(dataset, standard_rows)
+    raw_categorical_columns = categorical_feature_columns_from(dataset, standard_rows)
+    training_feature_columns = [
+        column for column in feature_columns
+        if column not in TRAINING_EXCLUDE_COLUMNS
+    ]
     return {
         "manifestVersion": "2026-09-11",
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -369,6 +420,13 @@ def build_manifest(
         "labelCounts": dict(sorted(labels.items())),
         "splitCounts": dict(sorted(splits.items())),
         "featureColumns": feature_columns,
+        "featureSummary": {
+            "columnCount": len(feature_columns),
+            "trainingColumnCount": len(training_feature_columns),
+            "trainingExcludeColumns": sorted(TRAINING_EXCLUDE_COLUMNS),
+            "rawNumericFeatureColumns": raw_numeric_columns,
+            "rawCategoricalFeatureColumns": raw_categorical_columns,
+        },
         "javaRuntimeReference": {
             "decisionModeEnv": "OEFMS_FRAUD_DECISION_MODE=ml|hybrid",
             "scoringClient": "org.openefms.frauddetection.ml.MlScoringClient",

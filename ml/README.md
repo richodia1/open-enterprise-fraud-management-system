@@ -36,8 +36,20 @@ Runtime integration should target the Java contracts documented in `docs/ml-runt
 Recommended first model path:
 
 1. Prepare the committed synthetic sample to verify the pipeline.
-2. Download PaySim or Credit Card Fraud locally and run the same preparation path.
-3. Build logistic regression and random forest baselines.
-4. Train an XGBoost baseline.
-5. Evaluate with precision-recall, ROC-AUC, PR-AUC, false-positive rate, and recall at fixed precision.
-6. Generate feature contribution explanations for investigator support.
+2. Download Bank Account Fraud Dataset Suite `Base.csv` locally and prepare `bank_account_fraud_neurips_2022`.
+3. Train the XGBoost baseline in `ml/experiments/xgboost-baseline/`.
+4. Evaluate with precision-recall, ROC-AUC, PR-AUC, false-positive rate, and recall at fixed precision.
+5. Generate feature contribution explanations for investigator support.
+6. Add logistic regression, random forest, LightGBM, and model-calibration comparisons.
+
+## Optional Training Stack
+
+Install the Python ML dependencies only when training locally:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r ml/requirements.txt
+```
+
+The repository smoke checks use standard-library validation paths, so contributors do not need the full ML stack to build the Java services.
