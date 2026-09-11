@@ -91,13 +91,18 @@ Use one branch per focused change.
 
 ### Case Management Service
 
-- Create an initial case or review item when a transaction needs investigation.
+- Consume explanation events from `oefms.case-management.explanation-prepared`.
+- Create an initial alert and case when a transaction needs investigation.
+- Publish alert, case, and audit events for reviewable explanations.
+- Skip low-risk approvals that do not need investigation.
 - Store status, priority, assignment-ready fields, and explanation references.
 - Leave full investigation workflow for a later phase.
 
 ### Audit Logging Service
 
-- Record append-only audit events for ingestion, fraud decision, explanation preparation, and case creation.
+- Consume audit events from `oefms.audit-logging.audit-event-recorded`.
+- Record audit events for alert and case creation to logs until persistence is added.
+- Prepare for append-only audit events across ingestion, fraud decision, explanation preparation, and case creation.
 - Preserve correlation IDs and event IDs so the full chain can be traced.
 - Avoid editable business workflows.
 

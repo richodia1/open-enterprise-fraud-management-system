@@ -46,4 +46,4 @@ OEFMS_RABBITMQ_DEFAULT_REQUEUE_REJECTED=false
 - Idempotency storage for consumed transaction event ids.
 - Outbox-backed publication when fraud decisions become persisted records.
 - Explainable AI consumer for `fraud.decision.produced`.
-- Case, alert, and audit handoff from the explanation result.
+- Persistent case, alert, and audit storage after the first explanation handoff.

@@ -96,3 +96,5 @@ See [RabbitMQ Event Spine](rabbitmq-event-spine.md) for the first broker exchang
 - Treat ML fields as decision-support signals until trained models, validation, governance, and serving are implemented.
 
 Explainable AI Service now uses the explanation contracts to build deterministic decision-support evidence from `FraudDecisionProducedEvent` before publishing `ExplanationPreparedEvent`.
+
+Case Management Service now uses the alert, case, and audit contracts to create the first review handoff from `ExplanationPreparedEvent`.

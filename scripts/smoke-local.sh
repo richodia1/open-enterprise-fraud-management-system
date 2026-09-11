@@ -12,6 +12,7 @@ health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
 ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}"
 fraud_service_url="${OEFMS_SMOKE_FRAUD_SERVICE_URL:-http://localhost:8081}"
+audit_service_url="${OEFMS_SMOKE_AUDIT_SERVICE_URL:-http://localhost:8090}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
 gateway_ingestion_path="${OEFMS_SMOKE_GATEWAY_INGESTION_PATH:-/api/v1/ingestion/transactions}"
 gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
@@ -25,6 +26,7 @@ core_services=(
   fraud-detection-service
   explainable-ai-service
   case-management-service
+  audit-logging-service
 )
 
 usage() {
@@ -43,6 +45,7 @@ Environment:
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
   OEFMS_SMOKE_INGESTION_SERVICE_URL        Ingestion service URL. Default: http://localhost:8089
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
+  OEFMS_SMOKE_AUDIT_SERVICE_URL            Audit Logging service URL. Default: http://localhost:8090
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
   OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
   OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
@@ -216,6 +219,7 @@ run_live_checks() {
   wait_for_http "Fraud Detection Service" "${fraud_service_url}/actuator/health"
   wait_for_http "Explainable AI Service" "${OEFMS_SMOKE_EXPLAINABLE_AI_SERVICE_URL:-http://localhost:8094}/actuator/health"
   wait_for_http "Case Management Service" "${OEFMS_SMOKE_CASE_SERVICE_URL:-http://localhost:8084}/actuator/health"
+  wait_for_http "Audit Logging Service" "${audit_service_url}/actuator/health"
   probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
 
