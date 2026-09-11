@@ -8,6 +8,7 @@ import org.openefms.common.events.EventTypes;
 import org.openefms.common.events.rabbitmq.RabbitMqQueues;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.frauddetection.decision.FraudDecisionMessage;
+import org.openefms.frauddetection.decision.FraudDecisionMessageSink;
 import org.openefms.frauddetection.decision.FraudDecisionOrchestrator;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

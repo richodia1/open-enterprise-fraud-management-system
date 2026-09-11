@@ -29,6 +29,7 @@ import org.openefms.common.models.transaction.TransactionDirection;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.openefms.common.models.transaction.TransactionParty;
 import org.openefms.common.models.transaction.TransactionType;
+import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
 
 class FraudDecisionOrchestratorTest {
     private static final Clock FIXED_CLOCK =
@@ -82,6 +83,7 @@ class FraudDecisionOrchestratorTest {
     void rejectsMlModeUntilModelServingIsImplemented() {
         FraudDecisionOrchestrator orchestrator = new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("ml", null, null),
+                rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 FIXED_CLOCK);
 
@@ -133,8 +135,13 @@ class FraudDecisionOrchestratorTest {
     private FraudDecisionOrchestrator rulesOrchestrator() {
         return new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("rules", null, null),
+                rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 FIXED_CLOCK);
+    }
+
+    private FraudRabbitMqProperties rabbitMqProperties() {
+        return new FraudRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER);
     }
 
     private TransactionIngestionRequest transaction(
