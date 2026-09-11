@@ -9,8 +9,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.common.events.EventEnvelope;
@@ -46,7 +48,8 @@ class FraudDecisionOrchestratorTest {
 
     @Test
     void approvesLowRiskTransactionsInRulesMode() {
-        FraudDecisionOrchestrator orchestrator = rulesOrchestrator();
+        CapturingFraudDecisionRepository repository = new CapturingFraudDecisionRepository();
+        FraudDecisionOrchestrator orchestrator = rulesOrchestrator(repository);
 
         var response = orchestrator.decide(transaction(
                 new BigDecimal("25.00"),
@@ -62,6 +65,16 @@ class FraudDecisionOrchestratorTest {
         assertTrue(response.ruleHits().isEmpty());
         assertTrue(response.modelSignals().isEmpty());
         assertEquals(OffsetDateTime.parse("2026-09-08T09:00:00Z"), response.decidedAt());
+
+        assertEquals(1, repository.records.size());
+        FraudDecisionRecord record = repository.records.getFirst();
+        assertEquals(response.decisionId(), record.decisionId());
+        assertEquals(TRANSACTION_ID, record.transactionId());
+        assertEquals(DecisionMode.RULES, record.mode());
+        assertEquals(DecisionOutcome.APPROVE, record.outcome());
+        assertEquals("No rule hits.", record.ruleEvidenceSummary());
+        assertEquals("No model signals.", record.modelSignalSummary());
+        assertEquals(null, record.eventType());
     }
 
     @Test
@@ -93,6 +106,8 @@ class FraudDecisionOrchestratorTest {
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 unavailableMlScoringClient(),
+                new CapturingFraudDecisionRepository(),
+                new FraudDecisionRecordMapper(),
                 FIXED_CLOCK);
 
         MlScoringUnavailableException exception = assertThrows(
@@ -128,6 +143,8 @@ class FraudDecisionOrchestratorTest {
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 scoringClient,
+                new CapturingFraudDecisionRepository(),
+                new FraudDecisionRecordMapper(),
                 FIXED_CLOCK);
 
         var response = orchestrator.decide(transaction(
@@ -170,6 +187,8 @@ class FraudDecisionOrchestratorTest {
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 scoringClient,
+                new CapturingFraudDecisionRepository(),
+                new FraudDecisionRecordMapper(),
                 FIXED_CLOCK);
 
         var response = orchestrator.decide(transaction(
@@ -193,7 +212,8 @@ class FraudDecisionOrchestratorTest {
 
     @Test
     void createsTransportReadyFraudDecisionMessagesFromTransactionEvents() {
-        FraudDecisionOrchestrator orchestrator = rulesOrchestrator();
+        CapturingFraudDecisionRepository repository = new CapturingFraudDecisionRepository();
+        FraudDecisionOrchestrator orchestrator = rulesOrchestrator(repository);
         EventEnvelope<TransactionReceivedEvent> sourceEvent = new EventEnvelope<>(
                 new EventMetadata(
                         SOURCE_EVENT_ID,
@@ -222,14 +242,61 @@ class FraudDecisionOrchestratorTest {
         assertEquals("correlation-1", message.envelope().metadata().correlationId());
         assertEquals(SOURCE_EVENT_ID.toString(), message.envelope().metadata().causationId());
         assertEquals(DecisionOutcome.APPROVE, message.envelope().payload().decision().outcome());
+
+        assertEquals(1, repository.records.size());
+        FraudDecisionRecord record = repository.records.getFirst();
+        assertEquals(message.envelope().payload().decision().decisionId(), record.decisionId());
+        assertEquals(EventTypes.FRAUD_DECISION_PRODUCED, record.eventType());
+        assertEquals(message.envelope().metadata().eventId(), record.eventId());
+        assertEquals("correlation-1", record.correlationId());
+        assertEquals(SOURCE_EVENT_ID.toString(), record.causationId());
+    }
+
+    @Test
+    void readsPersistedFraudDecisionRecords() {
+        CapturingFraudDecisionRepository repository = new CapturingFraudDecisionRepository();
+        FraudDecisionOrchestrator orchestrator = rulesOrchestrator(repository);
+
+        var response = orchestrator.decide(transaction(
+                new BigDecimal("200000.00"),
+                TransactionChannel.OTHER,
+                "GB",
+                "NG",
+                Map.of("velocityCount", "12", "highRisk", "true")));
+
+        FraudDecisionRecord record = orchestrator.decision(response.decisionId());
+        List<FraudDecisionRecord> byTransaction = orchestrator.decisionsForTransaction(TRANSACTION_ID);
+        List<FraudDecisionRecord> byTenant = orchestrator.decisionsForTenant(" tenant-a ");
+
+        assertEquals(DecisionOutcome.ESCALATE, record.outcome());
+        assertEquals(RiskBand.CRITICAL, record.riskBand());
+        assertEquals(5, record.ruleHitCount());
+        assertTrue(record.ruleEvidenceSummary().contains("CRITICAL_VALUE_AMOUNT"));
+        assertEquals(1, byTransaction.size());
+        assertEquals(1, byTenant.size());
+    }
+
+    @Test
+    void reportsMissingDecisionRecords() {
+        FraudDecisionOrchestrator orchestrator = rulesOrchestrator();
+
+        assertThrows(
+                FraudDecisionRecordNotFoundException.class,
+                () -> orchestrator.decision(UUID.fromString("25a499ee-c908-44de-817f-fcbe090d6469")));
     }
 
     private FraudDecisionOrchestrator rulesOrchestrator() {
+        return rulesOrchestrator(new CapturingFraudDecisionRepository());
+    }
+
+    private FraudDecisionOrchestrator rulesOrchestrator(FraudDecisionRepository repository) {
         return new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("rules", null, null),
                 rabbitMqProperties(),
                 new RuleBasedFraudDecisionEngine(),
                 unavailableMlScoringClient(),
+                repository,
+                new FraudDecisionRecordMapper(),
                 FIXED_CLOCK);
     }
 
@@ -317,6 +384,37 @@ class FraudDecisionOrchestratorTest {
 
         private MlScoreRequest lastRequest() {
             return lastRequest;
+        }
+    }
+
+    private static final class CapturingFraudDecisionRepository implements FraudDecisionRepository {
+        private final Map<UUID, FraudDecisionRecord> recordsById = new java.util.LinkedHashMap<>();
+        private final List<FraudDecisionRecord> records = new ArrayList<>();
+
+        @Override
+        public FraudDecisionRecord save(FraudDecisionRecord record) {
+            records.add(record);
+            recordsById.put(record.decisionId(), record);
+            return record;
+        }
+
+        @Override
+        public Optional<FraudDecisionRecord> findByDecisionId(UUID decisionId) {
+            return Optional.ofNullable(recordsById.get(decisionId));
+        }
+
+        @Override
+        public List<FraudDecisionRecord> findByTransactionId(UUID transactionId) {
+            return records.stream()
+                    .filter(record -> record.transactionId().equals(transactionId))
+                    .toList();
+        }
+
+        @Override
+        public List<FraudDecisionRecord> findByTenantId(String tenantId) {
+            return records.stream()
+                    .filter(record -> record.tenantId().equals(tenantId))
+                    .toList();
         }
     }
 }

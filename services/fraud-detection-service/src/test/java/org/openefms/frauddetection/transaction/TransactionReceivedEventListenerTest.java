@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.common.events.EventEnvelope;
@@ -37,6 +38,9 @@ import org.openefms.frauddetection.decision.FraudDecisionMessage;
 import org.openefms.frauddetection.decision.FraudDecisionMessageSink;
 import org.openefms.frauddetection.decision.FraudDecisionOrchestrator;
 import org.openefms.frauddetection.decision.FraudDecisionProperties;
+import org.openefms.frauddetection.decision.FraudDecisionRecord;
+import org.openefms.frauddetection.decision.FraudDecisionRecordMapper;
+import org.openefms.frauddetection.decision.FraudDecisionRepository;
 import org.openefms.frauddetection.decision.RuleBasedFraudDecisionEngine;
 import org.openefms.frauddetection.ml.MlScoringClient;
 import org.openefms.frauddetection.ml.MlScoringUnavailableException;
@@ -51,7 +55,8 @@ class TransactionReceivedEventListenerTest {
     @Test
     void consumesTransactionEventAndHandsDecisionMessageToSink() {
         CapturingFraudDecisionMessageSink sink = new CapturingFraudDecisionMessageSink();
-        TransactionReceivedEventListener listener = new TransactionReceivedEventListener(rulesOrchestrator(), sink);
+        CapturingFraudDecisionRepository repository = new CapturingFraudDecisionRepository();
+        TransactionReceivedEventListener listener = new TransactionReceivedEventListener(rulesOrchestrator(repository), sink);
 
         listener.handle(transactionEvent(EventTypes.TRANSACTION_RECEIVED, 1, new BigDecimal("25.00"), Map.of()));
 
@@ -63,6 +68,9 @@ class TransactionReceivedEventListenerTest {
         assertEquals(SOURCE_EVENT_ID.toString(), message.envelope().metadata().causationId());
         assertEquals(DecisionOutcome.APPROVE, message.envelope().payload().decision().outcome());
         assertEquals(TRANSACTION_ID, message.envelope().payload().decision().transactionId());
+        assertEquals(1, repository.records.size());
+        assertEquals(message.envelope().payload().decision().decisionId(), repository.records.getFirst().decisionId());
+        assertEquals(EventTypes.FRAUD_DECISION_PRODUCED, repository.records.getFirst().eventType());
     }
 
     @Test
@@ -113,11 +121,17 @@ class TransactionReceivedEventListenerTest {
     }
 
     private FraudDecisionOrchestrator rulesOrchestrator() {
+        return rulesOrchestrator(new CapturingFraudDecisionRepository());
+    }
+
+    private FraudDecisionOrchestrator rulesOrchestrator(FraudDecisionRepository repository) {
         return new FraudDecisionOrchestrator(
                 new FraudDecisionProperties("rules", null, null),
                 new FraudRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
                 new RuleBasedFraudDecisionEngine(),
                 unavailableMlScoringClient(),
+                repository,
+                new FraudDecisionRecordMapper(),
                 FIXED_CLOCK);
     }
 
@@ -166,6 +180,37 @@ class TransactionReceivedEventListenerTest {
         @Override
         public void accept(FraudDecisionMessage message) {
             messages.add(message);
+        }
+    }
+
+    private static final class CapturingFraudDecisionRepository implements FraudDecisionRepository {
+        private final Map<UUID, FraudDecisionRecord> recordsById = new java.util.LinkedHashMap<>();
+        private final List<FraudDecisionRecord> records = new ArrayList<>();
+
+        @Override
+        public FraudDecisionRecord save(FraudDecisionRecord record) {
+            records.add(record);
+            recordsById.put(record.decisionId(), record);
+            return record;
+        }
+
+        @Override
+        public Optional<FraudDecisionRecord> findByDecisionId(UUID decisionId) {
+            return Optional.ofNullable(recordsById.get(decisionId));
+        }
+
+        @Override
+        public List<FraudDecisionRecord> findByTransactionId(UUID transactionId) {
+            return records.stream()
+                    .filter(record -> record.transactionId().equals(transactionId))
+                    .toList();
+        }
+
+        @Override
+        public List<FraudDecisionRecord> findByTenantId(String tenantId) {
+            return records.stream()
+                    .filter(record -> record.tenantId().equals(tenantId))
+                    .toList();
         }
     }
 

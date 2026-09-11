@@ -25,4 +25,26 @@ public class FraudDecisionErrorHandler {
         problem.setProperty("modelName", exception.modelName());
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(problem);
     }
+
+    @ExceptionHandler(FraudDecisionRecordNotFoundException.class)
+    ResponseEntity<ProblemDetail> handleDecisionNotFound(FraudDecisionRecordNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Fraud decision record was not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(InvalidFraudDecisionQueryException.class)
+    ResponseEntity<ProblemDetail> handleInvalidQuery(InvalidFraudDecisionQueryException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problem.setTitle("Invalid fraud decision query");
+        problem.setProperty("errors", exception.errors());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(FraudDecisionPersistenceException.class)
+    ResponseEntity<ProblemDetail> handlePersistenceFailure(FraudDecisionPersistenceException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
+        problem.setTitle("Fraud decision record could not be stored");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
+    }
 }

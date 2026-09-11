@@ -1,6 +1,6 @@
 # Fraud Decision Events
 
-Fraud Detection Service now publishes preliminary fraud decisions after consuming transaction events.
+Fraud Detection Service now stores preliminary fraud decisions and publishes them after consuming transaction events.
 
 ## Published Event
 
@@ -13,6 +13,8 @@ Fraud Detection Service now publishes preliminary fraud decisions after consumin
 | Source service | `fraud-detection-service` |
 
 `FraudDecisionOrchestrator` preserves the source transaction event correlation id and trace id. It sets the decision event causation id to the source `transaction.received` event id.
+
+Before returning the prepared message, the orchestrator stores a `fraud_decisions` record containing the decision outcome, score, evidence summary, and publication event metadata.
 
 ## Broker Headers
 
@@ -44,6 +46,5 @@ OEFMS_RABBITMQ_DEFAULT_REQUEUE_REJECTED=false
 ## Still To Add
 
 - Idempotency storage for consumed transaction event ids.
-- Outbox-backed publication when fraud decisions become persisted records.
-- Explainable AI consumer for `fraud.decision.produced`.
+- Outbox-backed publication for persisted fraud decisions.
 - Persistent case, alert, and audit storage after the first explanation handoff.

@@ -62,6 +62,7 @@ Use one branch per focused change.
 | 8 | `feature/rule-management-foundation` | Add configurable rule definitions after the basic event flow is working. |
 | 9 | `feature/ml-runtime-contract` | Define the ML scoring contract and runtime switch without enabling production ML by default. |
 | 10 | `feature/transaction-persistence-foundation` | Persist received transaction receipts in the owning Ingestion Management schema. |
+| 11 | `feature/fraud-decision-persistence-foundation` | Persist fraud decision summaries in the owning Fraud Detection schema. |
 
 ## Service Responsibilities
 
@@ -82,6 +83,7 @@ Use one branch per focused change.
 - Keep `rules` as the default mode.
 - Route `ml` and `hybrid` modes through the ML scoring contract while keeping the default runtime disabled.
 - Publish `FraudDecisionProducedEvent` with outcome, score, risk band, rule hits, model signals, and evidence references.
+- Persist a durable fraud decision summary for traceability and later investigation views.
 
 ### Rule Management Service
 

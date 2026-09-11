@@ -45,6 +45,7 @@ The core live checks cover:
 | Ingestion Management Service | `GET /api/v1/ingestion/transactions/{transactionId}` |
 | Fraud Detection Service | `GET /actuator/health` |
 | Fraud Detection Service | `GET /api/v1/fraud/ml/runtime` |
+| Fraud Detection Service | `GET /api/v1/fraud/decisions/{decisionId}` |
 | Rule Management Service | `GET /actuator/health` |
 | Rule Management Service | `GET /api/v1/rules` |
 | Explainable AI Service | `GET /actuator/health` |
@@ -75,6 +76,14 @@ The fraud decision probe posts a low-risk synthetic transaction and expects:
 mode=RULES
 outcome=APPROVE
 ruleHitCount=0
+```
+
+It then reads back the persisted fraud decision record and expects:
+
+```text
+outcome=APPROVE
+riskBand=LOW
+transactionId=<smoke id>
 ```
 
 The ML runtime probe reads the configured scorer status and expects:
