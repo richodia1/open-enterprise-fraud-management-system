@@ -31,7 +31,13 @@ Supported configured modes:
 
 ## Dataset Shortlist
 
-Raw datasets should not be committed to this repository. Contributors should download them locally under `data/raw/`, which is ignored by Git.
+Raw datasets should not be committed to this repository. Contributors should download them locally under `data/raw/` or `data/external/`, which are ignored by Git.
+
+Dataset references and column mappings are tracked in:
+
+```text
+data/catalog/fraud-datasets.json
+```
 
 | Dataset | Good For | Notes |
 | --- | --- | --- |
@@ -40,6 +46,38 @@ Raw datasets should not be committed to this repository. Contributors should dow
 | IEEE-CIS Fraud Detection | Larger feature-engineering benchmark. | Useful for high-dimensional transaction and identity features. Source: https://www.kaggle.com/competitions/ieee-fraud-detection |
 | Bank Account Fraud Dataset Suite | Bank account opening fraud, bias, imbalance, and temporal evaluation. | A privacy-preserving synthetic tabular fraud suite published with NeurIPS 2022. Source: https://papers.nips.cc/paper_files/paper/2022/hash/126b93dcc2683fdaea4bb6d3be3727e0-Abstract-Datasets_and_Benchmarks.html |
 | Financial Fraud Alert Review Dataset | Human review and investigator decision-support research. | Useful later for human-in-the-loop fraud operations and learning-to-defer experiments. Source: https://springernature.figshare.com/articles/dataset/Financial_Fraud_Alert_Review_Dataset/28351172 |
+
+## Dataset Preparation Foundation
+
+The first dataset manipulation path is:
+
+```text
+data/catalog/fraud-datasets.json
+        |
+        v
+data/raw/ or data/samples/
+        |
+        v
+ml/pipelines/prepare_tabular_dataset.py
+        |
+        +--> data/interim/oefms-standard-transactions.csv
+        +--> data/processed/oefms-feature-matrix.csv
+        +--> ml/artifacts/dataset-prep/manifest.json
+```
+
+Run the committed synthetic sample:
+
+```bash
+./scripts/prepare-ml-dataset.sh oefms_synthetic_sample
+```
+
+The standardized output normalizes different dataset shapes into transaction-like fields such as transaction id, tenant id, type, channel, direction, amount, countries, timestamp, label, and source lineage.
+
+The processed feature matrix adds numeric and one-hot encoded features such as amount log scale, high-value flags, cross-border flags, channel indicators, currency indicators, amount buckets, and the supervised label.
+
+The manifest records the dataset id, source reference, generated outputs, label counts, split counts, feature columns, and Java scoring contract references.
+
+See [ML Dataset Foundation](ml-dataset-foundation.md) for the detailed contributor workflow.
 
 ## Recommended First Experiments
 
@@ -69,6 +107,7 @@ The Java services should not depend on notebooks or raw Python scripts at runtim
 
 Recommended future options:
 
+- Prepare datasets in `ml/pipelines/` using the catalog-driven transformation path.
 - Train models in `ml/` using Python tooling.
 - Store model artifacts outside Git or through a governed artifact store.
 - Serve models through a dedicated model-serving boundary or a JVM-compatible artifact format.
