@@ -89,6 +89,7 @@ The manifest records the dataset id, source reference, generated outputs, label 
 See [ML Dataset Foundation](ml-dataset-foundation.md) for the detailed contributor workflow.
 
 See [XGBoost Baseline Results](ml-xgboost-baseline-results.md) for the first local full-dataset BAF training summary.
+See [ML Threshold Calibration And Comparison](ml-threshold-calibration-and-comparison.md) for the repeatable baseline-comparison workflow.
 
 ## Recommended First Experiments
 
@@ -101,6 +102,8 @@ Start with tabular gradient-boosting models before deep learning.
 5. Hybrid rules plus ML score experiment.
 
 XGBoost is a strong first choice because fraud datasets are usually tabular, sparse, noisy, and imbalanced. For imbalanced labels, tune parameters such as `scale_pos_weight`, then evaluate with precision-recall metrics rather than relying on accuracy.
+
+Model comparison should include simple baselines because they give academic reviewers a reference point for whether the more complex gradient-boosted model is adding measurable value.
 
 ## Evaluation Principles
 
