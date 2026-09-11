@@ -2,6 +2,7 @@ package org.openefms.ingestionmanagement.transaction;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -25,16 +26,19 @@ class TransactionIngestionService {
     private static final String SOURCE_SERVICE = "ingestion-management-service";
 
     private final TransactionIngestionRequestValidator validator;
+    private final TransactionReceiptRepository receiptRepository;
     private final TransactionEventPublisher publisher;
     private final IngestionRabbitMqProperties rabbitMqProperties;
     private final Clock clock;
 
     TransactionIngestionService(
             TransactionIngestionRequestValidator validator,
+            TransactionReceiptRepository receiptRepository,
             TransactionEventPublisher publisher,
             IngestionRabbitMqProperties rabbitMqProperties,
             Clock clock) {
         this.validator = validator;
+        this.receiptRepository = receiptRepository;
         this.publisher = publisher;
         this.rabbitMqProperties = rabbitMqProperties;
         this.clock = clock;
@@ -49,17 +53,33 @@ class TransactionIngestionService {
 
         String resolvedCorrelationId = resolveCorrelationId(correlationId);
         OffsetDateTime acceptedAt = OffsetDateTime.now(clock);
+        EventMetadata metadata = eventMetadata(normalisedRequest, resolvedCorrelationId, textOrNull(traceId), acceptedAt);
         EventEnvelope<TransactionReceivedEvent> envelope = new EventEnvelope<>(
-                eventMetadata(normalisedRequest, resolvedCorrelationId, textOrNull(traceId), acceptedAt),
+                metadata,
                 new TransactionReceivedEvent(normalisedRequest));
 
+        receiptRepository.saveReceived(receipt(normalisedRequest, metadata, acceptedAt), normalisedRequest);
         TransactionIngestionMessage message = new TransactionIngestionMessage(
                 rabbitMqProperties.exchange(),
                 RabbitMqTopology.routingKeyFor(EventTypes.TRANSACTION_RECEIVED),
                 envelope);
         publisher.publish(message);
+        receiptRepository.markPublished(normalisedRequest.transactionId());
 
         return new TransactionIngestionResult(response(normalisedRequest, resolvedCorrelationId, acceptedAt), message);
+    }
+
+    List<TransactionReceiptRecord> receipts(String tenantId) {
+        String normalisedTenantId = trimToEmpty(tenantId);
+        if (normalisedTenantId.isBlank()) {
+            throw new InvalidTransactionIngestionRequestException(List.of("tenantId must not be blank"));
+        }
+        return receiptRepository.findByTenantId(normalisedTenantId);
+    }
+
+    TransactionReceiptRecord receipt(UUID transactionId) {
+        return receiptRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new TransactionReceiptNotFoundException(transactionId));
     }
 
     private EventMetadata eventMetadata(
@@ -99,6 +119,30 @@ class TransactionIngestionService {
                 correlationId,
                 acceptedAt,
                 Map.of("eventPublication", "published"));
+    }
+
+    private TransactionReceiptRecord receipt(
+            TransactionIngestionRequest request,
+            EventMetadata metadata,
+            OffsetDateTime acceptedAt) {
+        return new TransactionReceiptRecord(
+                request.transactionId(),
+                request.externalReference(),
+                request.tenantId(),
+                request.transactionType(),
+                request.channel(),
+                request.direction(),
+                request.amount().value(),
+                request.amount().currency(),
+                request.initiatedAt(),
+                acceptedAt,
+                TransactionReceiptStatus.RECEIVED,
+                metadata.eventType(),
+                metadata.eventId(),
+                metadata.correlationId(),
+                metadata.traceId(),
+                null,
+                request.attributes());
     }
 
     private TransactionIngestionRequest normalise(TransactionIngestionRequest request) {

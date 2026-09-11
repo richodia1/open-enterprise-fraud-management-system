@@ -37,4 +37,20 @@ class TransactionIngestionErrorHandler {
         problem.setProperty("routingKey", exception.routingKey());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problem);
     }
+
+    @ExceptionHandler(TransactionReceiptNotFoundException.class)
+    ResponseEntity<ProblemDetail> handleReceiptNotFound(TransactionReceiptNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Transaction receipt was not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(TransactionReceiptPersistenceException.class)
+    ResponseEntity<ProblemDetail> handleReceiptPersistenceFailure(TransactionReceiptPersistenceException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Transaction receipt could not be persisted or read.");
+        problem.setTitle("Transaction receipt persistence failed");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
+    }
 }

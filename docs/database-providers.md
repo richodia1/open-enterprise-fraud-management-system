@@ -7,13 +7,15 @@ OEFMS should remain adaptable across database providers, but PostgreSQL is the d
 - PostgreSQL 16 is the tested local development database.
 - Each deployable service has its own database in local Docker Compose.
 - Database-backed services use environment variables for JDBC URL, username, password, driver, Hibernate dialect, and Flyway locations.
-- No entities, repositories, or migrations are implemented yet.
+- Ingestion Management Service now has the first service-owned persistence slice for received transaction receipts.
+- Other services still have database configuration prepared before their first durable domain records are added.
 
 ## Local PostgreSQL Databases
 
 | Service | Local Database |
 | --- | --- |
 | Auth Service | `openefms_auth` |
+| Ingestion Management Service | `openefms_ingestion` |
 | Fraud Detection Service | `openefms_fraud` |
 | Explainable AI Service | `openefms_explainable_ai` |
 | Rule Management Service | `openefms_rules` |
