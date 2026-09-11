@@ -11,7 +11,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.common.events.EventTypes;
@@ -33,7 +36,8 @@ class TransactionIngestionServiceTest {
     @Test
     void receivesValidTransactionsAndPreparesTransportMessage() {
         CapturingTransactionEventPublisher publisher = new CapturingTransactionEventPublisher();
-        TransactionIngestionService service = service(publisher);
+        CapturingTransactionReceiptRepository receiptRepository = new CapturingTransactionReceiptRepository();
+        TransactionIngestionService service = service(publisher, receiptRepository);
 
         TransactionIngestionResult result = service.receive(validTransaction(), " correlation-1 ", " trace-1 ");
 
@@ -59,6 +63,18 @@ class TransactionIngestionServiceTest {
         assertEquals(TRANSACTION_ID, result.message().envelope().payload().transaction().transactionId());
         assertEquals("GBP", result.message().envelope().payload().transaction().amount().currency());
         assertEquals("GB", result.message().envelope().payload().transaction().originator().countryCode());
+
+        assertEquals(1, receiptRepository.receivedRecords.size());
+        TransactionReceiptRecord receivedRecord = receiptRepository.receivedRecords.getFirst();
+        assertEquals(TRANSACTION_ID, receivedRecord.transactionId());
+        assertEquals("tenant-a", receivedRecord.tenantId());
+        assertEquals(TransactionReceiptStatus.RECEIVED, receivedRecord.status());
+        assertEquals(EventTypes.TRANSACTION_RECEIVED, receivedRecord.eventType());
+        assertEquals(result.message().envelope().metadata().eventId(), receivedRecord.eventId());
+        assertEquals("correlation-1", receivedRecord.correlationId());
+        assertEquals("core-banking", receivedRecord.attributes().get("sourceSystem"));
+        assertEquals(1, receiptRepository.markPublishedCount);
+        assertEquals(TransactionReceiptStatus.PUBLISHED, receiptRepository.recordsById.get(TRANSACTION_ID).status());
     }
 
     @Test
@@ -75,7 +91,8 @@ class TransactionIngestionServiceTest {
     @Test
     void rejectsInvalidTransactions() {
         CapturingTransactionEventPublisher publisher = new CapturingTransactionEventPublisher();
-        TransactionIngestionService service = service(publisher);
+        CapturingTransactionReceiptRepository receiptRepository = new CapturingTransactionReceiptRepository();
+        TransactionIngestionService service = service(publisher, receiptRepository);
         TransactionIngestionRequest invalidTransaction = new TransactionIngestionRequest(
                 TRANSACTION_ID,
                 "EXT-001",
@@ -99,11 +116,56 @@ class TransactionIngestionServiceTest {
         assertTrue(exception.errors().contains("originator must include at least one reference"));
         assertTrue(exception.errors().contains("originator.countryCode must be a two-letter ISO 3166 country code"));
         assertEquals(0, publisher.publishCount());
+        assertTrue(receiptRepository.receivedRecords.isEmpty());
+    }
+
+    @Test
+    void keepsReceiptAtReceivedWhenPublicationFails() {
+        CapturingTransactionReceiptRepository receiptRepository = new CapturingTransactionReceiptRepository();
+        TransactionIngestionService service = service(new FailingTransactionEventPublisher(), receiptRepository);
+
+        assertThrows(
+                TransactionEventPublicationException.class,
+                () -> service.receive(validTransaction(), "correlation-1", null));
+
+        assertEquals(1, receiptRepository.receivedRecords.size());
+        assertEquals(0, receiptRepository.markPublishedCount);
+        assertEquals(TransactionReceiptStatus.RECEIVED, receiptRepository.recordsById.get(TRANSACTION_ID).status());
+    }
+
+    @Test
+    void readsPersistedReceiptRecords() {
+        CapturingTransactionReceiptRepository receiptRepository = new CapturingTransactionReceiptRepository();
+        TransactionIngestionService service = service(new CapturingTransactionEventPublisher(), receiptRepository);
+        service.receive(validTransaction(), "correlation-1", null);
+
+        TransactionReceiptRecord receipt = service.receipt(TRANSACTION_ID);
+        List<TransactionReceiptRecord> tenantReceipts = service.receipts("tenant-a");
+
+        assertEquals(TransactionReceiptStatus.PUBLISHED, receipt.status());
+        assertEquals(1, tenantReceipts.size());
+        assertEquals(TRANSACTION_ID, tenantReceipts.getFirst().transactionId());
+    }
+
+    @Test
+    void reportsMissingReceiptRecords() {
+        TransactionIngestionService service = service(new CapturingTransactionEventPublisher());
+
+        assertThrows(
+                TransactionReceiptNotFoundException.class,
+                () -> service.receipt(UUID.fromString("25a499ee-c908-44de-817f-fcbe090d6469")));
     }
 
     private TransactionIngestionService service(TransactionEventPublisher publisher) {
+        return service(publisher, new CapturingTransactionReceiptRepository());
+    }
+
+    private TransactionIngestionService service(
+            TransactionEventPublisher publisher,
+            TransactionReceiptRepository receiptRepository) {
         return new TransactionIngestionService(
                 new TransactionIngestionRequestValidator(),
+                receiptRepository,
                 publisher,
                 new IngestionRabbitMqProperties(null, null),
                 FIXED_CLOCK);
@@ -144,6 +206,66 @@ class TransactionIngestionServiceTest {
 
         private int publishCount() {
             return publishCount;
+        }
+    }
+
+    private static final class FailingTransactionEventPublisher implements TransactionEventPublisher {
+        @Override
+        public void publish(TransactionIngestionMessage message) {
+            throw new TransactionEventPublicationException(message, new IllegalStateException("broker unavailable"));
+        }
+    }
+
+    private static final class CapturingTransactionReceiptRepository implements TransactionReceiptRepository {
+        private final Map<UUID, TransactionReceiptRecord> recordsById = new java.util.LinkedHashMap<>();
+        private final List<TransactionReceiptRecord> receivedRecords = new ArrayList<>();
+        private int markPublishedCount;
+
+        @Override
+        public TransactionReceiptRecord saveReceived(
+                TransactionReceiptRecord record,
+                TransactionIngestionRequest transaction) {
+            receivedRecords.add(record);
+            recordsById.put(record.transactionId(), record);
+            return record;
+        }
+
+        @Override
+        public TransactionReceiptRecord markPublished(UUID transactionId) {
+            TransactionReceiptRecord record = recordsById.get(transactionId);
+            TransactionReceiptRecord published = new TransactionReceiptRecord(
+                    record.transactionId(),
+                    record.externalReference(),
+                    record.tenantId(),
+                    record.transactionType(),
+                    record.channel(),
+                    record.direction(),
+                    record.amount(),
+                    record.currency(),
+                    record.initiatedAt(),
+                    record.acceptedAt(),
+                    TransactionReceiptStatus.PUBLISHED,
+                    record.eventType(),
+                    record.eventId(),
+                    record.correlationId(),
+                    record.traceId(),
+                    OffsetDateTime.now(FIXED_CLOCK),
+                    record.attributes());
+            recordsById.put(transactionId, published);
+            markPublishedCount++;
+            return published;
+        }
+
+        @Override
+        public Optional<TransactionReceiptRecord> findByTransactionId(UUID transactionId) {
+            return Optional.ofNullable(recordsById.get(transactionId));
+        }
+
+        @Override
+        public List<TransactionReceiptRecord> findByTenantId(String tenantId) {
+            return recordsById.values().stream()
+                    .filter(record -> record.tenantId().equals(tenantId))
+                    .toList();
         }
     }
 }

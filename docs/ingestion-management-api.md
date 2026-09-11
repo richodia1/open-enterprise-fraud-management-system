@@ -2,18 +2,22 @@
 
 The Ingestion Management Service owns the first external transaction intake boundary.
 
-The service validates incoming transaction requests and publishes a `TransactionReceivedEvent` through RabbitMQ. It does not write to a database or trigger downstream fraud processing directly.
+The service validates incoming transaction requests, stores a service-owned receipt in its own database, and publishes a `TransactionReceivedEvent` through RabbitMQ. It does not score fraud or trigger downstream fraud processing directly.
 
-## Endpoint
+## Endpoints
 
 ```text
 POST /api/v1/ingestion/transactions
+GET /api/v1/ingestion/transactions/{transactionId}
+GET /api/v1/ingestion/transactions?tenantId={tenantId}
 ```
 
 Through the API Gateway, the same public path is used:
 
 ```text
 POST /api/v1/ingestion/transactions
+GET /api/v1/ingestion/transactions/{transactionId}
+GET /api/v1/ingestion/transactions?tenantId={tenantId}
 ```
 
 ## Request Body
@@ -59,7 +63,7 @@ Example:
 
 ## Response
 
-Successful requests return `202 Accepted`.
+Successful ingestion requests return `202 Accepted`.
 
 ```json
 {
@@ -77,6 +81,32 @@ Successful requests return `202 Accepted`.
 ```
 
 The service returns or generates `X-Correlation-Id` for traceability.
+
+The persisted receipt is created with `RECEIVED` status before RabbitMQ publication and is marked `PUBLISHED` after the event is accepted by the publisher. Receipt read endpoints return the persisted status:
+
+```json
+{
+  "transactionId": "118f3bd4-b208-44ff-b1ff-447c78d80d02",
+  "externalReference": "BANK-TXN-001",
+  "tenantId": "tenant-a",
+  "transactionType": "TRANSFER",
+  "channel": "MOBILE",
+  "direction": "OUTBOUND",
+  "amount": 25.00,
+  "currency": "GBP",
+  "initiatedAt": "2026-09-11T08:58:00Z",
+  "acceptedAt": "2026-09-11T09:00:00Z",
+  "status": "PUBLISHED",
+  "eventType": "transaction.received",
+  "eventId": "64b19954-4cf2-4594-8584-2b7c1dbcc59f",
+  "correlationId": "correlation-1",
+  "traceId": "correlation-1",
+  "publishedAt": "2026-09-11T09:00:01Z",
+  "attributes": {
+    "eventPublication": "published"
+  }
+}
+```
 
 ## Validation
 
@@ -110,7 +140,7 @@ The prepared message uses:
 | Source service | `ingestion-management-service` |
 | Event version | `1` |
 
-RabbitMQ publishing is part of the request path for this early implementation. If the broker is unavailable, the API returns `503 Service Unavailable` so callers know the event was not accepted into the event spine.
+RabbitMQ publishing is part of the request path for this early implementation. If the broker is unavailable, the API returns `503 Service Unavailable` so callers know the event was not accepted into the event spine. The receipt remains available as `RECEIVED` for follow-up reliability work.
 
 The exchange names are environment-driven:
 
@@ -118,3 +148,15 @@ The exchange names are environment-driven:
 | --- | --- |
 | `OEFMS_RABBITMQ_EXCHANGE` | `oefms.events` |
 | `OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE` | `oefms.events.dlx` |
+
+## Persistence
+
+The first persistence slice belongs only to Ingestion Management Service.
+
+| Resource | Value |
+| --- | --- |
+| Local database | `openefms_ingestion` |
+| Table | `received_transactions` |
+| Migration | `db/migration/postgresql/V1__create_received_transactions.sql` |
+
+The table stores the normalized receipt fields, originator and beneficiary reference details, event metadata, publication status, and optional request attributes.

@@ -42,6 +42,7 @@ The core live checks cover:
 | Auth Service | `GET /actuator/health` |
 | Ingestion Management Service | `GET /actuator/health` |
 | Ingestion Management Service | `POST /api/v1/ingestion/transactions` |
+| Ingestion Management Service | `GET /api/v1/ingestion/transactions/{transactionId}` |
 | Fraud Detection Service | `GET /actuator/health` |
 | Fraud Detection Service | `GET /api/v1/fraud/ml/runtime` |
 | Rule Management Service | `GET /actuator/health` |
@@ -59,6 +60,14 @@ eventType=transaction.received
 ```
 
 Because ingestion now publishes to RabbitMQ, this probe requires the broker to be reachable.
+
+The persisted receipt probe expects:
+
+```text
+status=PUBLISHED
+eventType=transaction.received
+tenantId=smoke-tenant
+```
 
 The fraud decision probe posts a low-risk synthetic transaction and expects:
 
@@ -109,7 +118,9 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_RULE_SERVICE_URL` | Rule Management Service base URL. | `http://localhost:8082` |
 | `OEFMS_SMOKE_AUDIT_SERVICE_URL` | Audit Logging Service base URL. | `http://localhost:8090` |
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
+| `OEFMS_SMOKE_TRANSACTION_ID` | Transaction id used by live probes. | `118f3bd4-b208-44ff-b1ff-447c78d80d02` |
 | `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
+| `OEFMS_SMOKE_GATEWAY_INGESTION_RECEIPT_PATH` | Gateway transaction receipt path. | `/api/v1/ingestion/transactions/<smoke id>` |
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
 | `OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH` | Gateway ML runtime path. | `/api/v1/fraud/ml/runtime` |
 | `OEFMS_SMOKE_GATEWAY_RULE_PATH` | Gateway rule catalog path. | `/api/v1/rules` |

@@ -61,6 +61,7 @@ Use one branch per focused change.
 | 7 | `feature/case-alert-audit-flow` | Create the first alert/case handoff and audit trail from decision and explanation events. |
 | 8 | `feature/rule-management-foundation` | Add configurable rule definitions after the basic event flow is working. |
 | 9 | `feature/ml-runtime-contract` | Define the ML scoring contract and runtime switch without enabling production ML by default. |
+| 10 | `feature/transaction-persistence-foundation` | Persist received transaction receipts in the owning Ingestion Management schema. |
 
 ## Service Responsibilities
 
@@ -70,6 +71,7 @@ Use one branch per focused change.
 - Validate required transaction fields, timestamps, amount, currency, channel, and parties.
 - Assign or propagate request correlation metadata.
 - Publish `TransactionReceivedEvent`.
+- Persist received transaction receipts and publication status in its own schema.
 - Avoid fraud scoring logic; that belongs in Fraud Detection Service.
 
 ### Fraud Detection Service
@@ -176,6 +178,7 @@ Phase 2 is complete when:
 - Static smoke checks pass.
 - The local Docker Compose configuration remains valid.
 - A transaction can be submitted through the API Gateway to Ingestion Management Service.
+- Ingestion Management Service can read back the persisted received transaction receipt.
 - A transaction-received event is published to RabbitMQ.
 - Fraud Detection Service can consume the event and produce a rule-mode decision.
 - Explainable AI Service can prepare decision-support output from the fraud decision.

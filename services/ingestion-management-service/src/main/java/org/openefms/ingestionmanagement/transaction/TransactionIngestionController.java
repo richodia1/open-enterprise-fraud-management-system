@@ -1,13 +1,18 @@
 package org.openefms.ingestionmanagement.transaction;
 
+import java.util.List;
+import java.util.UUID;
 import org.openefms.common.events.rabbitmq.RabbitMqHeaders;
 import org.openefms.common.models.transaction.TransactionIngestionRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,5 +34,15 @@ class TransactionIngestionController {
                 .accepted()
                 .header(RabbitMqHeaders.CORRELATION_ID, result.response().correlationId())
                 .body(result.response());
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    List<TransactionReceiptRecord> receipts(@RequestParam String tenantId) {
+        return ingestionService.receipts(tenantId);
+    }
+
+    @GetMapping(path = "/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    TransactionReceiptRecord receipt(@PathVariable UUID transactionId) {
+        return ingestionService.receipt(transactionId);
     }
 }
