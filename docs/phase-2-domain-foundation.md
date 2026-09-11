@@ -81,6 +81,13 @@ Use one branch per focused change.
 - Preserve future `ml` and `hybrid` modes behind configuration.
 - Publish `FraudDecisionProducedEvent` with outcome, score, risk band, rule hits, model signals, and evidence references.
 
+### Rule Management Service
+
+- Expose seeded baseline rule definitions through `GET /api/v1/rules`.
+- Support tenant-scoped rule creation, replacement, and lifecycle status updates.
+- Keep the first catalog in memory until the persistence lifecycle is settled.
+- Keep dynamic Fraud Detection integration for a later branch so rule authoring and decision execution remain reviewable separately.
+
 ### Explainable AI Service
 
 - Consume fraud-decision events from `oefms.explainable-ai.fraud-decision-produced`.
@@ -118,6 +125,7 @@ Recommended first persistence boundaries:
 | --- | --- |
 | Ingestion Management Service | Received transaction record and ingestion status. |
 | Fraud Detection Service | Fraud decision record and decision evidence summary. |
+| Rule Management Service | Rule definitions, versions, status history, and approval metadata. |
 | Explainable AI Service | Explanation record linked to transaction and decision IDs. |
 | Case Management Service | Case record linked to transaction, decision, and explanation IDs. |
 | Audit Logging Service | Append-only audit event record. |

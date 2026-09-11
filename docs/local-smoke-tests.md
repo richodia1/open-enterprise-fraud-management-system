@@ -43,6 +43,8 @@ The core live checks cover:
 | Ingestion Management Service | `GET /actuator/health` |
 | Ingestion Management Service | `POST /api/v1/ingestion/transactions` |
 | Fraud Detection Service | `GET /actuator/health` |
+| Rule Management Service | `GET /actuator/health` |
+| Rule Management Service | `GET /api/v1/rules` |
 | Explainable AI Service | `GET /actuator/health` |
 | Case Management Service | `GET /actuator/health` |
 | Audit Logging Service | `GET /actuator/health` |
@@ -63,6 +65,13 @@ The fraud decision probe posts a low-risk synthetic transaction and expects:
 mode=RULES
 outcome=APPROVE
 ruleHitCount=0
+```
+
+The rule catalog probe reads active global rules and expects:
+
+```text
+HIGH_VALUE_AMOUNT
+CRITICAL_VALUE_AMOUNT
 ```
 
 ## Gateway Probe
@@ -88,10 +97,12 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
 | `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
+| `OEFMS_SMOKE_RULE_SERVICE_URL` | Rule Management Service base URL. | `http://localhost:8082` |
 | `OEFMS_SMOKE_AUDIT_SERVICE_URL` | Audit Logging Service base URL. | `http://localhost:8090` |
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
 | `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
+| `OEFMS_SMOKE_GATEWAY_RULE_PATH` | Gateway rule catalog path. | `/api/v1/rules` |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |
 

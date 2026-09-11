@@ -12,10 +12,12 @@ health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
 ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}"
 fraud_service_url="${OEFMS_SMOKE_FRAUD_SERVICE_URL:-http://localhost:8081}"
+rule_service_url="${OEFMS_SMOKE_RULE_SERVICE_URL:-http://localhost:8082}"
 audit_service_url="${OEFMS_SMOKE_AUDIT_SERVICE_URL:-http://localhost:8090}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
 gateway_ingestion_path="${OEFMS_SMOKE_GATEWAY_INGESTION_PATH:-/api/v1/ingestion/transactions}"
 gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
+gateway_rule_path="${OEFMS_SMOKE_GATEWAY_RULE_PATH:-/api/v1/rules}"
 
 core_services=(
   postgres
@@ -24,6 +26,7 @@ core_services=(
   auth-service
   ingestion-management-service
   fraud-detection-service
+  rule-management-service
   explainable-ai-service
   case-management-service
   audit-logging-service
@@ -45,10 +48,12 @@ Environment:
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
   OEFMS_SMOKE_INGESTION_SERVICE_URL        Ingestion service URL. Default: http://localhost:8089
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
+  OEFMS_SMOKE_RULE_SERVICE_URL             Rule Management service URL. Default: http://localhost:8082
   OEFMS_SMOKE_AUDIT_SERVICE_URL            Audit Logging service URL. Default: http://localhost:8090
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
   OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
   OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
+  OEFMS_SMOKE_GATEWAY_RULE_PATH            Gateway rule catalog path. Default: /api/v1/rules
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -184,6 +189,18 @@ probe_fraud_decision() {
   log "Fraud decision probe passed"
 }
 
+probe_rule_catalog() {
+  local url="$1"
+  local response
+
+  log "Reading baseline rule catalog from ${url}"
+  response="$(curl -fsS "${url}?tenantId=global&status=active")"
+
+  printf '%s' "$response" | grep -q '"ruleCode":"HIGH_VALUE_AMOUNT"' || fail "Rule catalog did not include HIGH_VALUE_AMOUNT"
+  printf '%s' "$response" | grep -q '"ruleCode":"CRITICAL_VALUE_AMOUNT"' || fail "Rule catalog did not include CRITICAL_VALUE_AMOUNT"
+  log "Rule catalog probe passed"
+}
+
 run_static_checks() {
   require_command docker
 
@@ -217,16 +234,19 @@ run_live_checks() {
   wait_for_http "Auth Service" "${OEFMS_SMOKE_AUTH_SERVICE_URL:-http://localhost:8085}/actuator/health"
   wait_for_http "Ingestion Management Service" "${ingestion_service_url}/actuator/health"
   wait_for_http "Fraud Detection Service" "${fraud_service_url}/actuator/health"
+  wait_for_http "Rule Management Service" "${rule_service_url}/actuator/health"
   wait_for_http "Explainable AI Service" "${OEFMS_SMOKE_EXPLAINABLE_AI_SERVICE_URL:-http://localhost:8094}/actuator/health"
   wait_for_http "Case Management Service" "${OEFMS_SMOKE_CASE_SERVICE_URL:-http://localhost:8084}/actuator/health"
   wait_for_http "Audit Logging Service" "${audit_service_url}/actuator/health"
   probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
+  probe_rule_catalog "${rule_service_url}/api/v1/rules"
 
   if [ "$gateway_checks" = true ]; then
     wait_for_http "API Gateway" "${gateway_url}/actuator/health"
     probe_transaction_ingestion "${gateway_url}${gateway_ingestion_path}"
     probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
+    probe_rule_catalog "${gateway_url}${gateway_rule_path}"
   fi
 }
 

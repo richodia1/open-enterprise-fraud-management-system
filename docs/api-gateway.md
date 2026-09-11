@@ -38,7 +38,7 @@ It returns route ids, public path patterns, the correlation header name, and whe
 | `/api/v1/ingestion/**` | Ingestion Management Service |
 | `/api/v1/fraud/**` | Fraud Detection Service |
 | `/api/explanations/**` | Explainable AI Service |
-| `/api/rules/**` | Rule Management Service |
+| `/api/v1/rules`, `/api/v1/rules/**` | Rule Management Service |
 | `/api/lists/**` | List Management Service |
 | `/api/cases/**` | Case Management Service |
 | `/api/audit/**` | Audit Logging Service |
@@ -49,14 +49,15 @@ It returns route ids, public path patterns, the correlation header name, and whe
 Most scaffolded business-service routes strip the first two path segments before forwarding. For example:
 
 ```text
-/api/rules/actuator/health -> /actuator/health
+/api/lists/actuator/health -> /actuator/health
 ```
 
-Ingestion Management and Fraud Detection Core keep their versioned service paths end to end:
+Ingestion Management, Fraud Detection Core, and Rule Management keep their versioned service paths end to end:
 
 ```text
 /api/v1/ingestion/transactions -> /api/v1/ingestion/transactions
 /api/v1/fraud/decisions -> /api/v1/fraud/decisions
+/api/v1/rules -> /api/v1/rules
 ```
 
 ## Request Correlation
