@@ -9,6 +9,7 @@ The default script checks:
 - Docker Compose configuration using `.env.example`.
 - The sample ML dataset preparation path.
 - XGBoost feature-matrix validation without importing optional ML dependencies.
+- Model-comparison feature-matrix validation without importing optional ML dependencies.
 - A tiny BAF-shaped mapping probe that confirms real BAF numeric and categorical features are preserved.
 - The full Maven build unless `--skip-build` is passed.
 
@@ -125,7 +126,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | --- | --- | --- |
 | `MAVEN_CMD` | Maven executable used by the script. | `mvn` |
 | `PYTHON_CMD` | Python executable used by the dataset preparation probe. | `python3` |
-| `OEFMS_SMOKE_ML_DATASET_CHECKS` | Runs the sample ML dataset, XGBoost validation, and BAF mapping probes. | `true` |
+| `OEFMS_SMOKE_ML_DATASET_CHECKS` | Runs the sample ML dataset, XGBoost validation, model-comparison validation, and BAF mapping probes. | `true` |
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
 | `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |

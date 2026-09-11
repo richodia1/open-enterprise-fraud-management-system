@@ -34,6 +34,7 @@ ml/pipelines/prepare_tabular_dataset.py
 Runtime integration should target the Java contracts documented in `docs/ml-runtime-contract.md`. A production scorer should implement `org.openefms.frauddetection.ml.MlScoringClient` from the Fraud Detection Service and return calibrated scores plus explainable feature contributions.
 
 The first full local BAF baseline summary is recorded in `docs/ml-xgboost-baseline-results.md`.
+Threshold calibration and baseline comparison guidance is recorded in `docs/ml-threshold-calibration-and-comparison.md`.
 
 Recommended first model path:
 
@@ -42,7 +43,8 @@ Recommended first model path:
 3. Train the XGBoost baseline in `ml/experiments/xgboost-baseline/`.
 4. Evaluate with precision-recall, ROC-AUC, PR-AUC, false-positive rate, and recall at fixed precision.
 5. Generate feature contribution explanations for investigator support.
-6. Add logistic regression, random forest, LightGBM, and model-calibration comparisons.
+6. Compare logistic regression, XGBoost, and optional random forest with threshold and calibration reports.
+7. Add LightGBM, CatBoost, fairness analysis, and leakage checks.
 
 ## Optional Training Stack
 

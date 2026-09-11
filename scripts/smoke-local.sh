@@ -295,6 +295,11 @@ run_ml_dataset_checks() {
     --feature-matrix data/processed/oefms-smoke-feature-matrix.csv \
     --manifest ml/artifacts/smoke-dataset-prep/manifest.json \
     >/dev/null
+  "$python_cmd" ml/experiments/model-comparison/compare_tabular_models.py \
+    --validate-only \
+    --feature-matrix data/processed/oefms-smoke-feature-matrix.csv \
+    --manifest ml/artifacts/smoke-dataset-prep/manifest.json \
+    >/dev/null
   run_baf_feature_mapping_check
   log "ML dataset preparation probe passed"
 }

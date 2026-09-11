@@ -116,7 +116,7 @@ python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py
 
 Training outputs stay under ignored `ml/artifacts/`.
 
-See [XGBoost Baseline Results](docs/ml-xgboost-baseline-results.md) for the first local full-dataset BAF run summary.
+See [XGBoost Baseline Results](docs/ml-xgboost-baseline-results.md) for the first local full-dataset BAF run summary and [ML Threshold Calibration And Comparison](docs/ml-threshold-calibration-and-comparison.md) for the model-comparison workflow.
 
 ## First Build Target
 
