@@ -96,7 +96,7 @@ Fraud decision variables belong to the Fraud Detection Service.
 
 | Variable | Purpose | Local Default |
 | --- | --- | --- |
-| `OEFMS_FRAUD_DECISION_MODE` | Selects rule, ML, or hybrid decisioning. | `rules` |
+| `OEFMS_FRAUD_DECISION_MODE` | Selects rules, ML, or hybrid decisioning. | `rules` |
 | `OEFMS_FRAUD_RULE_HIGH_VALUE_AMOUNT_THRESHOLD` | Rule-mode high-value amount threshold. | `10000.00` |
 | `OEFMS_FRAUD_RULE_CRITICAL_VALUE_AMOUNT_THRESHOLD` | Rule-mode critical-value amount threshold. | `100000.00` |
 | `OEFMS_FRAUD_RULE_VELOCITY_REVIEW_COUNT` | Rule-mode recent transaction count that contributes to review. | `5` |
@@ -108,7 +108,7 @@ Fraud decision variables belong to the Fraud Detection Service.
 | `OEFMS_FRAUD_ML_MODEL_NAME` | Future deployed model name. | `xgboost-baseline` |
 | `OEFMS_FRAUD_ML_SCORE_THRESHOLD` | Future model score threshold. | `0.80` |
 
-Only `rules` mode should be treated as active until ML training, validation, explainability, and model-serving boundaries are implemented.
+`rules` remains the default runnable mode. `ml` and `hybrid` are wired through the ML scoring contract, but the default runtime reports disabled or contract-only until a validated scorer adapter is registered.
 
 ## Compose Health Checks
 

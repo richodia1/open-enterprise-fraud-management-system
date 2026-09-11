@@ -17,6 +17,7 @@ audit_service_url="${OEFMS_SMOKE_AUDIT_SERVICE_URL:-http://localhost:8090}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
 gateway_ingestion_path="${OEFMS_SMOKE_GATEWAY_INGESTION_PATH:-/api/v1/ingestion/transactions}"
 gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
+gateway_ml_runtime_path="${OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH:-/api/v1/fraud/ml/runtime}"
 gateway_rule_path="${OEFMS_SMOKE_GATEWAY_RULE_PATH:-/api/v1/rules}"
 
 core_services=(
@@ -39,7 +40,7 @@ Usage: ./scripts/smoke-local.sh [options]
 Options:
   --skip-build    Skip mvn clean verify.
   --live          Probe an already-running local stack.
-  --start-stack   Start the core Phase 1 stack, then run live probes.
+  --start-stack   Start the core local stack, then run live probes.
   --gateway       Include API Gateway health and optional route probes.
   -h, --help      Show this help text.
 
@@ -53,6 +54,7 @@ Environment:
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
   OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
   OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path. Default: /api/v1/fraud/decisions
+  OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH      Gateway ML runtime path. Default: /api/v1/fraud/ml/runtime
   OEFMS_SMOKE_GATEWAY_RULE_PATH            Gateway rule catalog path. Default: /api/v1/rules
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
@@ -189,6 +191,19 @@ probe_fraud_decision() {
   log "Fraud decision probe passed"
 }
 
+probe_ml_runtime() {
+  local url="$1"
+  local response
+
+  log "Reading ML runtime status from ${url}"
+  response="$(curl -fsS "$url")"
+
+  printf '%s' "$response" | grep -q '"modelName":"xgboost-baseline"' || fail "ML runtime did not report the default model name"
+  printf '%s' "$response" | grep -q '"state":' || fail "ML runtime did not report an availability state"
+  printf '%s' "$response" | grep -q '"supportedModes":' || fail "ML runtime did not report supported decision modes"
+  log "ML runtime probe passed"
+}
+
 probe_rule_catalog() {
   local url="$1"
   local response
@@ -240,12 +255,14 @@ run_live_checks() {
   wait_for_http "Audit Logging Service" "${audit_service_url}/actuator/health"
   probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
+  probe_ml_runtime "${fraud_service_url}/api/v1/fraud/ml/runtime"
   probe_rule_catalog "${rule_service_url}/api/v1/rules"
 
   if [ "$gateway_checks" = true ]; then
     wait_for_http "API Gateway" "${gateway_url}/actuator/health"
     probe_transaction_ingestion "${gateway_url}${gateway_ingestion_path}"
     probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
+    probe_ml_runtime "${gateway_url}${gateway_ml_runtime_path}"
     probe_rule_catalog "${gateway_url}${gateway_rule_path}"
   fi
 }

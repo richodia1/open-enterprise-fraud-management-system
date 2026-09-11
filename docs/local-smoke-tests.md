@@ -43,6 +43,7 @@ The core live checks cover:
 | Ingestion Management Service | `GET /actuator/health` |
 | Ingestion Management Service | `POST /api/v1/ingestion/transactions` |
 | Fraud Detection Service | `GET /actuator/health` |
+| Fraud Detection Service | `GET /api/v1/fraud/ml/runtime` |
 | Rule Management Service | `GET /actuator/health` |
 | Rule Management Service | `GET /api/v1/rules` |
 | Explainable AI Service | `GET /actuator/health` |
@@ -67,6 +68,14 @@ outcome=APPROVE
 ruleHitCount=0
 ```
 
+The ML runtime probe reads the configured scorer status and expects:
+
+```text
+modelName=xgboost-baseline
+state=<reported>
+supportedModes=<reported>
+```
+
 The rule catalog probe reads active global rules and expects:
 
 ```text
@@ -76,7 +85,7 @@ CRITICAL_VALUE_AMOUNT
 
 ## Gateway Probe
 
-Gateway health, transaction ingestion, and the Gateway fraud decision route can be included with:
+Gateway health, transaction ingestion, Fraud Detection, ML runtime, and Rule Management routes can be included with:
 
 ```bash
 ./scripts/smoke-local.sh --skip-build --live --gateway
@@ -102,6 +111,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
 | `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
+| `OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH` | Gateway ML runtime path. | `/api/v1/fraud/ml/runtime` |
 | `OEFMS_SMOKE_GATEWAY_RULE_PATH` | Gateway rule catalog path. | `/api/v1/rules` |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |

@@ -15,6 +15,8 @@ ml/
 
 Model artifacts should not be committed directly to Git. Use `ml/artifacts/` locally or a governed model registry later.
 
+Runtime integration should target the Java contracts documented in `docs/ml-runtime-contract.md`. A production scorer should implement `org.openefms.frauddetection.ml.MlScoringClient` from the Fraud Detection Service and return calibrated scores plus explainable feature contributions.
+
 Recommended first model path:
 
 1. Prepare PaySim and Credit Card Fraud datasets locally.

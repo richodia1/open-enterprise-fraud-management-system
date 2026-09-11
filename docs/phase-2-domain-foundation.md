@@ -78,7 +78,7 @@ Use one branch per focused change.
 - Validate the event type and supported event version before scoring.
 - Run the configured decision mode.
 - Keep `rules` as the default mode.
-- Preserve future `ml` and `hybrid` modes behind configuration.
+- Route `ml` and `hybrid` modes through the ML scoring contract while keeping the default runtime disabled.
 - Publish `FraudDecisionProducedEvent` with outcome, score, risk band, rule hits, model signals, and evidence references.
 
 ### Rule Management Service
@@ -155,7 +155,7 @@ The expected decision modes remain:
 | --- | --- |
 | `rules` | Default and runnable. |
 | `ml` | Contract-ready but disabled unless a validated scorer is configured. |
-| `hybrid` | Contract-ready but disabled until rule and ML score combination is tested. |
+| `hybrid` | Contract-ready and combines rule/ML posture when a validated scorer is configured. |
 
 ## Out Of Scope For Phase 2
 
@@ -181,4 +181,4 @@ Phase 2 is complete when:
 - Explainable AI Service can prepare decision-support output from the fraud decision.
 - Case Management Service can receive or create the first review case.
 - Audit Logging Service can record the major workflow events.
-- The ML runtime contract is documented without enabling unvalidated ML by default.
+- The ML runtime contract is implemented and documented without enabling unvalidated ML by default.

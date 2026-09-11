@@ -44,7 +44,7 @@ Start the core services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
-The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints, then posts a low-risk transaction to the Fraud Detection Service decision endpoint and reads the baseline rule catalog.
+The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints, then posts a low-risk transaction to the Fraud Detection Service decision endpoint, reads the ML runtime status, and reads the baseline rule catalog.
 
 ## Run Local Stack
 
@@ -114,4 +114,4 @@ The Fraud Detection Service defaults to rule-based decisioning:
 OEFMS_FRAUD_DECISION_MODE=rules
 ```
 
-Future supported values are `rules`, `ml`, and `hybrid`. See [ML and AI Strategy](ml-ai-strategy.md).
+Configured values are `rules`, `ml`, and `hybrid`. `ml` and `hybrid` require a production scorer adapter before they can score live transactions. See [ML and AI Strategy](ml-ai-strategy.md).
