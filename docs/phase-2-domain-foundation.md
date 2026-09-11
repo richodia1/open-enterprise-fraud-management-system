@@ -83,6 +83,7 @@ Use one branch per focused change.
 
 ### Explainable AI Service
 
+- Consume fraud-decision events from `oefms.explainable-ai.fraud-decision-produced`.
 - Convert rule hits, model signals, transaction attributes, and historical context into clear decision support.
 - Explain why a transaction is risky before a user confirms or rejects a fraud outcome.
 - Avoid becoming the final fraud authority.
