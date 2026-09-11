@@ -53,6 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=0.05)
     parser.add_argument("--subsample", type=float, default=0.8)
     parser.add_argument("--colsample-bytree", type=float, default=0.8)
+    parser.add_argument("--n-jobs", type=int, default=-1)
     parser.add_argument("--explain-sample-size", type=int, default=25)
     parser.add_argument(
         "--validate-only",
@@ -170,6 +171,7 @@ def train_baseline(args: argparse.Namespace, deps: dict[str, Any]) -> None:
         eval_metric="aucpr",
         tree_method="hist",
         scale_pos_weight=scale_pos_weight,
+        n_jobs=args.n_jobs,
         random_state=42,
     )
     model.fit(
@@ -261,6 +263,7 @@ def evaluate_split(y_true: Any, scores: Any, args: argparse.Namespace, deps: dic
         "f1": float(f1),
         "falsePositiveRate": float(fp / (fp + tn)) if (fp + tn) else 0.0,
         "recallAtMinimumPrecision": recall_at_minimum_precision(y_true, scores, args.min_precision, deps),
+        "operatingPoints": operating_points(y_true, scores, args.min_precision, deps),
         "confusionMatrix": {
             "trueNegative": int(tn),
             "falsePositive": int(fp),
@@ -281,10 +284,49 @@ def safe_metric(metric: Any, y_true: Any, scores: Any) -> float | None:
 
 
 def recall_at_minimum_precision(y_true: Any, scores: Any, minimum_precision: float, deps: dict[str, Any]) -> float:
-    precision, recall, _ = deps["precision_recall_curve"](y_true, scores)
-    eligible = [float(recall_value) for precision_value, recall_value in zip(precision, recall)
-                if precision_value >= minimum_precision]
-    return max(eligible) if eligible else 0.0
+    return operating_points(y_true, scores, minimum_precision, deps)["minimumPrecision"]["recall"]
+
+
+def operating_points(y_true: Any, scores: Any, minimum_precision: float, deps: dict[str, Any]) -> dict[str, Any]:
+    precision, recall, thresholds = deps["precision_recall_curve"](y_true, scores)
+    threshold_points = [
+        threshold_point(thresholds[index], precision[index], recall[index])
+        for index in range(len(thresholds))
+    ]
+    if not threshold_points:
+        empty_point = {"threshold": None, "precision": 0.0, "recall": 0.0, "f1": 0.0}
+        return {"bestF1": empty_point, "minimumPrecision": empty_point}
+
+    best_f1 = max(threshold_points, key=lambda point: point["f1"])
+    eligible = [
+        point for point in threshold_points
+        if point["precision"] >= minimum_precision
+    ]
+    minimum_precision_point = max(eligible, key=lambda point: point["recall"]) if eligible else {
+        "threshold": None,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+    }
+    return {
+        "bestF1": best_f1,
+        "minimumPrecision": minimum_precision_point,
+        "minimumPrecisionTarget": float(minimum_precision),
+    }
+
+
+def threshold_point(threshold: Any, precision: Any, recall: Any) -> dict[str, float]:
+    precision_value = float(precision)
+    recall_value = float(recall)
+    f1 = 0.0
+    if precision_value + recall_value:
+        f1 = 2 * precision_value * recall_value / (precision_value + recall_value)
+    return {
+        "threshold": float(threshold),
+        "precision": precision_value,
+        "recall": recall_value,
+        "f1": f1,
+    }
 
 
 def write_feature_importance(path: Path, feature_columns: list[str], model: Any) -> None:
@@ -379,6 +421,15 @@ def write_model_card(path: Path, metrics: dict[str, Any]) -> None:
     lines.extend(f"- `{feature}`: `{importance}`" for feature, importance in top_features)
     lines.extend([
         "",
+        "## Operating Points",
+        "",
+        "| Split | Strategy | Threshold | Precision | Recall | F1 |",
+        "| --- | --- | --- | --- | --- | --- |",
+        operating_point_row("validation", "best F1", validation["operatingPoints"]["bestF1"]),
+        operating_point_row("validation", "minimum precision", validation["operatingPoints"]["minimumPrecision"]),
+        operating_point_row("test", "best F1", test["operatingPoints"]["bestF1"]),
+        operating_point_row("test", "minimum precision", test["operatingPoints"]["minimumPrecision"]),
+        "",
         "## Runtime Handoff",
         "",
         "A production scorer must map this model output to the Java `MlScoringClient` contract and return "
@@ -393,6 +444,13 @@ def evaluation_row(name: str, values: dict[str, Any]) -> str:
         f"| {name} | {format_metric(values['prAuc'])} | {format_metric(values['rocAuc'])} | "
         f"{values['precision']:.4f} | {values['recall']:.4f} | {values['f1']:.4f} | "
         f"{values['falsePositiveRate']:.4f} |"
+    )
+
+
+def operating_point_row(split: str, strategy: str, values: dict[str, Any]) -> str:
+    return (
+        f"| {split} | {strategy} | {format_metric(values['threshold'])} | "
+        f"{values['precision']:.4f} | {values['recall']:.4f} | {values['f1']:.4f} |"
     )
 
 

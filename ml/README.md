@@ -33,6 +33,8 @@ ml/pipelines/prepare_tabular_dataset.py
 
 Runtime integration should target the Java contracts documented in `docs/ml-runtime-contract.md`. A production scorer should implement `org.openefms.frauddetection.ml.MlScoringClient` from the Fraud Detection Service and return calibrated scores plus explainable feature contributions.
 
+The first full local BAF baseline summary is recorded in `docs/ml-xgboost-baseline-results.md`.
+
 Recommended first model path:
 
 1. Prepare the committed synthetic sample to verify the pipeline.

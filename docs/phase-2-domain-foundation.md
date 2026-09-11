@@ -65,6 +65,7 @@ Use one branch per focused change.
 | 11 | `feature/fraud-decision-persistence-foundation` | Persist fraud decision summaries in the owning Fraud Detection schema. |
 | 12 | `feature/ml-dataset-foundation` | Track fraud dataset references and add the first reproducible feature-matrix preparation path. |
 | 13 | `feature/xgboost-baseline-experiment` | Preserve BAF model features and add the first optional XGBoost training/evaluation script. |
+| 14 | `feature/xgboost-training-validation` | Validate the first full local BAF XGBoost run and document baseline operating points. |
 
 ## Service Responsibilities
 

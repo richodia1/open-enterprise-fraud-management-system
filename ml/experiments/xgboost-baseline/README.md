@@ -48,6 +48,14 @@ Train the baseline:
 python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py
 ```
 
+For a faster first full-dataset baseline:
+
+```bash
+python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py \
+  --n-estimators 50 \
+  --n-jobs -1
+```
+
 Outputs are written under the ignored folder:
 
 ```text
@@ -60,7 +68,7 @@ ml/artifacts/xgboost-baseline/
   model-card.md
 ```
 
-The training script automatically sets `scale_pos_weight` from the training split class imbalance and evaluates validation/test data with PR-AUC, ROC-AUC, precision, recall, F1, false-positive rate, and recall at the configured minimum precision.
+The training script automatically sets `scale_pos_weight` from the training split class imbalance and evaluates validation/test data with PR-AUC, ROC-AUC, precision, recall, F1, false-positive rate, recall at the configured minimum precision, and threshold operating points.
 
 ## Explainability
 
