@@ -1,6 +1,6 @@
 # RabbitMQ Event Spine
 
-The RabbitMQ event spine defines the first broker conventions for Phase 1. It does not add service workflows, listeners, publishers, entities, retry code, or business rules yet.
+The RabbitMQ event spine defines the first broker conventions for Phase 1 and the early Phase 2 event flow.
 
 ## Exchange Names
 
@@ -94,4 +94,16 @@ The first publisher:
 - Copies event metadata into broker headers.
 - Returns `503 Service Unavailable` if the event cannot be published.
 
-Consumer listeners, service-specific retry policies, dead-letter handling, and outbox-backed publication should be added in later implementation branches.
+The Fraud Detection Service now consumes `transaction.received` events from `oefms.fraud-detection.transaction-received`.
+
+The first consumer:
+
+- Uses Spring AMQP and a JSON message converter.
+- Declares its durable queue and shared dead-letter queue.
+- Binds the fraud queue to `transaction.received`.
+- Validates event type and event version before processing.
+- Runs the existing rule-mode decision orchestrator.
+- Prepares a `FraudDecisionProducedEvent` message for the next publishing branch.
+- Does not publish the decision event yet.
+
+Service-specific retry policies, idempotency storage, dead-letter inspection workflows, and outbox-backed publication should be added in later implementation branches.
