@@ -67,6 +67,7 @@ Use one branch per focused change.
 | 13 | `feature/xgboost-baseline-experiment` | Preserve BAF model features and add the first optional XGBoost training/evaluation script. |
 | 14 | `feature/xgboost-training-validation` | Validate the first full local BAF XGBoost run and document baseline operating points. |
 | 15 | `feature/ml-threshold-calibration-and-comparison` | Add repeatable baseline comparison, threshold operating points, and calibration-bin reports. |
+| 16 | `feature/ml-leakage-fairness-audit` | Add leakage checks, slice-level fraud-rate summaries, and model prediction behavior audits. |
 
 ## Service Responsibilities
 

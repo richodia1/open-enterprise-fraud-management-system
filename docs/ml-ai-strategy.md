@@ -90,6 +90,7 @@ See [ML Dataset Foundation](ml-dataset-foundation.md) for the detailed contribut
 
 See [XGBoost Baseline Results](ml-xgboost-baseline-results.md) for the first local full-dataset BAF training summary.
 See [ML Threshold Calibration And Comparison](ml-threshold-calibration-and-comparison.md) for the repeatable baseline-comparison workflow.
+See [ML Leakage And Fairness Audit](ml-leakage-fairness-audit.md) for the first leakage, slice, and prediction-behavior audit workflow.
 
 ## Recommended First Experiments
 
@@ -112,6 +113,7 @@ Model comparison should include simple baselines because they give academic revi
 - Track precision, recall, F1, ROC-AUC, PR-AUC, false-positive rate, and recall at fixed precision.
 - Calibrate scores before exposing them as operational risk percentages.
 - Tune thresholds using business cost, not accuracy alone.
+- Run leakage and slice-level behavior audits before promoting a model.
 - Keep model cards and experiment metadata with each trained model.
 - Use SHAP or another explainability method for investigator-facing feature contribution summaries.
 

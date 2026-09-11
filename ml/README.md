@@ -35,6 +35,7 @@ Runtime integration should target the Java contracts documented in `docs/ml-runt
 
 The first full local BAF baseline summary is recorded in `docs/ml-xgboost-baseline-results.md`.
 Threshold calibration and baseline comparison guidance is recorded in `docs/ml-threshold-calibration-and-comparison.md`.
+Leakage review and slice-level audit guidance is recorded in `docs/ml-leakage-fairness-audit.md`.
 
 Recommended first model path:
 
@@ -44,7 +45,8 @@ Recommended first model path:
 4. Evaluate with precision-recall, ROC-AUC, PR-AUC, false-positive rate, and recall at fixed precision.
 5. Generate feature contribution explanations for investigator support.
 6. Compare logistic regression, XGBoost, and optional random forest with threshold and calibration reports.
-7. Add LightGBM, CatBoost, fairness analysis, and leakage checks.
+7. Export prediction scores and run leakage, fairness, and slice-level model-behavior audits.
+8. Add LightGBM, CatBoost, calibrated probabilities, and tuned hyperparameter searches.
 
 ## Optional Training Stack
 

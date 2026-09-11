@@ -41,6 +41,12 @@ Run the default comparison:
 .venv/bin/python ml/experiments/model-comparison/compare_tabular_models.py
 ```
 
+Write validation/test score files for the audit workflow:
+
+```bash
+.venv/bin/python ml/experiments/model-comparison/compare_tabular_models.py --write-scores
+```
+
 The default compares:
 
 ```text
@@ -75,6 +81,12 @@ ml/artifacts/model-comparison/
   threshold-operating-points.csv
   calibration-bins.csv
   comparison-report.md
+  logistic_regression-validation-scores.csv
+  logistic_regression-test-scores.csv
+  xgboost-validation-scores.csv
+  xgboost-test-scores.csv
 ```
+
+Score files are only written when `--write-scores` is supplied.
 
 The report focuses on PR-AUC, ROC-AUC, Brier score, fixed-threshold metrics, best-F1 thresholds, precision-target operating points, and calibration bins. This makes the experiment useful for fraud-model papers where class imbalance and investigator workload are central concerns.

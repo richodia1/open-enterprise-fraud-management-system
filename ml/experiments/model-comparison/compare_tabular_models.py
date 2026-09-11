@@ -62,6 +62,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--xgb-max-depth", type=int, default=4)
     parser.add_argument("--xgb-learning-rate", type=float, default=0.05)
     parser.add_argument(
+        "--write-scores",
+        action="store_true",
+        help="Write validation/test prediction scores for downstream audit workflows.",
+    )
+    parser.add_argument(
         "--validate-only",
         action="store_true",
         help="Validate feature matrix and manifest shape without importing ML dependencies.",
@@ -238,6 +243,15 @@ def compare_models(args: argparse.Namespace, deps: dict[str, Any]) -> None:
             model_results.append(comparison_row(model_name, split_name, metrics))
             all_threshold_rows.extend(threshold_rows(model_name, split_name, metrics))
             all_calibration_rows.extend(calibration_rows(model_name, split_name, metrics))
+            if args.write_scores:
+                write_scores(
+                    output_dir / f"{model_name}-{split_name}-scores.csv",
+                    df.loc[masks[split_name]],
+                    y[masks[split_name]],
+                    split_scores,
+                    model_name,
+                    split_name,
+                )
 
         write_json(output_dir / f"{model_name}-metrics.json", {
             "generatedAt": timestamp(),
@@ -591,6 +605,17 @@ def write_report(
         "",
     ])
     path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_scores(path: Path, df: Any, labels: Any, scores: Any, model_name: str, split_name: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    transaction_ids = df["transaction_id"].astype(str).tolist() if "transaction_id" in df else [""] * len(df)
+    label_values = labels.astype(int).tolist()
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["model", "split", "transaction_id", "label", "score"])
+        for transaction_id, label, score in zip(transaction_ids, label_values, scores):
+            writer.writerow([model_name, split_name, transaction_id, label, f"{float(score):.12f}"])
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:

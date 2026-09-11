@@ -6,7 +6,7 @@ OEFMS v0.1 is the initial foundation of the project and is being developed colla
 
 The project aims to provide an open and adaptable architecture that can be extended for different financial institutions, transaction types, fraud scenarios, regulatory environments, and technology stacks.
 
-OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion with a service-owned receipt store, persisted rule-mode fraud decisions, explainable decision support, the first case, alert, and audit event handoff, an in-memory rule-management catalog, an ML runtime contract, the first ML dataset preparation foundation, and an optional XGBoost baseline experiment path.
+OEFMS is still in its foundation phase. It currently defines the project layout, Spring Boot service shells, shared contracts, local infrastructure, Auth foundation, API Gateway routing, RabbitMQ conventions, transaction ingestion with a service-owned receipt store, persisted rule-mode fraud decisions, explainable decision support, the first case, alert, and audit event handoff, an in-memory rule-management catalog, an ML runtime contract, the first ML dataset preparation foundation, optional XGBoost and model-comparison experiment paths, and an offline ML leakage/slice-audit workflow.
 
 ## GitHub Repository Description
 
@@ -79,7 +79,7 @@ Phase 1 established the platform foundation: service contracts, Auth, API Gatewa
 
 Phase 2 is the next implementation phase. It focuses on the first end-to-end domain workflow: transaction ingestion, RabbitMQ event publication, fraud decision consumption, explainable decision support, case handoff, and audit logging.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Transaction Persistence Foundation](docs/transaction-persistence-foundation.md), [Fraud Decision Persistence Foundation](docs/fraud-decision-persistence-foundation.md), [ML Dataset Foundation](docs/ml-dataset-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Explanation Decision Support](docs/explanation-decision-support.md), [Case Alert Audit Flow](docs/case-alert-audit-flow.md), [Rule Management Foundation](docs/rule-management-foundation.md), [ML Runtime Contract](docs/ml-runtime-contract.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [Transaction Persistence Foundation](docs/transaction-persistence-foundation.md), [Fraud Decision Persistence Foundation](docs/fraud-decision-persistence-foundation.md), [ML Dataset Foundation](docs/ml-dataset-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Explanation Decision Support](docs/explanation-decision-support.md), [Case Alert Audit Flow](docs/case-alert-audit-flow.md), [Rule Management Foundation](docs/rule-management-foundation.md), [ML Runtime Contract](docs/ml-runtime-contract.md), [ML Leakage And Fairness Audit](docs/ml-leakage-fairness-audit.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
@@ -117,6 +117,15 @@ python3 ml/experiments/xgboost-baseline/train_xgboost_baseline.py
 Training outputs stay under ignored `ml/artifacts/`.
 
 See [XGBoost Baseline Results](docs/ml-xgboost-baseline-results.md) for the first local full-dataset BAF run summary and [ML Threshold Calibration And Comparison](docs/ml-threshold-calibration-and-comparison.md) for the model-comparison workflow.
+
+Generate prediction scores and run the leakage/slice audit:
+
+```bash
+python3 ml/experiments/model-comparison/compare_tabular_models.py --write-scores
+python3 ml/experiments/model-audit/audit_dataset_and_predictions.py
+```
+
+See [ML Leakage And Fairness Audit](docs/ml-leakage-fairness-audit.md) for the first full local BAF audit summary.
 
 ## First Build Target
 
