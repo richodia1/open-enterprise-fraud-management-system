@@ -81,13 +81,17 @@ RabbitMQ is the default local broker for asynchronous events.
 | `OEFMS_RABBITMQ_VHOST` | Local RabbitMQ virtual host. | `openefms` |
 | `OEFMS_RABBITMQ_HOST` | RabbitMQ host used by event-facing services. | `localhost` |
 | `OEFMS_RABBITMQ_PORT` | RabbitMQ AMQP port used by event-facing services. | `5672` |
+| `OEFMS_POSTGRES_HOST_PORT` | Host port exposed by the local PostgreSQL container. | `5432` |
+| `OEFMS_RABBITMQ_HOST_PORT` | Host port exposed by the local RabbitMQ AMQP listener. | `5672` |
+| `OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT` | Host port exposed by the local RabbitMQ Management UI. | `15672` |
+| `OEFMS_REDIS_HOST_PORT` | Host port exposed by the local Redis container. | `6379` |
 | `OEFMS_RABBITMQ_EXCHANGE` | Domain event exchange. | `oefms.events` |
 | `OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE` | Domain event dead-letter exchange. | `oefms.events.dlx` |
 
 The RabbitMQ Management UI runs on:
 
 ```text
-http://localhost:15672
+http://localhost:${OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT:-15672}
 ```
 
 ## Fraud Decision Variables
