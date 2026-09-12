@@ -2,6 +2,8 @@
 
 OEFMS contracts define the first shared API, event, rule, and ML shapes without adding persistence entities or service-specific business workflows.
 
+Live REST contracts are generated from each runnable Spring Boot service through Swagger/OpenAPI. See [Swagger OpenAPI Contracts](swagger-openapi-contracts.md) for the local URLs and verification command.
+
 The contracts live in shared modules:
 
 | Module | Purpose |

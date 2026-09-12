@@ -51,6 +51,10 @@ class GatewaySecurityConfiguration {
         return new String[]{
                 "/actuator/health",
                 "/actuator/info",
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs",
+                "/v3/api-docs/**",
                 "/gateway/routes",
                 "/auth/**",
                 "/oauth2/**",

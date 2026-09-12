@@ -64,6 +64,20 @@ Run a readable demo flow that prints the generated decision, case, alert, and au
 
 The demo command starts only the infrastructure and domain services needed for the MVP event flow. It starts the Spring services one at a time, then starts the API Gateway route surface.
 
+List the live Swagger/OpenAPI contract URLs:
+
+```bash
+./scripts/list-swagger-contracts.sh
+```
+
+After starting the local stack, verify which contract endpoints are reachable:
+
+```bash
+./scripts/list-swagger-contracts.sh --check
+```
+
+See [Swagger OpenAPI Contracts](swagger-openapi-contracts.md) for the full service URL table.
+
 The `--start-stack` path first checks Docker container startup with a tiny preflight container. If Docker can answer `docker info` but cannot start containers, restart Docker Desktop and verify `docker run --rm hello-world`.
 
 The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, reads the Audit Logging event list, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog. With `--event-flow`, the script also posts a reviewable transaction and waits for event-driven fraud decision, case, alert, and audit records.
@@ -127,6 +141,17 @@ The audit database was added after the first persistence branches. Reset local v
 | RabbitMQ | `${OEFMS_RABBITMQ_HOST_PORT:-5672}` |
 | RabbitMQ Management UI | `${OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT:-15672}` |
 | Redis | `${OEFMS_REDIS_HOST_PORT:-6379}` |
+
+## Swagger And OpenAPI
+
+Every runnable Spring Boot module exposes:
+
+```text
+/swagger-ui.html
+/v3/api-docs
+```
+
+The API Gateway Swagger UI is available at `http://localhost:8080/swagger-ui.html`. Each service also exposes its own Swagger UI on the service port listed above.
 
 ## Local Infrastructure Credentials
 
