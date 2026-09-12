@@ -11,6 +11,8 @@ env_file="${OEFMS_SMOKE_ENV_FILE:-.env.example}"
 maven_cmd="${MAVEN_CMD:-mvn}"
 python_cmd="${PYTHON_CMD:-python3}"
 ml_dataset_checks="${OEFMS_SMOKE_ML_DATASET_CHECKS:-true}"
+docker_runtime_preflight="${OEFMS_SMOKE_DOCKER_RUNTIME_PREFLIGHT:-true}"
+docker_run_timeout_seconds="${OEFMS_SMOKE_DOCKER_RUN_TIMEOUT_SECONDS:-30}"
 health_timeout_seconds="${OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS:-180}"
 health_interval_seconds="${OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS:-3}"
 ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:8089}"
@@ -59,6 +61,8 @@ Environment:
   MAVEN_CMD                                 Maven executable. Default: mvn
   PYTHON_CMD                                Python executable. Default: python3
   OEFMS_SMOKE_ML_DATASET_CHECKS            Run the sample ML dataset pipeline. Default: true
+  OEFMS_SMOKE_DOCKER_RUNTIME_PREFLIGHT     Run a tiny Docker container before --start-stack. Default: true
+  OEFMS_SMOKE_DOCKER_RUN_TIMEOUT_SECONDS   Docker runtime preflight timeout. Default: 30
   OEFMS_SMOKE_ENV_FILE                     Compose env file. Default: .env.example
   OEFMS_SMOKE_INGESTION_SERVICE_URL        Ingestion service URL. Default: http://localhost:8089
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
@@ -92,6 +96,76 @@ fail() {
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Required command not found: $1"
+}
+
+run_command_with_timeout() {
+  local timeout_seconds="$1"
+  shift
+  local output_file
+  local pid
+  local elapsed=0
+  local status=0
+
+  case "$timeout_seconds" in
+    ''|*[!0-9]*)
+      fail "Timeout must be a positive integer: ${timeout_seconds}"
+      ;;
+  esac
+  if [ "$timeout_seconds" -le 0 ]; then
+    fail "Timeout must be a positive integer: ${timeout_seconds}"
+  fi
+
+  output_file="$(mktemp)"
+  "$@" >"$output_file" 2>&1 &
+  pid="$!"
+
+  while kill -0 "$pid" >/dev/null 2>&1; do
+    if [ "$elapsed" -ge "$timeout_seconds" ]; then
+      kill "$pid" >/dev/null 2>&1 || true
+      sleep 1
+      kill -9 "$pid" >/dev/null 2>&1 || true
+      wait "$pid" >/dev/null 2>&1 || true
+      cat "$output_file" >&2
+      rm -f "$output_file"
+      return 124
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  if wait "$pid"; then
+    status=0
+  else
+    status="$?"
+  fi
+
+  if [ "$status" -ne 0 ]; then
+    cat "$output_file" >&2
+  fi
+  rm -f "$output_file"
+  return "$status"
+}
+
+run_docker_runtime_preflight() {
+  local container_name
+
+  if [ "$docker_runtime_preflight" != true ]; then
+    log "Skipping Docker runtime preflight"
+    return
+  fi
+
+  container_name="openefms-smoke-preflight-$$"
+  run_command_with_timeout 10 docker rm -f "$container_name" >/dev/null 2>&1 || true
+
+  log "Checking Docker container runtime"
+  if ! run_command_with_timeout \
+    "$docker_run_timeout_seconds" \
+    docker run --rm --name "$container_name" hello-world; then
+    run_command_with_timeout 10 docker rm -f "$container_name" >/dev/null 2>&1 || true
+    fail "Docker daemon is reachable, but a test container did not complete within ${docker_run_timeout_seconds}s. Restart Docker Desktop or verify 'docker run --rm hello-world' before rerunning --start-stack."
+  fi
+
+  log "Docker container runtime preflight passed"
 }
 
 new_uuid() {
@@ -506,6 +580,7 @@ run_live_checks() {
     fi
 
     docker info >/dev/null 2>&1 || fail "Docker daemon is not running; start Docker before using --start-stack"
+    run_docker_runtime_preflight
     log "Starting local smoke-test services"
     compose up -d --build "${services_to_start[@]}"
   fi

@@ -18,6 +18,8 @@ Start the stack and run the Gateway-backed MVP probe:
 ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
 ```
 
+The script first checks that Docker can start and finish a tiny `hello-world` container. If that preflight fails, restart Docker Desktop and verify `docker run --rm hello-world` before rerunning the MVP probe.
+
 The script leaves the stack running so failures can be inspected.
 
 ## What The Event Flow Proves

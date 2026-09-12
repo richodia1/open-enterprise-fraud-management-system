@@ -10,11 +10,7 @@ import org.openefms.common.models.ml.MlRuntimeStatus;
 import org.openefms.common.models.ml.MlScoreRequest;
 import org.openefms.common.models.ml.MlScoreResponse;
 import org.openefms.frauddetection.decision.FraudDecisionProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
-@Component
-@ConditionalOnMissingBean(MlScoringClient.class)
 class ContractOnlyMlScoringClient implements MlScoringClient {
     private static final String DISABLED_PROVIDER = "disabled";
 
