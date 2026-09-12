@@ -16,6 +16,7 @@ ingestion_service_url="${OEFMS_SMOKE_INGESTION_SERVICE_URL:-http://localhost:808
 fraud_service_url="${OEFMS_SMOKE_FRAUD_SERVICE_URL:-http://localhost:8081}"
 rule_service_url="${OEFMS_SMOKE_RULE_SERVICE_URL:-http://localhost:8082}"
 audit_service_url="${OEFMS_SMOKE_AUDIT_SERVICE_URL:-http://localhost:8090}"
+case_service_url="${OEFMS_SMOKE_CASE_SERVICE_URL:-http://localhost:8084}"
 gateway_url="${OEFMS_SMOKE_GATEWAY_URL:-http://localhost:8080}"
 smoke_transaction_id="${OEFMS_SMOKE_TRANSACTION_ID:-118f3bd4-b208-44ff-b1ff-447c78d80d02}"
 gateway_ingestion_path="${OEFMS_SMOKE_GATEWAY_INGESTION_PATH:-/api/v1/ingestion/transactions}"
@@ -23,6 +24,8 @@ gateway_ingestion_receipt_path="${OEFMS_SMOKE_GATEWAY_INGESTION_RECEIPT_PATH:-/a
 gateway_fraud_decision_path="${OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH:-/api/v1/fraud/decisions}"
 gateway_ml_runtime_path="${OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH:-/api/v1/fraud/ml/runtime}"
 gateway_rule_path="${OEFMS_SMOKE_GATEWAY_RULE_PATH:-/api/v1/rules}"
+gateway_case_path="${OEFMS_SMOKE_GATEWAY_CASE_PATH:-/api/v1/cases}"
+gateway_alert_path="${OEFMS_SMOKE_GATEWAY_ALERT_PATH:-/api/v1/alerts}"
 
 core_services=(
   postgres
@@ -57,6 +60,7 @@ Environment:
   OEFMS_SMOKE_FRAUD_SERVICE_URL            Fraud service URL. Default: http://localhost:8081
   OEFMS_SMOKE_RULE_SERVICE_URL             Rule Management service URL. Default: http://localhost:8082
   OEFMS_SMOKE_AUDIT_SERVICE_URL            Audit Logging service URL. Default: http://localhost:8090
+  OEFMS_SMOKE_CASE_SERVICE_URL             Case Management service URL. Default: http://localhost:8084
   OEFMS_SMOKE_GATEWAY_URL                  Gateway URL. Default: http://localhost:8080
   OEFMS_SMOKE_TRANSACTION_ID               Transaction id used by live probes. Default: fixed smoke UUID
   OEFMS_SMOKE_GATEWAY_INGESTION_PATH       Gateway ingestion path. Default: /api/v1/ingestion/transactions
@@ -64,6 +68,8 @@ Environment:
   OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH  Gateway fraud decision path and decision-record base. Default: /api/v1/fraud/decisions
   OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH      Gateway ML runtime path. Default: /api/v1/fraud/ml/runtime
   OEFMS_SMOKE_GATEWAY_RULE_PATH            Gateway rule catalog path. Default: /api/v1/rules
+  OEFMS_SMOKE_GATEWAY_CASE_PATH            Gateway case list path. Default: /api/v1/cases
+  OEFMS_SMOKE_GATEWAY_ALERT_PATH           Gateway alert list path. Default: /api/v1/alerts
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -254,6 +260,18 @@ probe_rule_catalog() {
   log "Rule catalog probe passed"
 }
 
+probe_json_list() {
+  local name="$1"
+  local url="$2"
+  local response
+
+  log "Reading ${name} from ${url}"
+  response="$(curl -fsS "${url}?tenantId=smoke-tenant")"
+
+  printf '%s' "$response" | grep -q '^\[' || fail "${name} did not return a JSON list"
+  log "${name} probe passed"
+}
+
 run_static_checks() {
   require_command docker
 
@@ -360,8 +378,10 @@ run_live_checks() {
   wait_for_http "Fraud Detection Service" "${fraud_service_url}/actuator/health"
   wait_for_http "Rule Management Service" "${rule_service_url}/actuator/health"
   wait_for_http "Explainable AI Service" "${OEFMS_SMOKE_EXPLAINABLE_AI_SERVICE_URL:-http://localhost:8094}/actuator/health"
-  wait_for_http "Case Management Service" "${OEFMS_SMOKE_CASE_SERVICE_URL:-http://localhost:8084}/actuator/health"
+  wait_for_http "Case Management Service" "${case_service_url}/actuator/health"
   wait_for_http "Audit Logging Service" "${audit_service_url}/actuator/health"
+  probe_json_list "Case list" "${case_service_url}/api/v1/cases"
+  probe_json_list "Alert list" "${case_service_url}/api/v1/alerts"
   probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_transaction_receipt "${ingestion_service_url}/api/v1/ingestion/transactions/${smoke_transaction_id}"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
@@ -375,6 +395,8 @@ run_live_checks() {
     probe_fraud_decision "${gateway_url}${gateway_fraud_decision_path}"
     probe_ml_runtime "${gateway_url}${gateway_ml_runtime_path}"
     probe_rule_catalog "${gateway_url}${gateway_rule_path}"
+    probe_json_list "Gateway case list" "${gateway_url}${gateway_case_path}"
+    probe_json_list "Gateway alert list" "${gateway_url}${gateway_alert_path}"
   fi
 }
 

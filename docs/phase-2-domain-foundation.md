@@ -68,6 +68,7 @@ Use one branch per focused change.
 | 14 | `feature/xgboost-training-validation` | Validate the first full local BAF XGBoost run and document baseline operating points. |
 | 15 | `feature/ml-threshold-calibration-and-comparison` | Add repeatable baseline comparison, threshold operating points, and calibration-bin reports. |
 | 16 | `feature/ml-leakage-fairness-audit` | Add leakage checks, slice-level fraud-rate summaries, and model prediction behavior audits. |
+| 17 | `feature/case-alert-persistence-foundation` | Persist the first alert/case records and expose read APIs for the future analyst console. |
 
 ## Service Responsibilities
 
@@ -116,6 +117,7 @@ Use one branch per focused change.
 
 - Consume explanation events from `oefms.case-management.explanation-prepared`.
 - Create an initial alert and case when a transaction needs investigation.
+- Persist initial alert and case records in the owning Case Management schema.
 - Publish alert, case, and audit events for reviewable explanations.
 - Skip low-risk approvals that do not need investigation.
 - Store status, priority, assignment-ready fields, and explanation references.
@@ -197,5 +199,6 @@ Phase 2 is complete when:
 - Fraud Detection Service can consume the event and produce a rule-mode decision.
 - Explainable AI Service can prepare decision-support output from the fraud decision.
 - Case Management Service can receive or create the first review case.
+- Case Management Service can persist and expose the first review alert and case records.
 - Audit Logging Service can record the major workflow events.
 - The ML runtime contract is implemented and documented without enabling unvalidated ML by default.

@@ -33,10 +33,18 @@ class CaseWorkflowOrchestrator {
     private static final String SYSTEM_ACTOR = "system:case-management-service";
 
     private final CaseManagementRabbitMqProperties rabbitMqProperties;
+    private final CaseWorkflowRepository workflowRepository;
+    private final CaseWorkflowRecordMapper recordMapper;
     private final Clock clock;
 
-    CaseWorkflowOrchestrator(CaseManagementRabbitMqProperties rabbitMqProperties, Clock clock) {
+    CaseWorkflowOrchestrator(
+            CaseManagementRabbitMqProperties rabbitMqProperties,
+            CaseWorkflowRepository workflowRepository,
+            CaseWorkflowRecordMapper recordMapper,
+            Clock clock) {
         this.rabbitMqProperties = rabbitMqProperties;
+        this.workflowRepository = workflowRepository;
+        this.recordMapper = recordMapper;
         this.clock = clock;
     }
 
@@ -62,6 +70,10 @@ class CaseWorkflowOrchestrator {
                 auditMessage(alertAudit(alert, caseId, createdAt), alertMessage.envelope().metadata(), createdAt);
         DomainEventMessage<AuditEventRecordedEvent> caseAuditMessage =
                 auditMessage(caseAudit(caseFile, createdAt), caseMessage.envelope().metadata(), createdAt);
+
+        workflowRepository.save(
+                recordMapper.fromAlert(alert, alertMessage.envelope().metadata()),
+                recordMapper.fromCase(caseFile, caseMessage.envelope().metadata()));
 
         return new CaseWorkflowMessages(List.of(alertMessage, caseMessage, alertAuditMessage, caseAuditMessage));
     }

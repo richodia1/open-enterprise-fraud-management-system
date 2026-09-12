@@ -55,6 +55,8 @@ The core live checks cover:
 | Rule Management Service | `GET /api/v1/rules` |
 | Explainable AI Service | `GET /actuator/health` |
 | Case Management Service | `GET /actuator/health` |
+| Case Management Service | `GET /api/v1/cases?tenantId=smoke-tenant` |
+| Case Management Service | `GET /api/v1/alerts?tenantId=smoke-tenant` |
 | Audit Logging Service | `GET /actuator/health` |
 | Fraud Detection Service | `POST /api/v1/fraud/decisions` |
 
@@ -106,6 +108,8 @@ HIGH_VALUE_AMOUNT
 CRITICAL_VALUE_AMOUNT
 ```
 
+The case and alert list probes expect JSON lists. They may be empty on a fresh local database.
+
 ## Gateway Probe
 
 Gateway health, transaction ingestion, Fraud Detection, ML runtime, and Rule Management routes can be included with:
@@ -133,6 +137,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
 | `OEFMS_SMOKE_RULE_SERVICE_URL` | Rule Management Service base URL. | `http://localhost:8082` |
 | `OEFMS_SMOKE_AUDIT_SERVICE_URL` | Audit Logging Service base URL. | `http://localhost:8090` |
+| `OEFMS_SMOKE_CASE_SERVICE_URL` | Case Management Service base URL. | `http://localhost:8084` |
 | `OEFMS_SMOKE_GATEWAY_URL` | API Gateway base URL. | `http://localhost:8080` |
 | `OEFMS_SMOKE_TRANSACTION_ID` | Transaction id used by live probes. | `118f3bd4-b208-44ff-b1ff-447c78d80d02` |
 | `OEFMS_SMOKE_GATEWAY_INGESTION_PATH` | Gateway transaction ingestion path. | `/api/v1/ingestion/transactions` |
@@ -140,6 +145,8 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH` | Gateway fraud decision path. | `/api/v1/fraud/decisions` |
 | `OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH` | Gateway ML runtime path. | `/api/v1/fraud/ml/runtime` |
 | `OEFMS_SMOKE_GATEWAY_RULE_PATH` | Gateway rule catalog path. | `/api/v1/rules` |
+| `OEFMS_SMOKE_GATEWAY_CASE_PATH` | Gateway case list path. | `/api/v1/cases` |
+| `OEFMS_SMOKE_GATEWAY_ALERT_PATH` | Gateway alert list path. | `/api/v1/alerts` |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |
 

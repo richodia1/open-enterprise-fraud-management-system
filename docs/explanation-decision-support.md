@@ -64,5 +64,5 @@ RabbitMQ explanation.prepared event
 - Idempotency storage for consumed fraud decision event ids.
 - Outbox-backed publication.
 - SHAP or feature-contribution support for real ML models.
-- Persistent Case Management records after the first `explanation.prepared` consumer.
-- Audit logging across ingestion, decision, explanation, and case creation.
+- Durable explanation storage before publishing `explanation.prepared`.
+- Audit persistence across ingestion, decision, explanation, and case creation.

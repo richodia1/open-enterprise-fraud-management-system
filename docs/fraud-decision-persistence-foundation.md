@@ -54,6 +54,5 @@ The response is a `FraudDecisionRecord`, not the original nested scoring respons
 ## Next Persistence Candidates
 
 - Explainable AI explanation records.
-- Case Management case and alert records.
 - Audit Logging append-only event records.
 - Rule Management rule definitions and version history.

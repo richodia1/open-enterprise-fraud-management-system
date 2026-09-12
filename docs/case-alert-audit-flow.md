@@ -12,7 +12,7 @@ Case Management Service now provides the first investigator handoff after Explai
 | Payload | `EventEnvelope<ExplanationPreparedEvent>` |
 | Supported event version | `1` |
 
-The listener validates event type and version before creating workflow messages.
+The listener validates event type and version before creating workflow messages. Reviewable explanations also create durable alert and case records before workflow messages are handed to the RabbitMQ publisher.
 
 ## Review Decision
 
@@ -34,6 +34,26 @@ For reviewable explanations, Case Management publishes:
 | `AuditEventRecordedEvent` | `audit.event.recorded` | Captures alert and case creation audit entries. |
 
 The case event uses the alert event id as its causation id. Audit events use the event id of the workflow event they record as their causation id.
+
+## Durable Alert And Case Records
+
+Case Management Service persists the first review records in its own database:
+
+| Record | Table | Initial Status |
+| --- | --- | --- |
+| Alert | `fraud_alerts` | `OPEN` |
+| Case | `fraud_cases` | `OPEN` |
+
+Read endpoints:
+
+```text
+GET /api/v1/alerts/{alertId}
+GET /api/v1/alerts?tenantId={tenantId}
+GET /api/v1/cases/{caseId}
+GET /api/v1/cases?tenantId={tenantId}
+```
+
+See [Case Alert Persistence Foundation](case-alert-persistence-foundation.md) for the table shape and persistence flow.
 
 ## Audit Logging
 
@@ -60,6 +80,7 @@ ExplanationPreparedEventListener
 CaseWorkflowOrchestrator
         |
         | creates alert, case, and audit messages
+        | saves fraud_alerts and fraud_cases
         v
 RabbitMqCaseWorkflowEventPublisher
         |
@@ -76,7 +97,6 @@ RabbitMqCaseWorkflowEventPublisher
 
 ## Still To Add
 
-- Persistent alert and case records.
 - Persistent append-only audit records.
 - Idempotency for consumed explanation and audit event ids.
 - Notification consumer for `alert.created` and `case.created`.
