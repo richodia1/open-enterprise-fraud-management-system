@@ -56,6 +56,8 @@ Run the full MVP event-flow probe through the API Gateway:
 ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
 ```
 
+The `--start-stack` path first checks Docker container startup with a tiny preflight container. If Docker can answer `docker info` but cannot start containers, restart Docker Desktop and verify `docker run --rm hello-world`.
+
 The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, reads the Audit Logging event list, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog. With `--event-flow`, the script also posts a reviewable transaction and waits for event-driven fraud decision, case, alert, and audit records.
 
 ## Prepare ML Dataset Sample

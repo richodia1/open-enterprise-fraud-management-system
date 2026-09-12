@@ -48,10 +48,11 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ["CMD-SHELL", "su-exec rabbitmq rabbitmq-diagnostics -q ping"]
+      start_period: 90s
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 15s
+      retries: 12
 
   redis:
     image: redis:7-alpine

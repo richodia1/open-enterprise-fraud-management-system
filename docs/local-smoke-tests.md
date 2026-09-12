@@ -38,6 +38,10 @@ To start the core services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
+Before creating the Compose stack, `--start-stack` runs a tiny Docker runtime preflight with `hello-world`. This catches local Docker Desktop issues where the daemon responds to `docker info` but containers remain stuck in `Created`.
+
+RabbitMQ gets an extended startup grace period in Compose because a clean local volume can spend close to a minute initializing metadata, feature flags, and the default OEFMS virtual host before it can answer its health probe. The probe runs as the `rabbitmq` user so Docker health checks do not create an unreadable Erlang cookie on new volumes.
+
 When `--gateway` is also supplied, the script starts and probes `api-gateway` as well.
 
 For the full MVP readiness path, add `--event-flow`:
@@ -155,6 +159,8 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `MAVEN_CMD` | Maven executable used by the script. | `mvn` |
 | `PYTHON_CMD` | Python executable used by the dataset preparation probe. | `python3` |
 | `OEFMS_SMOKE_ML_DATASET_CHECKS` | Runs the sample ML dataset, XGBoost validation, model-comparison validation, and BAF mapping probes. | `true` |
+| `OEFMS_SMOKE_DOCKER_RUNTIME_PREFLIGHT` | Runs a tiny Docker container before `--start-stack` creates the Compose stack. | `true` |
+| `OEFMS_SMOKE_DOCKER_RUN_TIMEOUT_SECONDS` | Docker runtime preflight timeout. | `30` |
 | `OEFMS_SMOKE_ENV_FILE` | Compose env file. | `.env.example` |
 | `OEFMS_SMOKE_INGESTION_SERVICE_URL` | Ingestion Management Service base URL. | `http://localhost:8089` |
 | `OEFMS_SMOKE_FRAUD_SERVICE_URL` | Fraud Detection Service base URL. | `http://localhost:8081` |
@@ -178,6 +184,12 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 ## Cleanup
 
 When `--start-stack` is used, the script leaves the stack running so failures can be inspected.
+
+If the script reports that Docker is reachable but a test container cannot complete, restart Docker Desktop and verify the runtime directly:
+
+```bash
+docker run --rm hello-world
+```
 
 Stop it with:
 
