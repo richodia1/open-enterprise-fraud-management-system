@@ -113,10 +113,10 @@ The audit database was added after the first persistence branches. Reset local v
 | Report Management Service | 8092 |
 | GDPR Service | 8093 |
 | Explainable AI Service | 8094 |
-| PostgreSQL | 5432 |
-| RabbitMQ | 5672 |
-| RabbitMQ Management UI | 15672 |
-| Redis | 6379 |
+| PostgreSQL | `${OEFMS_POSTGRES_HOST_PORT:-5432}` |
+| RabbitMQ | `${OEFMS_RABBITMQ_HOST_PORT:-5672}` |
+| RabbitMQ Management UI | `${OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT:-15672}` |
+| Redis | `${OEFMS_REDIS_HOST_PORT:-6379}` |
 
 ## Local Infrastructure Credentials
 
@@ -125,6 +125,12 @@ The audit database was added after the first persistence branches. Reset local v
 | RabbitMQ Management UI | `http://localhost:15672` | `openefms` | `openefms` |
 | API Gateway Routes | `http://localhost:8080/gateway/routes` | n/a | n/a |
 | Auth Service Bootstrap User | `http://localhost:8085/auth/foundation` | `oefms-admin` | `openefms-admin` |
+
+If a local database or broker is already using a default port, override only the host port before starting Docker Compose, for example:
+
+```bash
+OEFMS_POSTGRES_HOST_PORT=15433 OEFMS_REDIS_HOST_PORT=16379 docker compose --env-file .env.example up -d
+```
 
 ## Local Databases
 

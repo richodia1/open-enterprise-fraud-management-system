@@ -25,7 +25,7 @@ services:
       POSTGRES_USER: ${OEFMS_DATASOURCE_USERNAME:-openefms}
       POSTGRES_PASSWORD: ${OEFMS_DATASOURCE_PASSWORD:-openefms}
     ports:
-      - "5432:5432"
+      - "${OEFMS_POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -43,8 +43,8 @@ services:
       RABBITMQ_DEFAULT_PASS: ${OEFMS_RABBITMQ_PASSWORD:-openefms}
       RABBITMQ_DEFAULT_VHOST: ${OEFMS_RABBITMQ_VHOST:-openefms}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${OEFMS_RABBITMQ_HOST_PORT:-5672}:5672"
+      - "${OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT:-15672}:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
@@ -57,7 +57,7 @@ services:
     image: redis:7-alpine
     container_name: openefms-redis
     ports:
-      - "6379:6379"
+      - "${OEFMS_REDIS_HOST_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
