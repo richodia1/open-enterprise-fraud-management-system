@@ -48,10 +48,10 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD-SHELL", "su-exec rabbitmq rabbitmq-diagnostics -q ping"]
-      start_period: 90s
+      test: ["CMD-SHELL", "su-exec rabbitmq /opt/rabbitmq/sbin/rabbitmq-diagnostics -q ping"]
+      start_period: 180s
       interval: 10s
-      timeout: 15s
+      timeout: 30s
       retries: 12
 
   redis:
@@ -72,6 +72,7 @@ services:
       context: .
       dockerfile: api-gateway/Dockerfile
     container_name: openefms-api-gateway
+    init: true
     ports:
       - "8080:8080"
     environment:
@@ -112,6 +113,7 @@ services:
       context: .
       dockerfile: services/auth-service/Dockerfile
     container_name: openefms-auth-service
+    init: true
     ports:
       - "8085:8085"
     environment:
@@ -143,6 +145,7 @@ services:
       context: .
       dockerfile: services/identity-service/Dockerfile
     container_name: openefms-identity-service
+    init: true
     ports:
       - "8087:8087"
     depends_on:
@@ -154,6 +157,7 @@ services:
       context: .
       dockerfile: services/administration-service/Dockerfile
     container_name: openefms-administration-service
+    init: true
     ports:
       - "8086:8086"
     depends_on:
@@ -165,6 +169,7 @@ services:
       context: .
       dockerfile: services/configuration-management-service/Dockerfile
     container_name: openefms-configuration-management-service
+    init: true
     ports:
       - "8088:8088"
     depends_on:
@@ -176,6 +181,7 @@ services:
       context: .
       dockerfile: services/ingestion-management-service/Dockerfile
     container_name: openefms-ingestion-management-service
+    init: true
     ports:
       - "8089:8089"
     environment:
@@ -192,6 +198,7 @@ services:
       context: .
       dockerfile: services/fraud-detection-service/Dockerfile
     container_name: openefms-fraud-detection-service
+    init: true
     ports:
       - "8081:8081"
     environment:
@@ -221,6 +228,7 @@ services:
       context: .
       dockerfile: services/explainable-ai-service/Dockerfile
     container_name: openefms-explainable-ai-service
+    init: true
     ports:
       - "8094:8094"
     environment:
@@ -237,6 +245,7 @@ services:
       context: .
       dockerfile: services/rule-management-service/Dockerfile
     container_name: openefms-rule-management-service
+    init: true
     ports:
       - "8082:8082"
     environment:
@@ -251,6 +260,7 @@ services:
       context: .
       dockerfile: services/list-management-service/Dockerfile
     container_name: openefms-list-management-service
+    init: true
     ports:
       - "8083:8083"
     environment:
@@ -265,6 +275,7 @@ services:
       context: .
       dockerfile: services/case-management-service/Dockerfile
     container_name: openefms-case-management-service
+    init: true
     ports:
       - "8084:8084"
     environment:
@@ -281,6 +292,7 @@ services:
       context: .
       dockerfile: services/audit-logging-service/Dockerfile
     container_name: openefms-audit-logging-service
+    init: true
     ports:
       - "8090:8090"
     environment:
@@ -297,6 +309,7 @@ services:
       context: .
       dockerfile: services/notification-management-service/Dockerfile
     container_name: openefms-notification-management-service
+    init: true
     ports:
       - "8091:8091"
     environment:
@@ -310,6 +323,7 @@ services:
       context: .
       dockerfile: services/report-management-service/Dockerfile
     container_name: openefms-report-management-service
+    init: true
     ports:
       - "8092:8092"
     depends_on:
@@ -321,6 +335,7 @@ services:
       context: .
       dockerfile: services/gdpr-service/Dockerfile
     container_name: openefms-gdpr-service
+    init: true
     ports:
       - "8093:8093"
     depends_on:
