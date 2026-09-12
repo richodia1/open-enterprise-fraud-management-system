@@ -88,6 +88,13 @@ OEFMS_GATEWAY_AUTH_JWK_SET_URI
 
 Auth endpoints, actuator health/info, and `/gateway/routes` remain public so login, discovery, and local smoke checks can work.
 
+The gateway's own Swagger UI and OpenAPI JSON endpoints are also public locally:
+
+```text
+/swagger-ui.html
+/v3/api-docs
+```
+
 ## Downstream Service URLs
 
 All downstream URLs are environment-driven. Application fallbacks point to localhost ports. Docker Compose and `.env.example` use service DNS names such as `http://fraud-detection-service:8081`.

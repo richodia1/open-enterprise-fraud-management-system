@@ -79,7 +79,7 @@ Phase 1 established the platform foundation: service contracts, Auth, API Gatewa
 
 Phase 2 is the next implementation phase. It focuses on the first end-to-end domain workflow: transaction ingestion, RabbitMQ event publication, fraud decision consumption, explainable decision support, case handoff, and audit logging.
 
-See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [MVP Live Stack Readiness](docs/mvp-live-stack-readiness.md), [MVP Demo Runbook](docs/mvp-demo-runbook.md), [Transaction Persistence Foundation](docs/transaction-persistence-foundation.md), [Fraud Decision Persistence Foundation](docs/fraud-decision-persistence-foundation.md), [Case Alert Persistence Foundation](docs/case-alert-persistence-foundation.md), [Audit Log Persistence Foundation](docs/audit-log-persistence-foundation.md), [ML Dataset Foundation](docs/ml-dataset-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Explanation Decision Support](docs/explanation-decision-support.md), [Case Alert Audit Flow](docs/case-alert-audit-flow.md), [Rule Management Foundation](docs/rule-management-foundation.md), [ML Runtime Contract](docs/ml-runtime-contract.md), [ML Leakage And Fairness Audit](docs/ml-leakage-fairness-audit.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
+See [Phase 1 Foundation](docs/phase-1-foundation.md), [Phase 2 Domain Foundation](docs/phase-2-domain-foundation.md), [MVP Live Stack Readiness](docs/mvp-live-stack-readiness.md), [MVP Demo Runbook](docs/mvp-demo-runbook.md), [Swagger OpenAPI Contracts](docs/swagger-openapi-contracts.md), [Transaction Persistence Foundation](docs/transaction-persistence-foundation.md), [Fraud Decision Persistence Foundation](docs/fraud-decision-persistence-foundation.md), [Case Alert Persistence Foundation](docs/case-alert-persistence-foundation.md), [Audit Log Persistence Foundation](docs/audit-log-persistence-foundation.md), [ML Dataset Foundation](docs/ml-dataset-foundation.md), [Ingestion Management API](docs/ingestion-management-api.md), [Fraud Transaction Consumer](docs/fraud-transaction-consumer.md), [Fraud Decision Events](docs/fraud-decision-events.md), [Explanation Decision Support](docs/explanation-decision-support.md), [Case Alert Audit Flow](docs/case-alert-audit-flow.md), [Rule Management Foundation](docs/rule-management-foundation.md), [ML Runtime Contract](docs/ml-runtime-contract.md), [ML Leakage And Fairness Audit](docs/ml-leakage-fairness-audit.md), [Service Contracts](docs/service-contracts.md), [RabbitMQ Event Spine](docs/rabbitmq-event-spine.md), [Fraud Detection Core](docs/fraud-detection-core.md), and [Platform Configuration](docs/platform-configuration.md).
 
 ## Fraud Decision Modes
 
@@ -208,6 +208,13 @@ For a readable local demo that prints the generated transaction, decision, case,
 
 ```bash
 ./scripts/run-mvp-demo-flow.sh --start-stack
+```
+
+For live Swagger/OpenAPI contract URLs:
+
+```bash
+./scripts/list-swagger-contracts.sh
+./scripts/list-swagger-contracts.sh --check
 ```
 
 See [Local Smoke Tests](docs/local-smoke-tests.md) for live stack and optional gateway probes.

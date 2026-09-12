@@ -65,7 +65,15 @@ class AuthServiceSecurityConfiguration {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/actuator/health", "/actuator/info", "/auth/foundation").permitAll()
+                .requestMatchers(
+                        "/actuator/health",
+                        "/actuator/info",
+                        "/auth/foundation",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**"
+                ).permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(Customizer.withDefaults());
