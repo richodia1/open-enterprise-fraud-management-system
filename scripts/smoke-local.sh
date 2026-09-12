@@ -5,6 +5,7 @@ build_project=true
 live_checks=false
 start_stack=false
 gateway_checks=false
+event_flow_checks=false
 
 env_file="${OEFMS_SMOKE_ENV_FILE:-.env.example}"
 maven_cmd="${MAVEN_CMD:-mvn}"
@@ -50,6 +51,8 @@ Options:
   --live          Probe an already-running local stack.
   --start-stack   Start the core local stack, then run live probes.
   --gateway       Include API Gateway health and optional route probes.
+  --event-flow    Submit a reviewable transaction and wait for RabbitMQ workflow records.
+  --mvp-flow      Alias for --event-flow.
   -h, --help      Show this help text.
 
 Environment:
@@ -72,6 +75,7 @@ Environment:
   OEFMS_SMOKE_GATEWAY_CASE_PATH            Gateway case list path. Default: /api/v1/cases
   OEFMS_SMOKE_GATEWAY_ALERT_PATH           Gateway alert list path. Default: /api/v1/alerts
   OEFMS_SMOKE_GATEWAY_AUDIT_PATH           Gateway audit event list path. Default: /api/v1/audit-events
+  OEFMS_SMOKE_REVIEW_TRANSACTION_ID        Optional transaction id for --event-flow. Default: generated UUID
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -90,6 +94,16 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Required command not found: $1"
 }
 
+new_uuid() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuidgen | tr '[:upper:]' '[:lower:]'
+    return
+  fi
+
+  require_command "$python_cmd"
+  "$python_cmd" -c 'import uuid; print(uuid.uuid4())'
+}
+
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -105,6 +119,10 @@ parse_args() {
         ;;
       --gateway)
         gateway_checks=true
+        ;;
+      --event-flow|--mvp-flow)
+        event_flow_checks=true
+        live_checks=true
         ;;
       -h|--help)
         usage
@@ -136,6 +154,24 @@ wait_for_http() {
     sleep "$health_interval_seconds"
   done
   log "${name} is healthy"
+}
+
+wait_for_response_contains() {
+  local name="$1"
+  local url="$2"
+  local pattern="$3"
+  local deadline
+  local response
+
+  deadline=$((SECONDS + health_timeout_seconds))
+  log "Waiting for ${name}: ${url}"
+  until response="$(curl -fsS "$url" 2>/dev/null)" && printf '%s' "$response" | grep -q "$pattern"; do
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      fail "${name} did not become available within ${health_timeout_seconds}s"
+    fi
+    sleep "$health_interval_seconds"
+  done
+  log "${name} probe passed"
 }
 
 transaction_payload() {
@@ -171,6 +207,47 @@ transaction_payload() {
   },
   "initiatedAt": "2026-09-08T09:00:00Z",
   "attributes": {}
+}
+JSON
+}
+
+review_transaction_payload() {
+  local transaction_id="$1"
+
+  cat <<JSON
+{
+  "transactionId": "${transaction_id}",
+  "externalReference": "SMOKE-REVIEW-${transaction_id}",
+  "tenantId": "mvp-smoke-tenant",
+  "transactionType": "TRANSFER",
+  "channel": "MOBILE",
+  "direction": "OUTBOUND",
+  "amount": {
+    "value": 25000.00,
+    "currency": "GBP"
+  },
+  "originator": {
+    "partyReference": "originator-review-smoke",
+    "customerReference": "originator-review-customer",
+    "accountReference": "originator-review-account",
+    "accountNumberHash": "originator-review-account-hash",
+    "institutionCode": "SMOKE",
+    "countryCode": "GB",
+    "attributes": {}
+  },
+  "beneficiary": {
+    "partyReference": "beneficiary-review-smoke",
+    "customerReference": "beneficiary-review-customer",
+    "accountReference": "beneficiary-review-account",
+    "accountNumberHash": "beneficiary-review-account-hash",
+    "institutionCode": "SMOKE",
+    "countryCode": "NG",
+    "attributes": {}
+  },
+  "initiatedAt": "2026-09-12T09:00:00Z",
+  "attributes": {
+    "velocityCount": "6"
+  }
 }
 JSON
 }
@@ -272,6 +349,64 @@ probe_json_list() {
 
   printf '%s' "$response" | grep -q '^\[' || fail "${name} did not return a JSON list"
   log "${name} probe passed"
+}
+
+probe_review_event_flow() {
+  local ingestion_url="$1"
+  local fraud_decision_url="$2"
+  local case_url="$3"
+  local alert_url="$4"
+  local audit_url="$5"
+  local label="$6"
+  local review_transaction_id
+  local response
+  local decision_response
+
+  review_transaction_id="${OEFMS_SMOKE_REVIEW_TRANSACTION_ID:-$(new_uuid)}"
+
+  log "Running ${label} event-flow probe with transaction ${review_transaction_id}"
+  response="$(curl -fsS \
+    -H 'Content-Type: application/json' \
+    -H "X-Correlation-Id: smoke-event-flow-${review_transaction_id}" \
+    -d "$(review_transaction_payload "$review_transaction_id")" \
+    "$ingestion_url")"
+
+  printf '%s' "$response" | grep -q '"status":"RECEIVED"' \
+    || fail "Event-flow ingestion response did not acknowledge the review transaction"
+  printf '%s' "$response" | grep -q '"eventType":"transaction.received"' \
+    || fail "Event-flow ingestion response did not prepare a transaction.received event"
+
+  wait_for_response_contains \
+    "event-driven fraud decision" \
+    "${fraud_decision_url}?transactionId=${review_transaction_id}" \
+    "\"transactionId\":\"${review_transaction_id}\""
+
+  decision_response="$(curl -fsS "${fraud_decision_url}?transactionId=${review_transaction_id}")"
+  printf '%s' "$decision_response" | grep -Eq '"outcome":"(REVIEW|BLOCK|ESCALATE)"' \
+    || fail "Event-driven fraud decision did not require investigation"
+
+  wait_for_response_contains \
+    "event-driven case record" \
+    "${case_url}?tenantId=mvp-smoke-tenant" \
+    "\"transactionId\":\"${review_transaction_id}\""
+  wait_for_response_contains \
+    "event-driven alert record" \
+    "${alert_url}?tenantId=mvp-smoke-tenant" \
+    "\"transactionId\":\"${review_transaction_id}\""
+  wait_for_response_contains \
+    "event-driven alert audit record" \
+    "${audit_url}?tenantId=mvp-smoke-tenant" \
+    '"action":"ALERT_CREATED"'
+  wait_for_response_contains \
+    "event-driven case audit record" \
+    "${audit_url}?tenantId=mvp-smoke-tenant" \
+    '"action":"CASE_CREATED"'
+  wait_for_response_contains \
+    "event-driven audit transaction link" \
+    "${audit_url}?tenantId=mvp-smoke-tenant" \
+    "\"transactionId\":\"${review_transaction_id}\""
+
+  log "${label} event-flow probe passed"
 }
 
 run_static_checks() {
@@ -401,6 +536,26 @@ run_live_checks() {
     probe_json_list "Gateway case list" "${gateway_url}${gateway_case_path}"
     probe_json_list "Gateway alert list" "${gateway_url}${gateway_alert_path}"
     probe_json_list "Gateway audit event list" "${gateway_url}${gateway_audit_path}"
+  fi
+
+  if [ "$event_flow_checks" = true ]; then
+    if [ "$gateway_checks" = true ]; then
+      probe_review_event_flow \
+        "${gateway_url}${gateway_ingestion_path}" \
+        "${gateway_url}${gateway_fraud_decision_path}" \
+        "${gateway_url}${gateway_case_path}" \
+        "${gateway_url}${gateway_alert_path}" \
+        "${gateway_url}${gateway_audit_path}" \
+        "Gateway"
+    else
+      probe_review_event_flow \
+        "${ingestion_service_url}/api/v1/ingestion/transactions" \
+        "${fraud_service_url}/api/v1/fraud/decisions" \
+        "${case_service_url}/api/v1/cases" \
+        "${case_service_url}/api/v1/alerts" \
+        "${audit_service_url}/api/v1/audit-events" \
+        "Service"
+    fi
   fi
 }
 

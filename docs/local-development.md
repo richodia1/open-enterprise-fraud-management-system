@@ -50,7 +50,13 @@ Start the core services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
-The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, reads the Audit Logging event list, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog.
+Run the full MVP event-flow probe through the API Gateway:
+
+```bash
+./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
+
+The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, reads the Audit Logging event list, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog. With `--event-flow`, the script also posts a reviewable transaction and waits for event-driven fraud decision, case, alert, and audit records.
 
 ## Prepare ML Dataset Sample
 
@@ -85,6 +91,8 @@ If you previously started local infrastructure before database, RabbitMQ, or Red
 docker compose down -v
 docker compose up --build
 ```
+
+The audit database was added after the first persistence branches. Reset local volumes once before the first full MVP run if the local PostgreSQL volume already existed.
 
 ## Default Ports
 
