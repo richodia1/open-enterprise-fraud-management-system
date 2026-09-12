@@ -10,6 +10,7 @@ The default script checks:
 - The sample ML dataset preparation path.
 - XGBoost feature-matrix validation without importing optional ML dependencies.
 - Model-comparison feature-matrix validation without importing optional ML dependencies.
+- Model-audit feature-matrix validation without importing optional ML dependencies.
 - A tiny BAF-shaped mapping probe that confirms real BAF numeric and categorical features are preserved.
 - The full Maven build unless `--skip-build` is passed.
 

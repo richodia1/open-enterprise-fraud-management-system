@@ -49,6 +49,12 @@ Run the default model comparison after installing `ml/requirements.txt`:
 .venv/bin/python ml/experiments/model-comparison/compare_tabular_models.py
 ```
 
+Write validation/test score files for the audit workflow:
+
+```bash
+.venv/bin/python ml/experiments/model-comparison/compare_tabular_models.py --write-scores
+```
+
 Run a quick sampled comparison:
 
 ```bash
@@ -67,7 +73,11 @@ threshold-operating-points.csv
 calibration-bins.csv
 comparison-report.md
 <model-name>-metrics.json
+<model-name>-validation-scores.csv
+<model-name>-test-scores.csv
 ```
+
+Score files are only written when `--write-scores` is supplied.
 
 ## Metrics
 
@@ -122,6 +132,8 @@ Runtime was about 48 seconds on the local development machine.
 The first comparison shows that a simpler logistic regression baseline is competitive with the initial XGBoost configuration on this feature matrix. Logistic regression produced slightly higher test PR-AUC, ROC-AUC, and a lower Brier score, while XGBoost produced higher recall at the uncalibrated `0.5` threshold.
 
 This is a useful paper result because it justifies a formal baseline comparison rather than assuming the more complex model is automatically better. The next research step should add calibrated probabilities, feature leakage checks, fairness analysis across BAF variants, and tuned XGBoost hyperparameters.
+
+The first leakage and slice-level audit is documented in [ML Leakage And Fairness Audit](ml-leakage-fairness-audit.md).
 
 ## Runtime Boundary
 
