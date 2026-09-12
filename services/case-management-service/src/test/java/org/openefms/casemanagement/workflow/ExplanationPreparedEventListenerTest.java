@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.casemanagement.messaging.CaseManagementRabbitMqProperties;
@@ -67,6 +68,8 @@ class ExplanationPreparedEventListenerTest {
     private CaseWorkflowOrchestrator orchestrator() {
         return new CaseWorkflowOrchestrator(
                 new CaseManagementRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
+                new CapturingCaseWorkflowRepository(),
+                new CaseWorkflowRecordMapper(),
                 FIXED_CLOCK);
     }
 
@@ -112,6 +115,46 @@ class ExplanationPreparedEventListenerTest {
         @Override
         public void accept(DomainEventMessage<?> message) {
             messages.add(message);
+        }
+    }
+
+    private static final class CapturingCaseWorkflowRepository implements CaseWorkflowRepository {
+        private final List<AlertRecord> alerts = new ArrayList<>();
+        private final List<CaseRecord> cases = new ArrayList<>();
+
+        @Override
+        public CaseWorkflowRecord save(AlertRecord alert, CaseRecord caseFile) {
+            alerts.add(alert);
+            cases.add(caseFile);
+            return new CaseWorkflowRecord(alert, caseFile);
+        }
+
+        @Override
+        public Optional<AlertRecord> findAlertById(UUID alertId) {
+            return alerts.stream()
+                    .filter(alert -> alert.alertId().equals(alertId))
+                    .findFirst();
+        }
+
+        @Override
+        public List<AlertRecord> findAlertsByTenantId(String tenantId) {
+            return alerts.stream()
+                    .filter(alert -> alert.tenantId().equals(tenantId))
+                    .toList();
+        }
+
+        @Override
+        public Optional<CaseRecord> findCaseById(UUID caseId) {
+            return cases.stream()
+                    .filter(caseFile -> caseFile.caseId().equals(caseId))
+                    .findFirst();
+        }
+
+        @Override
+        public List<CaseRecord> findCasesByTenantId(String tenantId) {
+            return cases.stream()
+                    .filter(caseFile -> caseFile.tenantId().equals(tenantId))
+                    .toList();
         }
     }
 }

@@ -125,6 +125,7 @@ The first case workflow:
 
 - Creates `alert.created` for reviewable explanations.
 - Creates `case.created` linked to the alert.
+- Persists the first alert and case records before workflow messages are published.
 - Publishes `audit.event.recorded` for alert and case creation.
 - Skips alert/case creation for low-risk approvals.
 - Preserves correlation metadata across the generated workflow events.

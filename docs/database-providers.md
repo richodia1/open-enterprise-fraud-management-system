@@ -9,6 +9,7 @@ OEFMS should remain adaptable across database providers, but PostgreSQL is the d
 - Database-backed services use environment variables for JDBC URL, username, password, driver, Hibernate dialect, and Flyway locations.
 - Ingestion Management Service has service-owned persistence for received transaction receipts.
 - Fraud Detection Service has service-owned persistence for fraud decision records.
+- Case Management Service has service-owned persistence for the first alert and case records.
 - Other services still have database configuration prepared before their first durable domain records are added.
 
 ## Local PostgreSQL Databases

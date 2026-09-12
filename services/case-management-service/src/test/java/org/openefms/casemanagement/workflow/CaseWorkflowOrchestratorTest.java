@@ -8,8 +8,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.casemanagement.messaging.CaseManagementRabbitMqProperties;
@@ -38,7 +40,8 @@ class CaseWorkflowOrchestratorTest {
 
     @Test
     void preparesAlertCaseAndAuditMessagesForReviewableExplanation() {
-        CaseWorkflowOrchestrator orchestrator = orchestrator();
+        CapturingCaseWorkflowRepository repository = new CapturingCaseWorkflowRepository();
+        CaseWorkflowOrchestrator orchestrator = orchestrator(repository);
 
         CaseWorkflowMessages workflowMessages = orchestrator.prepare(explanationEvent("REVIEW", "MEDIUM"));
 
@@ -64,20 +67,45 @@ class CaseWorkflowOrchestratorTest {
         assertEquals(2, auditEvents.size());
         assertTrue(auditEvents.stream().anyMatch(event -> event.auditEvent().action() == AuditAction.ALERT_CREATED));
         assertTrue(auditEvents.stream().anyMatch(event -> event.auditEvent().action() == AuditAction.CASE_CREATED));
+
+        assertEquals(1, repository.alerts.size());
+        AlertRecord alertRecord = repository.alerts.getFirst();
+        assertEquals(alertCreated.alert().alertId(), alertRecord.alertId());
+        assertEquals(AlertStatus.OPEN, alertRecord.status());
+        assertEquals(EventTypes.ALERT_CREATED, alertRecord.eventType());
+        assertEquals(alertMessage.envelope().metadata().eventId(), alertRecord.eventId());
+        assertEquals("correlation-1", alertRecord.correlationId());
+
+        assertEquals(1, repository.cases.size());
+        CaseRecord caseRecord = repository.cases.getFirst();
+        assertEquals(caseCreated.caseFile().caseId(), caseRecord.caseId());
+        assertEquals(alertRecord.alertId(), caseRecord.alertId());
+        assertEquals(CaseStatus.OPEN, caseRecord.status());
+        assertEquals(EventTypes.CASE_CREATED, caseRecord.eventType());
+        assertEquals(caseMessage.envelope().metadata().eventId(), caseRecord.eventId());
     }
 
     @Test
     void doesNotOpenCaseForLowRiskApproval() {
-        CaseWorkflowOrchestrator orchestrator = orchestrator();
+        CapturingCaseWorkflowRepository repository = new CapturingCaseWorkflowRepository();
+        CaseWorkflowOrchestrator orchestrator = orchestrator(repository);
 
         CaseWorkflowMessages workflowMessages = orchestrator.prepare(explanationEvent("APPROVE", "LOW"));
 
         assertTrue(workflowMessages.messages().isEmpty());
+        assertTrue(repository.alerts.isEmpty());
+        assertTrue(repository.cases.isEmpty());
     }
 
     private CaseWorkflowOrchestrator orchestrator() {
+        return orchestrator(new CapturingCaseWorkflowRepository());
+    }
+
+    private CaseWorkflowOrchestrator orchestrator(CaseWorkflowRepository repository) {
         return new CaseWorkflowOrchestrator(
                 new CaseManagementRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
+                repository,
+                new CaseWorkflowRecordMapper(),
                 FIXED_CLOCK);
     }
 
@@ -122,5 +150,45 @@ class CaseWorkflowOrchestratorTest {
                         "decisionOutcome", outcome,
                         "riskBand", riskBand,
                         "riskScore", "0.60"));
+    }
+
+    private static final class CapturingCaseWorkflowRepository implements CaseWorkflowRepository {
+        private final List<AlertRecord> alerts = new ArrayList<>();
+        private final List<CaseRecord> cases = new ArrayList<>();
+
+        @Override
+        public CaseWorkflowRecord save(AlertRecord alert, CaseRecord caseFile) {
+            alerts.add(alert);
+            cases.add(caseFile);
+            return new CaseWorkflowRecord(alert, caseFile);
+        }
+
+        @Override
+        public Optional<AlertRecord> findAlertById(UUID alertId) {
+            return alerts.stream()
+                    .filter(alert -> alert.alertId().equals(alertId))
+                    .findFirst();
+        }
+
+        @Override
+        public List<AlertRecord> findAlertsByTenantId(String tenantId) {
+            return alerts.stream()
+                    .filter(alert -> alert.tenantId().equals(tenantId))
+                    .toList();
+        }
+
+        @Override
+        public Optional<CaseRecord> findCaseById(UUID caseId) {
+            return cases.stream()
+                    .filter(caseFile -> caseFile.caseId().equals(caseId))
+                    .findFirst();
+        }
+
+        @Override
+        public List<CaseRecord> findCasesByTenantId(String tenantId) {
+            return cases.stream()
+                    .filter(caseFile -> caseFile.tenantId().equals(tenantId))
+                    .toList();
+        }
     }
 }

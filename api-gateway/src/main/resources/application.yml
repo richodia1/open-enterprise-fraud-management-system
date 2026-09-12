@@ -46,6 +46,10 @@ spring:
               uri: "${OEFMS_GATEWAY_RULE_SERVICE_URL:http://localhost:8082}"
               predicates:
                 - Path=/api/v1/rules,/api/v1/rules/**
+            - id: case-management-service-v1
+              uri: "${OEFMS_GATEWAY_CASE_SERVICE_URL:http://localhost:8084}"
+              predicates:
+                - Path=/api/v1/cases,/api/v1/cases/**,/api/v1/alerts,/api/v1/alerts/**
             - id: list-management-service
               uri: "${OEFMS_GATEWAY_LIST_SERVICE_URL:http://localhost:8083}"
               predicates:
