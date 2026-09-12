@@ -40,6 +40,14 @@ To start the core services and then probe them:
 
 When `--gateway` is also supplied, the script starts and probes `api-gateway` as well.
 
+For the full MVP readiness path, add `--event-flow`:
+
+```bash
+./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
+
+This submits a reviewable transaction and waits for records produced by the RabbitMQ event chain.
+
 The core live checks cover:
 
 | Component | Probe |
@@ -111,6 +119,20 @@ CRITICAL_VALUE_AMOUNT
 
 The case, alert, and audit event list probes expect JSON lists. They may be empty on a fresh local database.
 
+## Event Flow Probe
+
+The event-flow probe uses a generated transaction id unless `OEFMS_SMOKE_REVIEW_TRANSACTION_ID` is supplied.
+
+It submits a reviewable transaction through Ingestion Management and waits for:
+
+- A persisted Fraud Detection decision for the transaction.
+- A Case Management case record for the transaction.
+- A Case Management alert record for the transaction.
+- Audit Logging records for `ALERT_CREATED` and `CASE_CREATED`.
+- An audit record containing the submitted transaction id.
+
+The default review transaction uses a high amount, cross-border beneficiary country, and velocity count so the rule-based engine should require investigation.
+
 ## Gateway Probe
 
 Gateway health, transaction ingestion, Fraud Detection, ML runtime, Rule Management, Case Management, and Audit Logging routes can be included with:
@@ -149,6 +171,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_GATEWAY_CASE_PATH` | Gateway case list path. | `/api/v1/cases` |
 | `OEFMS_SMOKE_GATEWAY_ALERT_PATH` | Gateway alert list path. | `/api/v1/alerts` |
 | `OEFMS_SMOKE_GATEWAY_AUDIT_PATH` | Gateway audit event list path. | `/api/v1/audit-events` |
+| `OEFMS_SMOKE_REVIEW_TRANSACTION_ID` | Optional fixed transaction id for the event-flow probe. | generated UUID |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |
 

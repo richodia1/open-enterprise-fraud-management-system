@@ -70,6 +70,7 @@ Use one branch per focused change.
 | 16 | `feature/ml-leakage-fairness-audit` | Add leakage checks, slice-level fraud-rate summaries, and model prediction behavior audits. |
 | 17 | `feature/case-alert-persistence-foundation` | Persist the first alert/case records and expose read APIs for the future analyst console. |
 | 18 | `feature/audit-log-persistence-foundation` | Persist consumed audit events and expose read APIs for traceability and investigation timelines. |
+| 19 | `feature/mvp-live-stack-readiness` | Add a live event-flow smoke probe for the first end-to-end MVP run. |
 
 ## Service Responsibilities
 
@@ -203,4 +204,5 @@ Phase 2 is complete when:
 - Case Management Service can receive or create the first review case.
 - Case Management Service can persist and expose the first review alert and case records.
 - Audit Logging Service can persist and expose the first major workflow audit events.
+- A live smoke probe can submit a reviewable transaction and observe the event-driven decision, case, alert, and audit records.
 - The ML runtime contract is implemented and documented without enabling unvalidated ML by default.
