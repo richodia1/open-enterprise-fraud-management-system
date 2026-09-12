@@ -283,7 +283,8 @@ services:
     ports:
       - "8090:8090"
     environment:
-      <<: *rabbitmq-service-environment
+      <<: *postgres-rabbitmq-service-environment
+      OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_audit
     depends_on:
       postgres:
         condition: service_healthy

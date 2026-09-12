@@ -69,6 +69,7 @@ Use one branch per focused change.
 | 15 | `feature/ml-threshold-calibration-and-comparison` | Add repeatable baseline comparison, threshold operating points, and calibration-bin reports. |
 | 16 | `feature/ml-leakage-fairness-audit` | Add leakage checks, slice-level fraud-rate summaries, and model prediction behavior audits. |
 | 17 | `feature/case-alert-persistence-foundation` | Persist the first alert/case records and expose read APIs for the future analyst console. |
+| 18 | `feature/audit-log-persistence-foundation` | Persist consumed audit events and expose read APIs for traceability and investigation timelines. |
 
 ## Service Responsibilities
 
@@ -126,8 +127,9 @@ Use one branch per focused change.
 ### Audit Logging Service
 
 - Consume audit events from `oefms.audit-logging.audit-event-recorded`.
-- Record audit events for alert and case creation to logs until persistence is added.
-- Prepare for append-only audit events across ingestion, fraud decision, explanation preparation, and case creation.
+- Persist audit events for alert and case creation in the owning Audit Logging schema.
+- Expose audit reads by audit event id, tenant, correlation id, and resource identity.
+- Prepare for broader audit events across ingestion, fraud decision, explanation preparation, and investigator actions.
 - Preserve correlation IDs and event IDs so the full chain can be traced.
 - Avoid editable business workflows.
 
@@ -200,5 +202,5 @@ Phase 2 is complete when:
 - Explainable AI Service can prepare decision-support output from the fraud decision.
 - Case Management Service can receive or create the first review case.
 - Case Management Service can persist and expose the first review alert and case records.
-- Audit Logging Service can record the major workflow events.
+- Audit Logging Service can persist and expose the first major workflow audit events.
 - The ML runtime contract is implemented and documented without enabling unvalidated ML by default.

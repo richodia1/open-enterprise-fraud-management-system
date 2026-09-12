@@ -10,6 +10,7 @@ OEFMS should remain adaptable across database providers, but PostgreSQL is the d
 - Ingestion Management Service has service-owned persistence for received transaction receipts.
 - Fraud Detection Service has service-owned persistence for fraud decision records.
 - Case Management Service has service-owned persistence for the first alert and case records.
+- Audit Logging Service has service-owned persistence for audit event records.
 - Other services still have database configuration prepared before their first durable domain records are added.
 
 ## Local PostgreSQL Databases
@@ -23,6 +24,7 @@ OEFMS should remain adaptable across database providers, but PostgreSQL is the d
 | Rule Management Service | `openefms_rules` |
 | List Management Service | `openefms_lists` |
 | Case Management Service | `openefms_cases` |
+| Audit Logging Service | `openefms_audit` |
 
 The local PostgreSQL container creates these databases using:
 

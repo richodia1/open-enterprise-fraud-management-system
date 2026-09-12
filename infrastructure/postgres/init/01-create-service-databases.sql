@@ -5,6 +5,7 @@ CREATE DATABASE openefms_explainable_ai;
 CREATE DATABASE openefms_rules;
 CREATE DATABASE openefms_lists;
 CREATE DATABASE openefms_cases;
+CREATE DATABASE openefms_audit;
 
 GRANT ALL PRIVILEGES ON DATABASE openefms_auth TO openefms;
 GRANT ALL PRIVILEGES ON DATABASE openefms_ingestion TO openefms;
@@ -13,3 +14,4 @@ GRANT ALL PRIVILEGES ON DATABASE openefms_explainable_ai TO openefms;
 GRANT ALL PRIVILEGES ON DATABASE openefms_rules TO openefms;
 GRANT ALL PRIVILEGES ON DATABASE openefms_lists TO openefms;
 GRANT ALL PRIVILEGES ON DATABASE openefms_cases TO openefms;
+GRANT ALL PRIVILEGES ON DATABASE openefms_audit TO openefms;

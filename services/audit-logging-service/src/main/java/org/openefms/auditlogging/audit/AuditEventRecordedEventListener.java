@@ -24,7 +24,7 @@ class AuditEventRecordedEventListener {
     public void handle(EventEnvelope<AuditEventRecordedEvent> event) {
         validate(event);
 
-        auditEventSink.record(event.payload().auditEvent());
+        auditEventSink.record(event.payload().auditEvent(), event.metadata());
     }
 
     private void validate(EventEnvelope<AuditEventRecordedEvent> event) {

@@ -50,7 +50,7 @@ Start the core services and then probe them:
 ./scripts/smoke-local.sh --skip-build --start-stack
 ```
 
-The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog.
+The live smoke path checks Auth, Ingestion Management, Fraud Detection, Rule Management, Explainable AI, Case Management, and Audit Logging health endpoints. It then reads the Case Management case and alert lists, reads the Audit Logging event list, posts a low-risk transaction to Ingestion Management, reads back the persisted receipt, posts the same transaction to the Fraud Detection Service decision endpoint, reads back the persisted fraud decision record, reads the ML runtime status, and reads the baseline rule catalog.
 
 ## Prepare ML Dataset Sample
 
@@ -129,6 +129,7 @@ docker compose up --build
 | Rule Management Service | `openefms_rules` |
 | List Management Service | `openefms_lists` |
 | Case Management Service | `openefms_cases` |
+| Audit Logging Service | `openefms_audit` |
 
 See [Database Providers](database-providers.md) for the provider strategy.
 
