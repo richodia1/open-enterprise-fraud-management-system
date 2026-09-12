@@ -30,6 +30,8 @@ class AuditEventRecordedEventListenerTest {
         assertEquals(1, sink.auditEvents.size());
         assertEquals(AuditAction.CASE_CREATED, sink.auditEvents.getFirst().action());
         assertEquals("case", sink.auditEvents.getFirst().resourceType());
+        assertEquals(EVENT_ID, sink.metadata.getFirst().eventId());
+        assertEquals("correlation-1", sink.metadata.getFirst().correlationId());
     }
 
     @Test
@@ -89,10 +91,12 @@ class AuditEventRecordedEventListenerTest {
 
     private static final class CapturingAuditEventSink implements AuditEventSink {
         private final List<AuditEventRecord> auditEvents = new ArrayList<>();
+        private final List<EventMetadata> metadata = new ArrayList<>();
 
         @Override
-        public void record(AuditEventRecord auditEvent) {
+        public void record(AuditEventRecord auditEvent, EventMetadata metadata) {
             auditEvents.add(auditEvent);
+            this.metadata.add(metadata);
         }
     }
 }

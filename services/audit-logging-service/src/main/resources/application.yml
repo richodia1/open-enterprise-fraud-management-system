@@ -1,6 +1,21 @@
 spring:
   application:
     name: audit-logging-service
+  datasource:
+    url: "${OEFMS_DATASOURCE_URL:jdbc:postgresql://localhost:5432/openefms_audit}"
+    username: "${OEFMS_DATASOURCE_USERNAME:openefms}"
+    password: "${OEFMS_DATASOURCE_PASSWORD:openefms}"
+    driver-class-name: "${OEFMS_DATASOURCE_DRIVER:org.postgresql.Driver}"
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: "${OEFMS_JPA_DDL_AUTO:none}"
+    properties:
+      hibernate:
+        dialect: "${OEFMS_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}"
+  flyway:
+    enabled: "${OEFMS_FLYWAY_ENABLED:true}"
+    locations: "${OEFMS_FLYWAY_LOCATIONS:classpath:db/migration/common,classpath:db/migration/postgresql}"
   rabbitmq:
     host: "${OEFMS_RABBITMQ_HOST:localhost}"
     port: "${OEFMS_RABBITMQ_PORT:5672}"

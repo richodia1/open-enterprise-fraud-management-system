@@ -130,6 +130,6 @@ The first case workflow:
 - Skips alert/case creation for low-risk approvals.
 - Preserves correlation metadata across the generated workflow events.
 
-The Audit Logging Service now consumes `audit.event.recorded` events from `oefms.audit-logging.audit-event-recorded` and records them to logs until audit persistence is introduced.
+The Audit Logging Service now consumes `audit.event.recorded` events from `oefms.audit-logging.audit-event-recorded`, persists them in `audit_events`, and retains envelope metadata for correlation and traceability.
 
 Service-specific retry policies, idempotency storage, dead-letter inspection workflows, and outbox-backed publication should be added in later implementation branches.

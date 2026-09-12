@@ -65,4 +65,4 @@ RabbitMQ explanation.prepared event
 - Outbox-backed publication.
 - SHAP or feature-contribution support for real ML models.
 - Durable explanation storage before publishing `explanation.prepared`.
-- Audit persistence across ingestion, decision, explanation, and case creation.
+- Broader audit events across ingestion, decision, explanation, and investigator actions.

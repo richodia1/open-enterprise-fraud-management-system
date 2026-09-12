@@ -26,6 +26,7 @@ gateway_ml_runtime_path="${OEFMS_SMOKE_GATEWAY_ML_RUNTIME_PATH:-/api/v1/fraud/ml
 gateway_rule_path="${OEFMS_SMOKE_GATEWAY_RULE_PATH:-/api/v1/rules}"
 gateway_case_path="${OEFMS_SMOKE_GATEWAY_CASE_PATH:-/api/v1/cases}"
 gateway_alert_path="${OEFMS_SMOKE_GATEWAY_ALERT_PATH:-/api/v1/alerts}"
+gateway_audit_path="${OEFMS_SMOKE_GATEWAY_AUDIT_PATH:-/api/v1/audit-events}"
 
 core_services=(
   postgres
@@ -70,6 +71,7 @@ Environment:
   OEFMS_SMOKE_GATEWAY_RULE_PATH            Gateway rule catalog path. Default: /api/v1/rules
   OEFMS_SMOKE_GATEWAY_CASE_PATH            Gateway case list path. Default: /api/v1/cases
   OEFMS_SMOKE_GATEWAY_ALERT_PATH           Gateway alert list path. Default: /api/v1/alerts
+  OEFMS_SMOKE_GATEWAY_AUDIT_PATH           Gateway audit event list path. Default: /api/v1/audit-events
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -382,6 +384,7 @@ run_live_checks() {
   wait_for_http "Audit Logging Service" "${audit_service_url}/actuator/health"
   probe_json_list "Case list" "${case_service_url}/api/v1/cases"
   probe_json_list "Alert list" "${case_service_url}/api/v1/alerts"
+  probe_json_list "Audit event list" "${audit_service_url}/api/v1/audit-events"
   probe_transaction_ingestion "${ingestion_service_url}/api/v1/ingestion/transactions"
   probe_transaction_receipt "${ingestion_service_url}/api/v1/ingestion/transactions/${smoke_transaction_id}"
   probe_fraud_decision "${fraud_service_url}/api/v1/fraud/decisions"
@@ -397,6 +400,7 @@ run_live_checks() {
     probe_rule_catalog "${gateway_url}${gateway_rule_path}"
     probe_json_list "Gateway case list" "${gateway_url}${gateway_case_path}"
     probe_json_list "Gateway alert list" "${gateway_url}${gateway_alert_path}"
+    probe_json_list "Gateway audit event list" "${gateway_url}${gateway_audit_path}"
   fi
 }
 

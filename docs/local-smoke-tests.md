@@ -58,6 +58,7 @@ The core live checks cover:
 | Case Management Service | `GET /api/v1/cases?tenantId=smoke-tenant` |
 | Case Management Service | `GET /api/v1/alerts?tenantId=smoke-tenant` |
 | Audit Logging Service | `GET /actuator/health` |
+| Audit Logging Service | `GET /api/v1/audit-events?tenantId=smoke-tenant` |
 | Fraud Detection Service | `POST /api/v1/fraud/decisions` |
 
 The ingestion probe posts a low-risk synthetic transaction and expects:
@@ -108,11 +109,11 @@ HIGH_VALUE_AMOUNT
 CRITICAL_VALUE_AMOUNT
 ```
 
-The case and alert list probes expect JSON lists. They may be empty on a fresh local database.
+The case, alert, and audit event list probes expect JSON lists. They may be empty on a fresh local database.
 
 ## Gateway Probe
 
-Gateway health, transaction ingestion, Fraud Detection, ML runtime, and Rule Management routes can be included with:
+Gateway health, transaction ingestion, Fraud Detection, ML runtime, Rule Management, Case Management, and Audit Logging routes can be included with:
 
 ```bash
 ./scripts/smoke-local.sh --skip-build --live --gateway
@@ -147,6 +148,7 @@ OEFMS_SMOKE_GATEWAY_FRAUD_DECISION_PATH=/api/v1/fraud/decisions \
 | `OEFMS_SMOKE_GATEWAY_RULE_PATH` | Gateway rule catalog path. | `/api/v1/rules` |
 | `OEFMS_SMOKE_GATEWAY_CASE_PATH` | Gateway case list path. | `/api/v1/cases` |
 | `OEFMS_SMOKE_GATEWAY_ALERT_PATH` | Gateway alert list path. | `/api/v1/alerts` |
+| `OEFMS_SMOKE_GATEWAY_AUDIT_PATH` | Gateway audit event list path. | `/api/v1/audit-events` |
 | `OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS` | HTTP health wait timeout. | `180` |
 | `OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS` | HTTP health poll interval. | `3` |
 

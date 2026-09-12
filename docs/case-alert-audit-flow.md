@@ -12,7 +12,7 @@ Case Management Service now provides the first investigator handoff after Explai
 | Payload | `EventEnvelope<ExplanationPreparedEvent>` |
 | Supported event version | `1` |
 
-The listener validates event type and version before creating workflow messages. Reviewable explanations also create durable alert and case records before workflow messages are handed to the RabbitMQ publisher.
+The listener validates event type and version before creating workflow messages. Reviewable explanations also create durable alert and case records before workflow messages are handed to the RabbitMQ publisher. Audit messages are persisted by Audit Logging Service after they are consumed from RabbitMQ.
 
 ## Review Decision
 
@@ -65,7 +65,18 @@ Audit Logging Service now consumes:
 | Routing key | `audit.event.recorded` |
 | Payload | `EventEnvelope<AuditEventRecordedEvent>` |
 
-The current audit sink records audit events to logs. Durable audit persistence should be added in a later branch.
+The audit sink stores received audit events in the Audit Logging Service database and retains envelope metadata for correlation, causation, source event, source service, and trace lookups.
+
+Read endpoints:
+
+```text
+GET /api/v1/audit-events/{auditEventId}
+GET /api/v1/audit-events?tenantId={tenantId}
+GET /api/v1/audit-events?correlationId={correlationId}
+GET /api/v1/audit-events?tenantId={tenantId}&resourceType={resourceType}&resourceId={resourceId}
+```
+
+See [Audit Log Persistence Foundation](audit-log-persistence-foundation.md) for the table shape and query flow.
 
 ## Processing Path
 
@@ -92,12 +103,14 @@ RabbitMqCaseWorkflowEventPublisher
           AuditEventRecordedEventListener
                  |
                  v
-          LoggingAuditEventSink
+          PersistingAuditEventSink
+                 |
+                 v
+          audit_events
 ```
 
 ## Still To Add
 
-- Persistent append-only audit records.
 - Idempotency for consumed explanation and audit event ids.
 - Notification consumer for `alert.created` and `case.created`.
 - Case assignment, status history, investigator actions, and final fraud disposition.
