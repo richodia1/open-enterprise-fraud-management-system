@@ -54,6 +54,10 @@ spring:
                 - Path=/api/explanations/**
               filters:
                 - StripPrefix=2
+            - id: explainable-ai-service-v1
+              uri: "${OEFMS_GATEWAY_EXPLAINABLE_AI_SERVICE_URL:http://localhost:8094}"
+              predicates:
+                - Path=/api/v1/explanations/**
             - id: rule-management-service
               uri: "${OEFMS_GATEWAY_RULE_SERVICE_URL:http://localhost:8082}"
               predicates:

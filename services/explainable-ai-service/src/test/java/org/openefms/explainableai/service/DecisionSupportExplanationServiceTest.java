@@ -44,7 +44,8 @@ class DecisionSupportExplanationServiceTest {
         assertEquals(EXPLANATION_ID, response.explanationId());
         assertEquals(DECISION_ID, response.decisionId());
         assertEquals(TRANSACTION_ID, response.transactionId());
-        assertEquals("Decision REVIEW with MEDIUM risk score 0.60. Key evidence: High value amount, xgboost-baseline.",
+        assertEquals("Decision REVIEW with MEDIUM risk score 0.60. Recommended action: HOLD_FOR_MANUAL_REVIEW. "
+                        + "Key evidence: High value amount, xgboost-baseline.",
                 response.summary());
         assertEquals(2, response.evidence().size());
         assertEquals("RULE", response.evidence().getFirst().evidenceType());
@@ -52,6 +53,7 @@ class DecisionSupportExplanationServiceTest {
         assertEquals("MODEL_SIGNAL", response.evidence().get(1).evidenceType());
         assertEquals("0.82", response.evidence().get(1).attributes().get("score"));
         assertEquals("2", response.attributes().get("evidenceCount"));
+        assertEquals("HOLD_FOR_MANUAL_REVIEW", response.attributes().get("recommendedAction"));
         assertEquals(EXPLAINED_AT, response.explainedAt());
     }
 
@@ -78,6 +80,7 @@ class DecisionSupportExplanationServiceTest {
                 Map.of(
                         "decisionMode", "RULES",
                         "decisionOutcome", "REVIEW",
+                        "recommendedAction", "HOLD_FOR_MANUAL_REVIEW",
                         "riskBand", "MEDIUM",
                         "riskScore", "0.60"));
     }

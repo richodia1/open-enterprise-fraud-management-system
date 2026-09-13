@@ -17,9 +17,11 @@ import org.openefms.common.events.EventTypes;
 import org.openefms.common.events.fraud.FraudDecisionProducedEvent;
 import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
+import org.openefms.common.models.feedback.TransactionFraudFeedbackResponse;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
 import org.openefms.common.models.fraud.FraudDecisionResponse;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.models.fraud.RiskScore;
 import org.openefms.common.models.fraud.RuleHit;
@@ -52,7 +54,33 @@ class ExplanationOrchestratorTest {
         assertEquals(OffsetDateTime.parse("2026-09-11T10:00:00Z"), message.envelope().metadata().occurredAt());
         assertEquals(DECISION_ID, message.envelope().payload().explanation().decisionId());
         assertEquals(TRANSACTION_ID, message.envelope().payload().explanation().transactionId());
+        assertEquals(
+                RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW.name(),
+                message.envelope().payload().explanation().attributes().get("recommendedAction"));
         assertEquals("RULE", message.envelope().payload().explanation().evidence().getFirst().evidenceType());
+    }
+
+    @Test
+    void preparesTransactionFeedbackWithDecisionAndExplanationDetails() {
+        ExplanationOrchestrator orchestrator = new ExplanationOrchestrator(
+                new DecisionSupportExplanationService(),
+                new ExplainableAiRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
+                FIXED_CLOCK);
+
+        TransactionFraudFeedbackResponse feedback = orchestrator.feedback(decision());
+
+        assertEquals(TRANSACTION_ID, feedback.transactionId());
+        assertEquals(DECISION_ID, feedback.decisionId());
+        assertEquals("tenant-a", feedback.tenantId());
+        assertEquals(DecisionOutcome.REVIEW, feedback.outcome());
+        assertEquals(RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW, feedback.recommendedAction());
+        assertEquals(new BigDecimal("0.42"), feedback.riskScore().value());
+        assertEquals("Decision REVIEW with MEDIUM risk score 0.42. Recommended action: HOLD_FOR_MANUAL_REVIEW. "
+                        + "Key evidence: High value amount.",
+                feedback.explanationSummary());
+        assertEquals("RULE", feedback.evidence().getFirst().evidenceType());
+        assertEquals("0.42", feedback.attributes().get("riskScore"));
+        assertEquals(OffsetDateTime.parse("2026-09-11T10:00:00Z"), feedback.explainedAt());
     }
 
     private EventEnvelope<FraudDecisionProducedEvent> fraudDecisionEvent() {

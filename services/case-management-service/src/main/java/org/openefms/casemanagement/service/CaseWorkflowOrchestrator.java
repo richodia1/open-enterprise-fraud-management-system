@@ -96,6 +96,7 @@ public class CaseWorkflowOrchestrator {
         Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("explanationId", explanation.explanationId().toString());
         attributes.put("decisionOutcome", explanation.attributes().getOrDefault("decisionOutcome", "UNKNOWN"));
+        attributes.put("recommendedAction", explanation.attributes().getOrDefault("recommendedAction", "UNKNOWN"));
         attributes.put("riskScore", explanation.attributes().getOrDefault("riskScore", "0.00"));
         attributes.put("evidenceCount", Integer.toString(explanation.evidence().size()));
 
@@ -121,6 +122,7 @@ public class CaseWorkflowOrchestrator {
         Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("explanationId", explanation.explanationId().toString());
         attributes.put("decisionOutcome", explanation.attributes().getOrDefault("decisionOutcome", "UNKNOWN"));
+        attributes.put("recommendedAction", explanation.attributes().getOrDefault("recommendedAction", "UNKNOWN"));
         attributes.put("riskBand", explanation.attributes().getOrDefault("riskBand", "UNKNOWN"));
         attributes.put("riskScore", explanation.attributes().getOrDefault("riskScore", "0.00"));
 
@@ -191,6 +193,7 @@ public class CaseWorkflowOrchestrator {
                         "transactionId", alert.transactionId().toString(),
                         "decisionId", alert.decisionId().toString(),
                         "caseId", caseId.toString(),
+                        "recommendedAction", alert.attributes().getOrDefault("recommendedAction", "UNKNOWN"),
                         "priority", alert.priority().name()));
     }
 
@@ -208,6 +211,7 @@ public class CaseWorkflowOrchestrator {
                         "transactionId", caseFile.transactionId().toString(),
                         "decisionId", caseFile.decisionId().toString(),
                         "alertId", caseFile.alertId().toString(),
+                        "recommendedAction", caseFile.attributes().getOrDefault("recommendedAction", "UNKNOWN"),
                         "priority", caseFile.priority().name()));
     }
 

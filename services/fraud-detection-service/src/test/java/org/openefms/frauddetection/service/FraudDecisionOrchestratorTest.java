@@ -23,6 +23,7 @@ import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.models.fraud.RuleHit;
 import org.openefms.common.models.ml.MlFeatureContribution;
@@ -62,6 +63,7 @@ class FraudDecisionOrchestratorTest {
 
         assertEquals(DecisionMode.RULES, response.mode());
         assertEquals(DecisionOutcome.APPROVE, response.outcome());
+        assertEquals(RecommendedTransactionAction.PROCEED_TO_COMPLETION, response.recommendedAction());
         assertEquals(new BigDecimal("0.00"), response.riskScore().value());
         assertEquals(RiskBand.LOW, response.riskScore().band());
         assertTrue(response.ruleHits().isEmpty());
@@ -74,6 +76,7 @@ class FraudDecisionOrchestratorTest {
         assertEquals(TRANSACTION_ID, record.transactionId());
         assertEquals(DecisionMode.RULES, record.mode());
         assertEquals(DecisionOutcome.APPROVE, record.outcome());
+        assertEquals(RecommendedTransactionAction.PROCEED_TO_COMPLETION, record.recommendedAction());
         assertEquals("No rule hits.", record.ruleEvidenceSummary());
         assertEquals("No model signals.", record.modelSignalSummary());
         assertEquals(null, record.eventType());
@@ -91,6 +94,7 @@ class FraudDecisionOrchestratorTest {
                 Map.of("velocityCount", "12", "highRisk", "true")));
 
         assertEquals(DecisionOutcome.ESCALATE, response.outcome());
+        assertEquals(RecommendedTransactionAction.ESCALATE_FOR_INVESTIGATION, response.recommendedAction());
         assertEquals(new BigDecimal("1.00"), response.riskScore().value());
         assertEquals(RiskBand.CRITICAL, response.riskScore().band());
         assertEquals(5, response.ruleHits().size());
@@ -158,6 +162,7 @@ class FraudDecisionOrchestratorTest {
 
         assertEquals(DecisionMode.ML, response.mode());
         assertEquals(DecisionOutcome.REVIEW, response.outcome());
+        assertEquals(RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW, response.recommendedAction());
         assertEquals(new BigDecimal("0.62"), response.riskScore().value());
         assertEquals(RiskBand.MEDIUM, response.riskScore().band());
         assertTrue(response.ruleHits().isEmpty());
@@ -202,6 +207,7 @@ class FraudDecisionOrchestratorTest {
 
         assertEquals(DecisionMode.HYBRID, response.mode());
         assertEquals(DecisionOutcome.BLOCK, response.outcome());
+        assertEquals(RecommendedTransactionAction.REJECT_TRANSACTION, response.recommendedAction());
         assertEquals(new BigDecimal("0.82"), response.riskScore().value());
         assertEquals(RiskBand.HIGH, response.riskScore().band());
         assertTrue(ruleCodes(response.ruleHits()).contains("HIGH_VALUE_AMOUNT"));
@@ -244,6 +250,9 @@ class FraudDecisionOrchestratorTest {
         assertEquals("correlation-1", message.envelope().metadata().correlationId());
         assertEquals(SOURCE_EVENT_ID.toString(), message.envelope().metadata().causationId());
         assertEquals(DecisionOutcome.APPROVE, message.envelope().payload().decision().outcome());
+        assertEquals(
+                RecommendedTransactionAction.PROCEED_TO_COMPLETION,
+                message.envelope().payload().decision().recommendedAction());
 
         assertEquals(1, repository.records.size());
         FraudDecisionRecord record = repository.records.getFirst();
@@ -271,6 +280,7 @@ class FraudDecisionOrchestratorTest {
         List<FraudDecisionRecord> byTenant = orchestrator.decisionsForTenant(" tenant-a ");
 
         assertEquals(DecisionOutcome.ESCALATE, record.outcome());
+        assertEquals(RecommendedTransactionAction.ESCALATE_FOR_INVESTIGATION, record.recommendedAction());
         assertEquals(RiskBand.CRITICAL, record.riskBand());
         assertEquals(5, record.ruleHitCount());
         assertTrue(record.ruleEvidenceSummary().contains("CRITICAL_VALUE_AMOUNT"));

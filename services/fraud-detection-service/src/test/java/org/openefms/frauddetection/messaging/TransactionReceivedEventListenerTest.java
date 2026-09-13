@@ -24,6 +24,7 @@ import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.events.transaction.TransactionReceivedEvent;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.ml.MlRuntimeState;
 import org.openefms.common.models.ml.MlRuntimeStatus;
 import org.openefms.common.models.ml.MlScoreRequest;
@@ -65,6 +66,9 @@ class TransactionReceivedEventListenerTest {
         assertEquals("correlation-1", message.envelope().metadata().correlationId());
         assertEquals(SOURCE_EVENT_ID.toString(), message.envelope().metadata().causationId());
         assertEquals(DecisionOutcome.APPROVE, message.envelope().payload().decision().outcome());
+        assertEquals(
+                RecommendedTransactionAction.PROCEED_TO_COMPLETION,
+                message.envelope().payload().decision().recommendedAction());
         assertEquals(TRANSACTION_ID, message.envelope().payload().decision().transactionId());
         assertEquals(1, repository.records.size());
         assertEquals(message.envelope().payload().decision().decisionId(), repository.records.getFirst().decisionId());

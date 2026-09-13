@@ -61,12 +61,14 @@ class CaseWorkflowOrchestratorTest {
         assertEquals(AlertPriority.MEDIUM, alertCreated.alert().priority());
         assertEquals(DECISION_ID, alertCreated.alert().decisionId());
         assertEquals(TRANSACTION_ID, alertCreated.alert().transactionId());
+        assertEquals("HOLD_FOR_MANUAL_REVIEW", alertCreated.alert().attributes().get("recommendedAction"));
         assertEquals(SOURCE_EVENT_ID.toString(), alertMessage.envelope().metadata().causationId());
 
         DomainEventMessage<?> caseMessage = message(workflowMessages, RabbitMqRoutingKeys.CASE_CREATED);
         CaseCreatedEvent caseCreated = (CaseCreatedEvent) caseMessage.envelope().payload();
         assertEquals(CasePriority.MEDIUM, caseCreated.caseFile().priority());
         assertEquals(alertCreated.alert().alertId(), caseCreated.caseFile().alertId());
+        assertEquals("HOLD_FOR_MANUAL_REVIEW", caseCreated.caseFile().attributes().get("recommendedAction"));
         assertEquals(alertMessage.envelope().metadata().eventId().toString(), caseMessage.envelope().metadata().causationId());
 
         List<AuditEventRecordedEvent> auditEvents = workflowMessages.messages().stream()
@@ -76,6 +78,8 @@ class CaseWorkflowOrchestratorTest {
         assertEquals(2, auditEvents.size());
         assertTrue(auditEvents.stream().anyMatch(event -> event.auditEvent().action() == AuditAction.ALERT_CREATED));
         assertTrue(auditEvents.stream().anyMatch(event -> event.auditEvent().action() == AuditAction.CASE_CREATED));
+        assertTrue(auditEvents.stream()
+                .allMatch(event -> "HOLD_FOR_MANUAL_REVIEW".equals(event.auditEvent().attributes().get("recommendedAction"))));
 
         assertEquals(1, repository.alerts.size());
         AlertRecord alertRecord = repository.alerts.getFirst();
@@ -157,6 +161,7 @@ class CaseWorkflowOrchestratorTest {
                 OffsetDateTime.parse("2026-09-11T10:00:00Z"),
                 Map.of(
                         "decisionOutcome", outcome,
+                        "recommendedAction", "HOLD_FOR_MANUAL_REVIEW",
                         "riskBand", riskBand,
                         "riskScore", "0.60"));
     }

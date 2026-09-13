@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.persistence.entity.TenantScopedCausalEventAttributesEntity;
 
@@ -31,6 +32,10 @@ public class FraudDecisionEntity extends TenantScopedCausalEventAttributesEntity
     @Enumerated(EnumType.STRING)
     @Column(name = "outcome", nullable = false, length = 32)
     private DecisionOutcome outcome;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recommended_action", nullable = false, length = 48)
+    private RecommendedTransactionAction recommendedAction;
 
     @Column(name = "risk_score_value", nullable = false, precision = 5, scale = 4)
     private BigDecimal riskScoreValue;
@@ -90,6 +95,14 @@ public class FraudDecisionEntity extends TenantScopedCausalEventAttributesEntity
 
     public void outcome(DecisionOutcome outcome) {
         this.outcome = outcome;
+    }
+
+    public RecommendedTransactionAction recommendedAction() {
+        return recommendedAction;
+    }
+
+    public void recommendedAction(RecommendedTransactionAction recommendedAction) {
+        this.recommendedAction = recommendedAction;
     }
 
     public BigDecimal riskScoreValue() {

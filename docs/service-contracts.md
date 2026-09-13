@@ -18,10 +18,11 @@ These modules should stay small. Do not add repositories, JPA annotations, servi
 | Package | Responsibility |
 | --- | --- |
 | `org.openefms.common.models.transaction` | Transaction ingestion request, parties, amount, channel, direction, and type. |
-| `org.openefms.common.models.fraud` | Fraud decision response, risk score, risk band, decision mode, decision outcome, rule hits, and model signals. |
+| `org.openefms.common.models.fraud` | Fraud decision response, risk score, risk band, decision mode, decision outcome, recommended transaction-core action, rule hits, and model signals. |
 | `org.openefms.common.models.rule` | Configurable fraud rule definitions, categories, and lifecycle status. |
 | `org.openefms.common.models.ml` | ML scoring requests, scoring responses, feature contributions, and runtime status. |
 | `org.openefms.common.models.explanation` | Explanation request, explanation response, and evidence items. |
+| `org.openefms.common.models.feedback` | Combined fraud-feedback payloads for transaction-core and operator integrations. |
 | `org.openefms.common.models.alert` | Alert creation request and priority. |
 | `org.openefms.common.models.casefile` | Case creation request and priority. |
 | `org.openefms.common.models.audit` | Audit event record and audit action. |
@@ -106,3 +107,7 @@ Case Management Service now uses the alert, case, and audit contracts to create 
 Rule Management Service now exposes `FraudRuleDefinition` contracts for the first configurable rule catalog. Fraud Detection still uses its local baseline rules until a later branch wires dynamic rule lookup into the decision engine.
 
 Fraud Detection Service now exposes an `MlScoringClient` boundary backed by shared ML contracts. The default runtime is contract-only and does not enable unvalidated ML scoring.
+
+`FraudDecisionResponse.recommendedAction` tells an upstream transaction core whether to proceed, hold, reject, or escalate. OEFMS recommends the action, but the transaction core remains the source of truth for transaction status and settlement. See [Transaction Core Feedback Contract](transaction-core-feedback.md).
+
+Explainable AI Service can now package a fraud decision and its investigator-facing explanation into `TransactionFraudFeedbackResponse`. This is the preferred payload shape for future bank-owned callback, queue, or topic adapters because it contains both the machine action and the human-readable reason.
