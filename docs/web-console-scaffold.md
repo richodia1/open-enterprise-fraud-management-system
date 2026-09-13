@@ -10,6 +10,7 @@ Swagger remains useful for contract inspection, but the product also needs a UI 
 
 - Dashboard for gateway health, case volume, alert volume, rules, and recent audit traceability.
 - Cases and alerts views backed by the current case-management contracts.
+- Case detail view with assignment, status, final disposition, and lifecycle history.
 - Rule view backed by the current rule-management contract.
 - Generic CRUD workspaces for configuration, list, identity, and report-management resource contracts.
 - Identity provider visibility for tenant identity integrations.
@@ -32,7 +33,6 @@ The root CI pipeline installs the web-console dependencies with `npm ci`, then r
 
 ## Next UI Work
 
-- Add investigator case-detail screens once the case lifecycle endpoints are expanded.
 - Add create/update screens for rule definitions once the rule-management API becomes fully persisted.
 - Add authentication and tenant-aware navigation once the Auth and tenant identity adapters mature.
 - Add charts for fraud trends and model explainability when report-management and explainable-ai storage are durable.

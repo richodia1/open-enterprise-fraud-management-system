@@ -21,3 +21,11 @@ export function titleFromResourceType(value: string) {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
 }
+
+export function formatEnum(value?: string) {
+  if (!value) {
+    return 'Not available'
+  }
+
+  return titleFromResourceType(value)
+}

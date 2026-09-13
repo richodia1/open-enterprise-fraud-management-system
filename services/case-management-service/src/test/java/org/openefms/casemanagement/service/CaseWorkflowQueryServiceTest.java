@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.casemanagement.entity.AlertRecord;
+import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.entity.CaseWorkflowRecord;
 import org.openefms.casemanagement.enums.AlertStatus;
@@ -134,6 +135,16 @@ class CaseWorkflowQueryServiceTest {
             return cases.stream()
                     .filter(caseFile -> caseFile.tenantId().equals(tenantId))
                     .toList();
+        }
+
+        @Override
+        public CaseActionRecord saveCaseAction(CaseRecord caseFile, CaseActionRecord action) {
+            return action;
+        }
+
+        @Override
+        public List<CaseActionRecord> findCaseActionsByCaseId(UUID caseId) {
+            return List.of();
         }
     }
 }

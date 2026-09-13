@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.casemanagement.entity.AlertRecord;
+import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.enums.AlertStatus;
+import org.openefms.casemanagement.enums.CaseActionType;
 import org.openefms.casemanagement.enums.CaseStatus;
 import org.openefms.common.models.alert.AlertPriority;
 import org.openefms.common.models.casefile.CasePriority;
@@ -41,6 +43,32 @@ class CaseWorkflowRecordMapperTest {
     }
 
     @Test
+    void mapsCaseActionRecordThroughEntity() {
+        CaseActionRecord source = new CaseActionRecord(
+                UUID.fromString("e36f472e-4956-477b-ab35-4f8fae6c7916"),
+                CASE_ID,
+                "tenant-a",
+                CaseActionType.STATUS_CHANGED,
+                "investigator-1",
+                "Confirmed fraud.",
+                CaseStatus.IN_REVIEW,
+                CaseStatus.FRAUD_CONFIRMED,
+                "investigator-1",
+                OffsetDateTime.parse("2026-09-13T09:00:00Z"),
+                Map.of("decision", "fraud"));
+
+        CaseActionRecord roundTripped = mapper.toRecord(mapper.toEntity(source));
+
+        assertEquals(source.caseActionId(), roundTripped.caseActionId());
+        assertEquals(source.caseId(), roundTripped.caseId());
+        assertEquals(source.tenantId(), roundTripped.tenantId());
+        assertEquals(source.actionType(), roundTripped.actionType());
+        assertEquals(source.fromStatus(), roundTripped.fromStatus());
+        assertEquals(source.toStatus(), roundTripped.toStatus());
+        assertEquals(source.attributes(), roundTripped.attributes());
+    }
+
+    @Test
     void mapsCaseRecordThroughEntity() {
         CaseRecord source = caseRecord();
 
@@ -53,6 +81,8 @@ class CaseWorkflowRecordMapperTest {
         assertEquals(source.tenantId(), roundTripped.tenantId());
         assertEquals(source.priority(), roundTripped.priority());
         assertEquals(source.status(), roundTripped.status());
+        assertEquals(source.assigneeId(), roundTripped.assigneeId());
+        assertEquals(source.updatedAt(), roundTripped.updatedAt());
         assertEquals(source.eventId(), roundTripped.eventId());
         assertEquals(source.attributes(), roundTripped.attributes());
     }
@@ -89,6 +119,10 @@ class CaseWorkflowRecordMapperTest {
                 "Review case",
                 "Investigate the transaction.",
                 OffsetDateTime.parse("2026-09-12T10:00:00Z"),
+                "investigator-1",
+                OffsetDateTime.parse("2026-09-12T10:30:00Z"),
+                OffsetDateTime.parse("2026-09-12T11:00:00Z"),
+                null,
                 "case.created",
                 EVENT_ID,
                 "correlation-1",

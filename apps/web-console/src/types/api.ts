@@ -45,7 +45,11 @@ export type AlertRecord = {
 
 export type CaseRecord = {
   alertId: string
+  assignedAt?: string
+  assigneeId?: string
+  attributes?: Record<string, string>
   caseId: string
+  closedAt?: string
   createdAt: string
   decisionId: string
   priority: string
@@ -54,6 +58,26 @@ export type CaseRecord = {
   tenantId: string
   title: string
   transactionId: string
+  updatedAt: string
+}
+
+export type CaseActionRecord = {
+  actionType: string
+  actorId: string
+  assigneeId?: string
+  attributes?: Record<string, string>
+  caseActionId: string
+  caseId: string
+  fromStatus?: string
+  note: string
+  occurredAt: string
+  tenantId: string
+  toStatus?: string
+}
+
+export type CaseActionResponse = {
+  action: CaseActionRecord
+  caseFile: CaseRecord
 }
 
 export type AuditLogRecord = {

@@ -45,6 +45,18 @@ public class FraudCaseEntity extends TenantScopedCausalEventAttributesEntity {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "assignee_id", length = 128)
+    private String assigneeId;
+
+    @Column(name = "assigned_at")
+    private OffsetDateTime assignedAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
+    @Column(name = "closed_at")
+    private OffsetDateTime closedAt;
+
     public FraudCaseEntity() {
     }
 
@@ -118,6 +130,38 @@ public class FraudCaseEntity extends TenantScopedCausalEventAttributesEntity {
 
     public void createdAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String assigneeId() {
+        return assigneeId;
+    }
+
+    public void assigneeId(String assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public OffsetDateTime assignedAt() {
+        return assignedAt;
+    }
+
+    public void assignedAt(OffsetDateTime assignedAt) {
+        this.assignedAt = assignedAt;
+    }
+
+    public OffsetDateTime updatedAt() {
+        return updatedAt;
+    }
+
+    public void updatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public OffsetDateTime closedAt() {
+        return closedAt;
+    }
+
+    public void closedAt(OffsetDateTime closedAt) {
+        this.closedAt = closedAt;
     }
 
 }

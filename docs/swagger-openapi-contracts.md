@@ -51,3 +51,11 @@ The current API Gateway also exposes its own local contract. Downstream service 
 Auth Service protects production OAuth/OIDC flows, but its local Swagger and OpenAPI endpoints are public so contributors can inspect the bootstrap contract without logging in.
 
 Management services expose their legacy CRUD contract foundation under `/api/v1/{service}/resources`. See [Legacy CRUD Contract Map](legacy-crud-contracts.md) for the old-system resources covered by the first Java pass.
+
+Case Management also exposes the first investigator lifecycle contracts:
+
+```text
+GET   /api/v1/cases/{caseId}/actions
+PATCH /api/v1/cases/{caseId}/assignment
+PATCH /api/v1/cases/{caseId}/status
+```
