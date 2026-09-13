@@ -34,6 +34,8 @@ OEFMS v0.1 is the starting point for building an open, extensible enterprise fra
 
 ```text
 open-enterprise-fraud-management-system/
+├── apps/
+│   └── web-console/
 ├── api-gateway/
 ├── services/
 │   ├── auth-service/
@@ -70,6 +72,7 @@ open-enterprise-fraud-management-system/
 - Spring Boot 4.1.1
 - Spring Cloud 2025.1.3
 - Maven multi-module build
+- React, TypeScript, Vite, and MUI for the first web console
 - PostgreSQL 16 for local database testing
 - Docker Compose for local infrastructure
 
@@ -176,6 +179,8 @@ Investigator confirms, rejects, or escalates the fraud outcome
 Ingestion Management transaction receipt persistence, Fraud Detection decision persistence, Case Management alert/case persistence, and Audit Logging event persistence have been added. Production fraud policy, full investigation workflow, durable explanation storage, and the frontend analyst console have not been added yet.
 
 See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.
+
+See [Web Console Scaffold](docs/web-console-scaffold.md) for the first React console that will consume the CRUD, investigation, audit, identity, reporting, and health contracts.
 
 See [Auth Service](docs/auth-service.md) for the local authentication and OAuth2/OIDC foundation.
 

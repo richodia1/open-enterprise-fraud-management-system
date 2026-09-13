@@ -26,3 +26,18 @@ jobs:
 
       - name: Local smoke checks
         run: ./scripts/smoke-local.sh --skip-build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web-console/package-lock.json
+
+      - name: Build web console
+        working-directory: apps/web-console
+        run: |
+          npm ci
+          npm run lint
+          npm test
+          npm run build
