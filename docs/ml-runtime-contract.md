@@ -79,7 +79,7 @@ The default production bean is contract-only. It reports status but throws `MlSc
 A production scorer should provide a Spring bean implementing:
 
 ```text
-org.openefms.frauddetection.ml.MlScoringClient
+org.openefms.frauddetection.service.MlScoringClient
 ```
 
 Expected adapter responsibilities:

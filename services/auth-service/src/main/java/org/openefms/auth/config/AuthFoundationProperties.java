@@ -1,10 +1,9 @@
 package org.openefms.auth.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.StringUtils;
-
 import java.time.Duration;
 import java.util.List;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 @ConfigurationProperties(prefix = "oefms.auth")
 public record AuthFoundationProperties(

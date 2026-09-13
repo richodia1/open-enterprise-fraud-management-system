@@ -12,11 +12,11 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableConfigurationProperties(GatewaySecurityProperties.class)
-class GatewaySecurityConfiguration {
+public class GatewaySecurityConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "oefms.gateway.security", name = "enabled", havingValue = "true")
-    SecurityFilterChain jwtGatewaySecurityFilterChain(
+    public SecurityFilterChain jwtGatewaySecurityFilterChain(
             HttpSecurity http,
             GatewaySecurityProperties properties
     ) throws Exception {
@@ -38,7 +38,7 @@ class GatewaySecurityConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "oefms.gateway.security", name = "enabled", havingValue = "false", matchIfMissing = true)
-    SecurityFilterChain openGatewaySecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain openGatewaySecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable);

@@ -9,41 +9,41 @@ import org.openefms.rulemanagement.entity.RuleConditionDefinition;
 import org.openefms.rulemanagement.entity.RuleEscalationUser;
 
 public interface RuleConfigurationRepository {
-    List<RuleCategory> findCategories();
+    public List<RuleCategory> findCategories();
 
-    Optional<RuleCategory> findCategory(String id);
+    public Optional<RuleCategory> findCategory(String id);
 
-    RuleCategory saveCategory(RuleCategory category);
+    public RuleCategory saveCategory(RuleCategory category);
 
-    void deleteCategory(String id);
+    public void deleteCategory(String id);
 
-    List<RuleEscalationUser> findEscalationUsers();
+    public List<RuleEscalationUser> findEscalationUsers();
 
-    Optional<RuleEscalationUser> findEscalationUser(String id);
+    public Optional<RuleEscalationUser> findEscalationUser(String id);
 
-    RuleEscalationUser saveEscalationUser(RuleEscalationUser user);
+    public RuleEscalationUser saveEscalationUser(RuleEscalationUser user);
 
-    void deleteEscalationUser(String id);
+    public void deleteEscalationUser(String id);
 
-    List<RuleConditionDefinition> findConditionDefinitions();
+    public List<RuleConditionDefinition> findConditionDefinitions();
 
-    Optional<RuleConditionDefinition> findConditionDefinition(String id);
+    public Optional<RuleConditionDefinition> findConditionDefinition(String id);
 
-    RuleConditionDefinition saveConditionDefinition(RuleConditionDefinition definition);
+    public RuleConditionDefinition saveConditionDefinition(RuleConditionDefinition definition);
 
-    void deleteConditionDefinition(String id);
+    public void deleteConditionDefinition(String id);
 
-    List<RuleAuditTrail> findAuditTrails();
+    public List<RuleAuditTrail> findAuditTrails();
 
-    Optional<RuleAuditTrail> findAuditTrail(String id);
+    public Optional<RuleAuditTrail> findAuditTrail(String id);
 
-    RuleAuditTrail saveAuditTrail(RuleAuditTrail auditTrail);
+    public RuleAuditTrail saveAuditTrail(RuleAuditTrail auditTrail);
 
-    void deleteAuditTrail(String id);
+    public void deleteAuditTrail(String id);
 
-    List<RuleApproval> findApprovals();
+    public List<RuleApproval> findApprovals();
 
-    Optional<RuleApproval> findApproval(String id);
+    public Optional<RuleApproval> findApproval(String id);
 
-    RuleApproval saveApproval(RuleApproval approval);
+    public RuleApproval saveApproval(RuleApproval approval);
 }

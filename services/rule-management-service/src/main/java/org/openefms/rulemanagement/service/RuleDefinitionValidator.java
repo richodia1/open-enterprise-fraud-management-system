@@ -8,12 +8,12 @@ import java.util.Map;
 import org.openefms.rulemanagement.dto.RuleDefinitionRequest;
 import org.openefms.rulemanagement.dto.RuleStatusUpdateRequest;
 
-class RuleDefinitionValidator {
+public class RuleDefinitionValidator {
     private static final BigDecimal ZERO = new BigDecimal("0.00");
     private static final BigDecimal ONE = new BigDecimal("1.00");
     private static final String RULE_CODE_PATTERN = "^[A-Z][A-Z0-9_]{2,63}$";
 
-    void validateCreateOrReplace(RuleDefinitionRequest request) {
+    public void validateCreateOrReplace(RuleDefinitionRequest request) {
         List<String> errors = new ArrayList<>();
         if (request == null) {
             errors.add("request body must not be null");
@@ -33,7 +33,7 @@ class RuleDefinitionValidator {
         throwIfInvalid(errors);
     }
 
-    void validateStatusUpdate(RuleStatusUpdateRequest request) {
+    public void validateStatusUpdate(RuleStatusUpdateRequest request) {
         List<String> errors = new ArrayList<>();
         if (request == null) {
             errors.add("request body must not be null");
@@ -45,7 +45,7 @@ class RuleDefinitionValidator {
         throwIfInvalid(errors);
     }
 
-    void validateFilter(String tenantId, String status, String category) {
+    public void validateFilter(String tenantId, String status, String category) {
         List<String> errors = new ArrayList<>();
         validateText(tenantId, "tenantId", errors);
         validateEnumValue(status, "status", errors);
@@ -53,7 +53,7 @@ class RuleDefinitionValidator {
         throwIfInvalid(errors);
     }
 
-    void validateLookup(String tenantId, String ruleCode) {
+    public void validateLookup(String tenantId, String ruleCode) {
         List<String> errors = new ArrayList<>();
         validateText(tenantId, "tenantId", errors);
         validateText(ruleCode, "ruleCode", errors);

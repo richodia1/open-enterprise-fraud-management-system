@@ -3,8 +3,6 @@ package org.openefms.frauddetection.messaging;
 import java.util.Date;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.rabbitmq.RabbitMqHeaders;
-import org.openefms.frauddetection.decision.FraudDecisionMessage;
-import org.openefms.frauddetection.decision.FraudDecisionMessageSink;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
@@ -13,10 +11,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-class RabbitMqFraudDecisionEventPublisher implements FraudDecisionMessageSink {
+public class RabbitMqFraudDecisionEventPublisher implements FraudDecisionMessageSink {
     private final RabbitTemplate rabbitTemplate;
 
-    RabbitMqFraudDecisionEventPublisher(RabbitTemplate rabbitTemplate) {
+    public RabbitMqFraudDecisionEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 

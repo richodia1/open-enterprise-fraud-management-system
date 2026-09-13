@@ -15,20 +15,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class RabbitMqAuditLoggingConfiguration {
+public class RabbitMqAuditLoggingConfiguration {
     private final AuditLoggingRabbitMqProperties properties;
 
-    RabbitMqAuditLoggingConfiguration(AuditLoggingRabbitMqProperties properties) {
+    public RabbitMqAuditLoggingConfiguration(AuditLoggingRabbitMqProperties properties) {
         this.properties = properties;
     }
 
     @Bean
-    MessageConverter rabbitJsonMessageConverter() {
+    public MessageConverter rabbitJsonMessageConverter() {
         return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    Declarables auditLoggingTopology() {
+    public Declarables auditLoggingTopology() {
         TopicExchange domainExchange = ExchangeBuilder.topicExchange(properties.exchange()).durable(true).build();
         TopicExchange deadLetterExchange = ExchangeBuilder.topicExchange(properties.deadLetterExchange()).durable(true).build();
         Queue auditEventQueue = QueueBuilder

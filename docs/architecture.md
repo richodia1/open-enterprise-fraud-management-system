@@ -10,6 +10,23 @@ Fraud decisioning should support configurable rule-based, ML-based, and hybrid m
 
 The foundation sequence is tracked in [Phase 1 Foundation](phase-1-foundation.md). The next domain sequence is tracked in [Phase 2 Domain Foundation](phase-2-domain-foundation.md). Shared API and event shapes are tracked in [Service Contracts](service-contracts.md).
 
+## Service Package Layout
+
+Each Spring Boot service should use the same package shape as domain behavior is added:
+
+| Package | Responsibility |
+| --- | --- |
+| `controller` | REST controllers and HTTP error handling. |
+| `dto` | Service-owned API request or response payloads that are not shared contracts. |
+| `entity` | Service-owned JPA entities and domain records. |
+| `enums` | Service-owned enum values. Use `enums` because `enum` is a Java keyword. |
+| `repository` | Repository interfaces, Spring Data adapters, JPA adapters, and persistence mappers. |
+| `service` | Business workflow, validation, orchestration, and service-level exceptions. |
+| `messaging` | RabbitMQ publishers, listeners, message envelopes, and broker configuration. |
+| `config` | Spring configuration and configuration-properties classes. |
+
+Small scaffolded services keep `package-info.java` markers for empty layers until their first domain slice is added.
+
 ## High-Level Direction
 
 ```text
@@ -34,5 +51,3 @@ API Gateway
 Fraud decisions should be traceable. The Explainable AI Service is intended to produce investigator-facing decision support from rule hits, model signals, feature contributions, historical context, and audit trails. It should explain why a transaction is risky before a user finally confirms or rejects a fraud outcome.
 
 Future modules may include ML scoring, graph intelligence, device intelligence, and external integration adapters.
-
-No domain entities or business workflows are implemented in this scaffold.

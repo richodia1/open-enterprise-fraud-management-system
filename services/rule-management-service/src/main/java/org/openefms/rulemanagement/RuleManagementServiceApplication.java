@@ -13,7 +13,7 @@ public class RuleManagementServiceApplication {
     }
 
     @Bean
-    Clock clock() {
+    public Clock clock() {
         return Clock.systemUTC();
     }
 }

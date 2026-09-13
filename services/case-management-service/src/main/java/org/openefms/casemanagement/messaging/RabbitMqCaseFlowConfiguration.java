@@ -15,20 +15,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class RabbitMqCaseFlowConfiguration {
+public class RabbitMqCaseFlowConfiguration {
     private final CaseManagementRabbitMqProperties properties;
 
-    RabbitMqCaseFlowConfiguration(CaseManagementRabbitMqProperties properties) {
+    public RabbitMqCaseFlowConfiguration(CaseManagementRabbitMqProperties properties) {
         this.properties = properties;
     }
 
     @Bean
-    MessageConverter rabbitJsonMessageConverter() {
+    public MessageConverter rabbitJsonMessageConverter() {
         return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    Declarables caseManagementExplanationPreparedTopology() {
+    public Declarables caseManagementExplanationPreparedTopology() {
         TopicExchange domainExchange = ExchangeBuilder.topicExchange(properties.exchange()).durable(true).build();
         TopicExchange deadLetterExchange = ExchangeBuilder.topicExchange(properties.deadLetterExchange()).durable(true).build();
         Queue explanationPreparedQueue = QueueBuilder

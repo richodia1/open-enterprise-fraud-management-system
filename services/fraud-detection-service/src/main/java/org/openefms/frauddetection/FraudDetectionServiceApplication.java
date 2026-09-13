@@ -1,8 +1,8 @@
 package org.openefms.frauddetection;
 
 import java.time.Clock;
-import org.openefms.frauddetection.decision.FraudDecisionProperties;
 import org.openefms.frauddetection.messaging.FraudRabbitMqProperties;
+import org.openefms.frauddetection.service.FraudDecisionProperties;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +19,7 @@ public class FraudDetectionServiceApplication {
     }
 
     @Bean
-    Clock clock() {
+    public Clock clock() {
         return Clock.systemUTC();
     }
 }

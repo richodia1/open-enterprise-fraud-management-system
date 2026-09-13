@@ -3,8 +3,6 @@ package org.openefms.explainableai.messaging;
 import java.util.Date;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.rabbitmq.RabbitMqHeaders;
-import org.openefms.explainableai.explanation.ExplanationMessage;
-import org.openefms.explainableai.explanation.ExplanationMessageSink;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
@@ -13,10 +11,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-class RabbitMqExplanationEventPublisher implements ExplanationMessageSink {
+public class RabbitMqExplanationEventPublisher implements ExplanationMessageSink {
     private final RabbitTemplate rabbitTemplate;
 
-    RabbitMqExplanationEventPublisher(RabbitTemplate rabbitTemplate) {
+    public RabbitMqExplanationEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 

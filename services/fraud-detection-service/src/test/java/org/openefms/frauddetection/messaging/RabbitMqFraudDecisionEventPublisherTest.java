@@ -22,7 +22,6 @@ import org.openefms.common.models.fraud.DecisionOutcome;
 import org.openefms.common.models.fraud.FraudDecisionResponse;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.models.fraud.RiskScore;
-import org.openefms.frauddetection.decision.FraudDecisionMessage;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;

@@ -8,20 +8,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class RabbitMqPublisherConfiguration {
+public class RabbitMqPublisherConfiguration {
     private final IngestionRabbitMqProperties properties;
 
-    RabbitMqPublisherConfiguration(IngestionRabbitMqProperties properties) {
+    public RabbitMqPublisherConfiguration(IngestionRabbitMqProperties properties) {
         this.properties = properties;
     }
 
     @Bean
-    MessageConverter rabbitJsonMessageConverter() {
+    public MessageConverter rabbitJsonMessageConverter() {
         return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    Declarables domainEventExchanges() {
+    public Declarables domainEventExchanges() {
         return new Declarables(
                 ExchangeBuilder.topicExchange(properties.exchange()).durable(true).build(),
                 ExchangeBuilder.topicExchange(properties.deadLetterExchange()).durable(true).build());

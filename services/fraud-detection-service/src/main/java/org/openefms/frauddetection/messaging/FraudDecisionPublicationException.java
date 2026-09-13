@@ -1,28 +1,26 @@
 package org.openefms.frauddetection.messaging;
 
-import org.openefms.frauddetection.decision.FraudDecisionMessage;
-
-class FraudDecisionPublicationException extends RuntimeException {
+public class FraudDecisionPublicationException extends RuntimeException {
     private final String eventType;
     private final String exchangeName;
     private final String routingKey;
 
-    FraudDecisionPublicationException(FraudDecisionMessage message, Throwable cause) {
+    public FraudDecisionPublicationException(FraudDecisionMessage message, Throwable cause) {
         super("Unable to publish fraud decision event to RabbitMQ.", cause);
         this.eventType = message.envelope().metadata().eventType();
         this.exchangeName = message.exchangeName();
         this.routingKey = message.routingKey();
     }
 
-    String eventType() {
+    public String eventType() {
         return eventType;
     }
 
-    String exchangeName() {
+    public String exchangeName() {
         return exchangeName;
     }
 
-    String routingKey() {
+    public String routingKey() {
         return routingKey;
     }
 }
