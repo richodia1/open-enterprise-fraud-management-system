@@ -3,8 +3,10 @@ package org.openefms.rulemanagement.rule;
 import java.net.URI;
 import java.util.List;
 import org.openefms.common.models.rule.FraudRuleDefinition;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +61,25 @@ class RuleManagementController {
             @PathVariable String ruleCode,
             @RequestBody RuleStatusUpdateRequest request) {
         return service.updateStatus(ruleCode, request);
+    }
+
+    @DeleteMapping(path = "/{ruleCode}")
+    ResponseEntity<Void> delete(
+            @PathVariable String ruleCode,
+            @RequestParam(defaultValue = BaselineRuleDefinitions.GLOBAL_TENANT_ID) String tenantId,
+            @RequestParam(defaultValue = "system") String updatedBy) {
+        service.delete(tenantId, ruleCode, updatedBy);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(path = "/{ruleCode}/submit-for-approval", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<RuleApproval> submitForApproval(
+            @PathVariable String ruleCode,
+            @RequestBody RuleApprovalRequest request) {
+        RuleApproval approval = service.submitForApproval(ruleCode, request);
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .location(URI.create("/api/v1/rule-approvals/" + approval.approvalId()))
+                .body(approval);
     }
 }

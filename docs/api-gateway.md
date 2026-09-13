@@ -38,7 +38,7 @@ It returns route ids, public path patterns, the correlation header name, and whe
 | `/api/v1/ingestion/**` | Ingestion Management Service |
 | `/api/v1/fraud/**` | Fraud Detection Service |
 | `/api/explanations/**` | Explainable AI Service |
-| `/api/v1/rules`, `/api/v1/rules/**` | Rule Management Service |
+| `/api/v1/rules`, `/api/v1/rules/**`, `/api/v1/rule-categories/**`, `/api/v1/rule-escalation-users/**`, `/api/v1/rule-definitions/**`, `/api/v1/rule-audit-trails/**`, `/api/v1/rule-approvals/**` | Rule Management Service |
 | `/api/v1/cases`, `/api/v1/cases/**`, `/api/v1/alerts`, `/api/v1/alerts/**` | Case Management Service |
 | `/api/v1/audit-events`, `/api/v1/audit-events/**` | Audit Logging Service |
 | `/api/lists/**` | List Management Service |
@@ -61,6 +61,8 @@ Ingestion Management, Fraud Detection Core, Rule Management, Case Management, an
 /api/v1/fraud/decisions -> /api/v1/fraud/decisions
 /api/v1/fraud/ml/runtime -> /api/v1/fraud/ml/runtime
 /api/v1/rules -> /api/v1/rules
+/api/v1/rule-categories -> /api/v1/rule-categories
+/api/v1/rule-approvals/pending -> /api/v1/rule-approvals/pending
 /api/v1/cases -> /api/v1/cases
 /api/v1/alerts -> /api/v1/alerts
 /api/v1/audit-events -> /api/v1/audit-events

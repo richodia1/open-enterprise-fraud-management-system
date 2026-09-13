@@ -38,6 +38,11 @@ class InMemoryRuleDefinitionRepository implements RuleDefinitionRepository {
         return definition;
     }
 
+    @Override
+    public void delete(String tenantId, String ruleCode) {
+        definitions.remove(new RuleKey(tenantId, ruleCode));
+    }
+
     private record RuleKey(String tenantId, String ruleCode) {
         RuleKey {
             tenantId = normaliseTenantId(tenantId);

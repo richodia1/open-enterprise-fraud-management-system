@@ -1,7 +1,7 @@
 package org.openefms.rulemanagement.rule;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -123,6 +123,236 @@ class RuleManagementServiceTest {
     }
 
     @Test
+    void deletesExistingRuleDefinitionsAndRecordsAuditTrail() {
+        RuleManagementService service = service();
+
+        service.delete("global", "HIGH_VALUE_AMOUNT", "admin");
+
+        assertThrows(
+                RuleDefinitionNotFoundException.class,
+                () -> service.get("global", "HIGH_VALUE_AMOUNT"));
+        assertEquals(
+                1,
+                service.listAuditTrails("global", null, "HIGH_VALUE_AMOUNT", RuleAuditAction.DELETED).size());
+    }
+
+    @Test
+    void managesRuleCategoriesForConfigurationScreens() {
+        RuleManagementService service = service();
+
+        List<RuleCategory> seeded = service.listCategories("GLOBAL", "velo", null, null);
+        assertEquals(1, seeded.size());
+        assertEquals("Velocity", seeded.getFirst().name());
+
+        RuleCategory created = service.createCategory(new RuleCategoryRequest(
+                "Tenant-A",
+                "Sanctions",
+                "Sanctions screening rules.",
+                "analyst"));
+
+        assertEquals("tenant-a", created.tenantId());
+        assertEquals("Sanctions", created.name());
+
+        RuleCategory replaced = service.replaceCategory(
+                created.id(),
+                new RuleCategoryRequest("tenant-a", "Sanctions Review", "Updated text.", "approver"));
+
+        assertEquals(created.id(), replaced.id());
+        assertEquals("Sanctions Review", replaced.name());
+        assertEquals(created.createdAt(), replaced.createdAt());
+        assertEquals("approver", replaced.updatedBy());
+
+        service.deleteCategory(created.id());
+
+        assertThrows(RuleManagementResourceNotFoundException.class, () -> service.getCategory(created.id()));
+    }
+
+    @Test
+    void managesRuleEscalationUsersForWorkflowConfiguration() {
+        RuleManagementService service = service();
+
+        RuleEscalationUser created = service.createEscalationUser(new RuleEscalationUserRequest(
+                "global",
+                null,
+                "high_value_amount",
+                "Fraud.Team@Example.com",
+                "user-001",
+                "Fraud Team",
+                "analyst"));
+
+        assertEquals("global", created.tenantId());
+        assertEquals("HIGH_VALUE_AMOUNT", created.ruleCode());
+        assertEquals("fraud.team@example.com", created.email());
+        assertEquals(service.get("global", "HIGH_VALUE_AMOUNT").ruleId(), created.ruleId());
+
+        List<RuleEscalationUser> filtered = service.listEscalationUsers(
+                "global",
+                "fraud",
+                null,
+                null,
+                null,
+                "HIGH_VALUE_AMOUNT",
+                null);
+
+        assertEquals(1, filtered.size());
+
+        RuleEscalationUser replaced = service.replaceEscalationUser(
+                created.id(),
+                new RuleEscalationUserRequest(
+                        "global",
+                        created.ruleId(),
+                        "HIGH_VALUE_AMOUNT",
+                        "Level2@Example.com",
+                        "user-002",
+                        "Level 2 Fraud Team",
+                        "approver"));
+
+        assertEquals("level2@example.com", replaced.email());
+        assertEquals("Level 2 Fraud Team", replaced.name());
+
+        service.deleteEscalationUser(created.id());
+
+        assertThrows(RuleManagementResourceNotFoundException.class, () -> service.getEscalationUser(created.id()));
+    }
+
+    @Test
+    void managesRuleConditionDefinitionsForRuleBuilders() {
+        RuleManagementService service = service();
+
+        RuleConditionDefinition created = service.createConditionDefinition(new RuleConditionDefinitionRequest(
+                "global",
+                null,
+                "high_value_amount",
+                "GREATER_THAN",
+                "10000",
+                "group-1",
+                "AND",
+                "source-amount",
+                null,
+                "transaction_amount",
+                "configured_limit",
+                "Number",
+                "Number",
+                "analyst"));
+
+        assertEquals("global", created.tenantId());
+        assertEquals("HIGH_VALUE_AMOUNT", created.ruleCode());
+        assertEquals("TRANSACTION_AMOUNT", created.sourceDataPointCode());
+        assertEquals("CONFIGURED_LIMIT", created.destinationDataPointCode());
+        assertEquals(service.get("global", "HIGH_VALUE_AMOUNT").ruleId(), created.ruleId());
+
+        List<RuleConditionDefinition> filtered = service.listConditionDefinitions(
+                "global",
+                "amount",
+                null,
+                "high_value_amount",
+                null,
+                null,
+                null);
+
+        assertEquals(1, filtered.size());
+
+        RuleConditionDefinition replaced = service.replaceConditionDefinition(
+                created.id(),
+                new RuleConditionDefinitionRequest(
+                        "global",
+                        created.ruleId(),
+                        "HIGH_VALUE_AMOUNT",
+                        "GREATER_THAN_OR_EQUAL",
+                        "12000",
+                        "group-1",
+                        "AND",
+                        "source-amount",
+                        null,
+                        "transaction_amount",
+                        "configured_limit",
+                        "Number",
+                        "Number",
+                        "approver"));
+
+        assertEquals("GREATER_THAN_OR_EQUAL", replaced.operator());
+        assertEquals("12000", replaced.datapointValue());
+
+        service.deleteConditionDefinition(created.id());
+
+        assertThrows(RuleManagementResourceNotFoundException.class, () -> service.getConditionDefinition(created.id()));
+    }
+
+    @Test
+    void submitsAndApprovesRulesForMakerCheckerWorkflow() {
+        RuleManagementService service = service();
+        service.updateStatus(
+                "HIGH_VALUE_AMOUNT",
+                new RuleStatusUpdateRequest("global", FraudRuleStatus.INACTIVE, "analyst"));
+
+        RuleApproval approval = service.submitForApproval(
+                "HIGH_VALUE_AMOUNT",
+                new RuleApprovalRequest("global", RuleApprovalAction.ACTIVATE, "maker", "Reactivate threshold rule."));
+
+        assertEquals(RuleApprovalStatus.PENDING, approval.status());
+        assertEquals(1, service.listPendingApprovals("global").size());
+
+        RuleApproval approved = service.approve(
+                approval.approvalId(),
+                new RuleApprovalDecisionRequest("checker", "Approved for monitoring."));
+
+        assertEquals(RuleApprovalStatus.APPROVED, approved.status());
+        assertEquals("checker", approved.decidedBy());
+        assertEquals(FraudRuleStatus.ACTIVE, service.get("global", "HIGH_VALUE_AMOUNT").status());
+        assertTrue(service.listPendingApprovals("global").isEmpty());
+
+        InvalidRuleDefinitionException exception = assertThrows(
+                InvalidRuleDefinitionException.class,
+                () -> service.approve(approval.approvalId(), new RuleApprovalDecisionRequest("checker", null)));
+        assertEquals(List.of("approval must be pending before it can be decided"), exception.errors());
+    }
+
+    @Test
+    void createsUpdatesAndDeletesManualAuditTrailEntries() {
+        RuleManagementService service = service();
+
+        RuleAuditTrail created = service.createAuditTrail(new RuleAuditTrailRequest(
+                "global",
+                null,
+                "HIGH_VALUE_AMOUNT",
+                RuleAuditAction.UPDATED,
+                FraudRuleStatus.DRAFT,
+                FraudRuleStatus.ACTIVE,
+                "Manual import from governance board.",
+                "corr-001",
+                "analyst",
+                null));
+
+        assertEquals("global", created.tenantId());
+        assertEquals("HIGH_VALUE_AMOUNT", created.ruleCode());
+        assertEquals("analyst", created.createdBy());
+        assertEquals("analyst", created.updatedBy());
+
+        RuleAuditTrail replaced = service.replaceAuditTrail(
+                created.id(),
+                new RuleAuditTrailRequest(
+                        "global",
+                        null,
+                        "HIGH_VALUE_AMOUNT",
+                        RuleAuditAction.REJECTED,
+                        FraudRuleStatus.DRAFT,
+                        FraudRuleStatus.DRAFT,
+                        "Rejected during review.",
+                        "corr-002",
+                        "analyst",
+                        "checker"));
+
+        assertEquals(created.id(), replaced.id());
+        assertEquals(RuleAuditAction.REJECTED, replaced.action());
+        assertEquals("checker", replaced.updatedBy());
+        assertFalse(service.listAuditTrails("global", null, "HIGH_VALUE_AMOUNT", RuleAuditAction.REJECTED).isEmpty());
+
+        service.deleteAuditTrail(created.id());
+
+        assertThrows(RuleManagementResourceNotFoundException.class, () -> service.getAuditTrail(created.id()));
+    }
+
+    @Test
     void rejectsInvalidRuleDefinitions() {
         RuleManagementService service = service();
 
@@ -179,6 +409,7 @@ class RuleManagementServiceTest {
     private RuleManagementService service() {
         return new RuleManagementService(
                 new InMemoryRuleDefinitionRepository(new BaselineRuleDefinitions(), FIXED_CLOCK),
+                new InMemoryRuleConfigurationRepository(FIXED_CLOCK),
                 FIXED_CLOCK);
     }
 
