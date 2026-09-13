@@ -12,20 +12,18 @@ import java.util.UUID;
 import org.openefms.common.models.transaction.TransactionChannel;
 import org.openefms.common.models.transaction.TransactionDirection;
 import org.openefms.common.models.transaction.TransactionType;
+import org.openefms.common.persistence.entity.TenantScopedEventAttributesEntity;
 import org.openefms.ingestionmanagement.enums.TransactionReceiptStatus;
 
 @Entity
 @Table(name = "received_transactions")
-public class ReceivedTransactionEntity {
+public class ReceivedTransactionEntity extends TenantScopedEventAttributesEntity {
     @Id
     @Column(name = "transaction_id", nullable = false)
     private UUID transactionId;
 
     @Column(name = "external_reference", length = 128)
     private String externalReference;
-
-    @Column(name = "tenant_id", nullable = false, length = 128)
-    private String tenantId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false, length = 64)
@@ -91,23 +89,8 @@ public class ReceivedTransactionEntity {
     @Column(name = "status", nullable = false, length = 32)
     private TransactionReceiptStatus status;
 
-    @Column(name = "event_type", nullable = false, length = 128)
-    private String eventType;
-
-    @Column(name = "event_id", nullable = false)
-    private UUID eventId;
-
-    @Column(name = "correlation_id", nullable = false, length = 128)
-    private String correlationId;
-
-    @Column(name = "trace_id", length = 128)
-    private String traceId;
-
     @Column(name = "published_at")
     private OffsetDateTime publishedAt;
-
-    @Column(name = "attributes_text", nullable = false, columnDefinition = "text")
-    private String attributesText;
 
     public ReceivedTransactionEntity() {
     }
@@ -126,14 +109,6 @@ public class ReceivedTransactionEntity {
 
     public void externalReference(String externalReference) {
         this.externalReference = externalReference;
-    }
-
-    public String tenantId() {
-        return tenantId;
-    }
-
-    public void tenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public TransactionType transactionType() {
@@ -296,38 +271,6 @@ public class ReceivedTransactionEntity {
         this.status = status;
     }
 
-    public String eventType() {
-        return eventType;
-    }
-
-    public void eventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public UUID eventId() {
-        return eventId;
-    }
-
-    public void eventId(UUID eventId) {
-        this.eventId = eventId;
-    }
-
-    public String correlationId() {
-        return correlationId;
-    }
-
-    public void correlationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public String traceId() {
-        return traceId;
-    }
-
-    public void traceId(String traceId) {
-        this.traceId = traceId;
-    }
-
     public OffsetDateTime publishedAt() {
         return publishedAt;
     }
@@ -336,11 +279,4 @@ public class ReceivedTransactionEntity {
         this.publishedAt = publishedAt;
     }
 
-    public String attributesText() {
-        return attributesText;
-    }
-
-    public void attributesText(String attributesText) {
-        this.attributesText = attributesText;
-    }
 }

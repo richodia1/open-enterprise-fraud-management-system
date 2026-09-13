@@ -10,6 +10,8 @@ Fraud decisioning should support configurable rule-based, ML-based, and hybrid m
 
 The legacy .NET CRUD surfaces are being reintroduced as explicit Java/Spring contracts. The first pass is a contract-first management-resource API so Swagger can show UI-facing resources while persistence and workflow depth are added incrementally.
 
+Shared persistence foundations live in `shared/common-persistence`, but concrete business entities remain inside the owning service. This keeps repeated technical columns consistent without coupling service-owned database models.
+
 The foundation sequence is tracked in [Phase 1 Foundation](phase-1-foundation.md). The next domain sequence is tracked in [Phase 2 Domain Foundation](phase-2-domain-foundation.md). Shared API and event shapes are tracked in [Service Contracts](service-contracts.md).
 
 ## Service Package Layout
@@ -53,3 +55,9 @@ API Gateway
 Fraud decisions should be traceable. The Explainable AI Service is intended to produce investigator-facing decision support from rule hits, model signals, feature contributions, historical context, and audit trails. It should explain why a transaction is risky before a user finally confirms or rejects a fraud outcome.
 
 Future modules may include ML scoring, graph intelligence, device intelligence, and external integration adapters.
+
+## Web Console Direction
+
+The OEFMS Web Console should live under `apps/web-console` as a separate frontend app. It should use the API Gateway as its backend entry point, not individual service ports.
+
+The first UI phase should focus on operational screens for dashboard, cases, alerts, explanations, rules, configuration, lists, identity, audit logs, and reports. Swagger remains useful for API inspection, but the Web Console is the user-facing product surface.

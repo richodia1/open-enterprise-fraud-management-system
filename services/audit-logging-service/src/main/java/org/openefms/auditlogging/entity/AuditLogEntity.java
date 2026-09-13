@@ -9,16 +9,14 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.openefms.common.models.audit.AuditAction;
+import org.openefms.common.persistence.entity.TenantScopedCausalEventAttributesEntity;
 
 @Entity
 @Table(name = "audit_events")
-public class AuditLogEntity {
+public class AuditLogEntity extends TenantScopedCausalEventAttributesEntity {
     @Id
     @Column(name = "audit_event_id", nullable = false)
     private UUID auditEventId;
-
-    @Column(name = "tenant_id", nullable = false, length = 128)
-    private String tenantId;
 
     @Column(name = "actor_id", nullable = false, length = 128)
     private String actorId;
@@ -39,29 +37,11 @@ public class AuditLogEntity {
     @Column(name = "occurred_at", nullable = false)
     private OffsetDateTime occurredAt;
 
-    @Column(name = "event_type", length = 128)
-    private String eventType;
-
-    @Column(name = "event_id")
-    private UUID eventId;
-
-    @Column(name = "correlation_id", length = 128)
-    private String correlationId;
-
-    @Column(name = "causation_id", length = 128)
-    private String causationId;
-
-    @Column(name = "trace_id", length = 128)
-    private String traceId;
-
     @Column(name = "source_service", length = 128)
     private String sourceService;
 
     @Column(name = "event_occurred_at")
     private OffsetDateTime eventOccurredAt;
-
-    @Column(name = "attributes_text", nullable = false, columnDefinition = "text")
-    private String attributesText;
 
     public AuditLogEntity() {
     }
@@ -72,14 +52,6 @@ public class AuditLogEntity {
 
     public void auditEventId(UUID auditEventId) {
         this.auditEventId = auditEventId;
-    }
-
-    public String tenantId() {
-        return tenantId;
-    }
-
-    public void tenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String actorId() {
@@ -130,46 +102,6 @@ public class AuditLogEntity {
         this.occurredAt = occurredAt;
     }
 
-    public String eventType() {
-        return eventType;
-    }
-
-    public void eventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public UUID eventId() {
-        return eventId;
-    }
-
-    public void eventId(UUID eventId) {
-        this.eventId = eventId;
-    }
-
-    public String correlationId() {
-        return correlationId;
-    }
-
-    public void correlationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public String causationId() {
-        return causationId;
-    }
-
-    public void causationId(String causationId) {
-        this.causationId = causationId;
-    }
-
-    public String traceId() {
-        return traceId;
-    }
-
-    public void traceId(String traceId) {
-        this.traceId = traceId;
-    }
-
     public String sourceService() {
         return sourceService;
     }
@@ -186,11 +118,4 @@ public class AuditLogEntity {
         this.eventOccurredAt = eventOccurredAt;
     }
 
-    public String attributesText() {
-        return attributesText;
-    }
-
-    public void attributesText(String attributesText) {
-        this.attributesText = attributesText;
-    }
 }

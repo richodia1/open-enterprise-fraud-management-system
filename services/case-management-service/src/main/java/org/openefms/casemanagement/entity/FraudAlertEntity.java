@@ -11,10 +11,11 @@ import java.util.UUID;
 import org.openefms.casemanagement.enums.AlertStatus;
 import org.openefms.common.models.alert.AlertPriority;
 import org.openefms.common.models.fraud.RiskBand;
+import org.openefms.common.persistence.entity.TenantScopedCausalEventAttributesEntity;
 
 @Entity
 @Table(name = "fraud_alerts")
-public class FraudAlertEntity {
+public class FraudAlertEntity extends TenantScopedCausalEventAttributesEntity {
     @Id
     @Column(name = "alert_id", nullable = false)
     private UUID alertId;
@@ -24,9 +25,6 @@ public class FraudAlertEntity {
 
     @Column(name = "transaction_id", nullable = false)
     private UUID transactionId;
-
-    @Column(name = "tenant_id", nullable = false, length = 128)
-    private String tenantId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false, length = 32)
@@ -48,24 +46,6 @@ public class FraudAlertEntity {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
-
-    @Column(name = "event_type", length = 128)
-    private String eventType;
-
-    @Column(name = "event_id")
-    private UUID eventId;
-
-    @Column(name = "correlation_id", length = 128)
-    private String correlationId;
-
-    @Column(name = "causation_id", length = 128)
-    private String causationId;
-
-    @Column(name = "trace_id", length = 128)
-    private String traceId;
-
-    @Column(name = "attributes_text", nullable = false, columnDefinition = "text")
-    private String attributesText;
 
     public FraudAlertEntity() {
     }
@@ -92,14 +72,6 @@ public class FraudAlertEntity {
 
     public void transactionId(UUID transactionId) {
         this.transactionId = transactionId;
-    }
-
-    public String tenantId() {
-        return tenantId;
-    }
-
-    public void tenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public AlertPriority priority() {
@@ -150,51 +122,4 @@ public class FraudAlertEntity {
         this.createdAt = createdAt;
     }
 
-    public String eventType() {
-        return eventType;
-    }
-
-    public void eventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public UUID eventId() {
-        return eventId;
-    }
-
-    public void eventId(UUID eventId) {
-        this.eventId = eventId;
-    }
-
-    public String correlationId() {
-        return correlationId;
-    }
-
-    public void correlationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public String causationId() {
-        return causationId;
-    }
-
-    public void causationId(String causationId) {
-        this.causationId = causationId;
-    }
-
-    public String traceId() {
-        return traceId;
-    }
-
-    public void traceId(String traceId) {
-        this.traceId = traceId;
-    }
-
-    public String attributesText() {
-        return attributesText;
-    }
-
-    public void attributesText(String attributesText) {
-        this.attributesText = attributesText;
-    }
 }
