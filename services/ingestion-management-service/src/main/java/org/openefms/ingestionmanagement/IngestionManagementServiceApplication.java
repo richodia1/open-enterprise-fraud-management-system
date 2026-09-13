@@ -16,7 +16,7 @@ public class IngestionManagementServiceApplication {
     }
 
     @Bean
-    Clock clock() {
+    public Clock clock() {
         return Clock.systemUTC();
     }
 }

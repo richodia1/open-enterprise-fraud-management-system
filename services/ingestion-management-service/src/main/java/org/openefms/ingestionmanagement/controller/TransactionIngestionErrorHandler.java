@@ -1,0 +1,60 @@
+package org.openefms.ingestionmanagement.controller;
+
+import org.openefms.ingestionmanagement.messaging.TransactionEventPublicationException;
+import org.openefms.ingestionmanagement.service.InvalidTransactionIngestionRequestException;
+import org.openefms.ingestionmanagement.service.TransactionReceiptNotFoundException;
+import org.openefms.ingestionmanagement.service.TransactionReceiptPersistenceException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class TransactionIngestionErrorHandler {
+    @ExceptionHandler(InvalidTransactionIngestionRequestException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidRequest(InvalidTransactionIngestionRequestException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problem.setTitle("Transaction ingestion request is invalid");
+        problem.setProperty("errors", exception.errors());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleUnreadableMessage(HttpMessageNotReadableException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Request body must be valid JSON matching the transaction ingestion contract.");
+        problem.setTitle("Transaction ingestion request body is invalid");
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(TransactionEventPublicationException.class)
+    public ResponseEntity<ProblemDetail> handlePublicationFailure(TransactionEventPublicationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Transaction was accepted by the API layer but could not be published to the event broker.");
+        problem.setTitle("Transaction event publication failed");
+        problem.setProperty("eventType", exception.eventType());
+        problem.setProperty("exchange", exception.exchangeName());
+        problem.setProperty("routingKey", exception.routingKey());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problem);
+    }
+
+    @ExceptionHandler(TransactionReceiptNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleReceiptNotFound(TransactionReceiptNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Transaction receipt was not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(TransactionReceiptPersistenceException.class)
+    public ResponseEntity<ProblemDetail> handleReceiptPersistenceFailure(TransactionReceiptPersistenceException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Transaction receipt could not be persisted or read.");
+        problem.setTitle("Transaction receipt persistence failed");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
+    }
+}

@@ -5,6 +5,14 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,22 +41,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.UUID;
-
 @Configuration
 @EnableConfigurationProperties(AuthFoundationProperties.class)
-class AuthServiceSecurityConfiguration {
+public class AuthServiceSecurityConfiguration {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         http.oauth2AuthorizationServer(authorizationServer -> {
             http.securityMatcher(authorizationServer.getEndpointsMatcher());
             authorizationServer.oidc(Customizer.withDefaults());
@@ -63,7 +62,7 @@ class AuthServiceSecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
                         "/actuator/health",
@@ -81,7 +80,7 @@ class AuthServiceSecurityConfiguration {
     }
 
     @Bean
-    UserDetailsService userDetailsService(AuthFoundationProperties properties, PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService(AuthFoundationProperties properties, PasswordEncoder passwordEncoder) {
         AuthFoundationProperties.BootstrapUser bootstrapUser = properties.bootstrap().user();
         ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
         bootstrapUser.roles().stream()
@@ -106,7 +105,7 @@ class AuthServiceSecurityConfiguration {
     }
 
     @Bean
-    RegisteredClientRepository registeredClientRepository(AuthFoundationProperties properties, PasswordEncoder passwordEncoder) {
+    public RegisteredClientRepository registeredClientRepository(AuthFoundationProperties properties, PasswordEncoder passwordEncoder) {
         AuthFoundationProperties.BootstrapClient bootstrapClient = properties.bootstrap().client();
         RegisteredClient registeredClient = RegisteredClient
                 .withId(stableClientId(bootstrapClient.clientId()))
@@ -136,25 +135,25 @@ class AuthServiceSecurityConfiguration {
     }
 
     @Bean
-    AuthorizationServerSettings authorizationServerSettings(AuthFoundationProperties properties) {
+    public AuthorizationServerSettings authorizationServerSettings(AuthFoundationProperties properties) {
         return AuthorizationServerSettings.builder()
                 .issuer(properties.issuer())
                 .build();
     }
 
     @Bean
-    JWKSource<SecurityContext> jwkSource() {
+    public JWKSource<SecurityContext> jwkSource() {
         RSAKey rsaKey = generateRsaKey();
         return new ImmutableJWKSet<>(new JWKSet(rsaKey));
     }
 
     @Bean
-    JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

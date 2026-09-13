@@ -1,8 +1,6 @@
 package org.openefms.casemanagement.messaging;
 
 import java.util.Date;
-import org.openefms.casemanagement.workflow.DomainEventMessage;
-import org.openefms.casemanagement.workflow.DomainEventMessageSink;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.rabbitmq.RabbitMqHeaders;
 import org.springframework.amqp.AmqpException;
@@ -13,10 +11,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-class RabbitMqCaseWorkflowEventPublisher implements DomainEventMessageSink {
+public class RabbitMqCaseWorkflowEventPublisher implements DomainEventMessageSink {
     private final RabbitTemplate rabbitTemplate;
 
-    RabbitMqCaseWorkflowEventPublisher(RabbitTemplate rabbitTemplate) {
+    public RabbitMqCaseWorkflowEventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 

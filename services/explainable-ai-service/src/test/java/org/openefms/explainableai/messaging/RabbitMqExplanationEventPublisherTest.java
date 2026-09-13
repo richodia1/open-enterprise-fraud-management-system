@@ -17,7 +17,6 @@ import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqHeaders;
 import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.models.explanation.ExplanationResponse;
-import org.openefms.explainableai.explanation.ExplanationMessage;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;

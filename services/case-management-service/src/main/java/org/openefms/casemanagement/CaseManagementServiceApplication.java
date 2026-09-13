@@ -18,7 +18,7 @@ public class CaseManagementServiceApplication {
     }
 
     @Bean
-    Clock clock() {
+    public Clock clock() {
         return Clock.systemUTC();
     }
 }

@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.openefms.casemanagement.workflow.DomainEventMessage;
 import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.EventTypes;

@@ -73,6 +73,23 @@ open-enterprise-fraud-management-system/
 - PostgreSQL 16 for local database testing
 - Docker Compose for local infrastructure
 
+## Service Code Layout
+
+Domain services use a consistent package layout as behavior is added:
+
+```text
+controller  REST endpoints and HTTP errors
+dto         service-owned request/response payloads
+entity      JPA entities and service-owned domain records
+enums       service-owned enum values
+repository  persistence ports, adapters, Spring Data interfaces, and mappers
+service     workflow, validation, orchestration, and service-level exceptions
+messaging   RabbitMQ publishers, listeners, envelopes, and broker configuration
+config      Spring configuration and configuration properties
+```
+
+Small scaffolded services keep `package-info.java` markers for empty layers until their first domain slice lands.
+
 ## Current Roadmap
 
 Phase 1 established the platform foundation: service contracts, Auth, API Gateway routing, RabbitMQ messaging, local runtime hygiene, and the first rule-mode fraud decision spine.

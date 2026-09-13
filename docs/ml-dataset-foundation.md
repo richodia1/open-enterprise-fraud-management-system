@@ -124,7 +124,7 @@ The catalog keeps the raw data out of Git while preserving BAF modelling signals
 Each preparation run writes a manifest that records dataset lineage and Java runtime references:
 
 ```text
-org.openefms.frauddetection.ml.MlScoringClient
+org.openefms.frauddetection.service.MlScoringClient
 org.openefms.common.models.ml.MlScoreRequest
 org.openefms.common.models.ml.MlScoreResponse
 org.openefms.common.models.ml.MlFeatureContribution

@@ -15,20 +15,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class RabbitMqConsumerConfiguration {
+public class RabbitMqConsumerConfiguration {
     private final ExplainableAiRabbitMqProperties properties;
 
-    RabbitMqConsumerConfiguration(ExplainableAiRabbitMqProperties properties) {
+    public RabbitMqConsumerConfiguration(ExplainableAiRabbitMqProperties properties) {
         this.properties = properties;
     }
 
     @Bean
-    MessageConverter rabbitJsonMessageConverter() {
+    public MessageConverter rabbitJsonMessageConverter() {
         return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    Declarables explainableAiFraudDecisionTopology() {
+    public Declarables explainableAiFraudDecisionTopology() {
         TopicExchange domainExchange = ExchangeBuilder.topicExchange(properties.exchange()).durable(true).build();
         TopicExchange deadLetterExchange = ExchangeBuilder.topicExchange(properties.deadLetterExchange()).durable(true).build();
         Queue fraudDecisionQueue = QueueBuilder
