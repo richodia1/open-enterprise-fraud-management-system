@@ -133,3 +133,5 @@ oefms:
     security:
       enabled: "${OEFMS_GATEWAY_SECURITY_ENABLED:false}"
       jwk-set-uri: "${OEFMS_GATEWAY_AUTH_JWK_SET_URI:http://localhost:8085/oauth2/jwks}"
+    cors:
+      allowed-origins: "${OEFMS_GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}"
