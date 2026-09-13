@@ -10,6 +10,8 @@ Fraud decisioning should support configurable rule-based, ML-based, and hybrid m
 
 The legacy .NET CRUD surfaces are being reintroduced as explicit Java/Spring contracts. The first pass is a contract-first management-resource API so Swagger can show UI-facing resources while persistence and workflow depth are added incrementally.
 
+Shared persistence foundations live in `shared/common-persistence`, but concrete business entities remain inside the owning service. This keeps repeated technical columns consistent without coupling service-owned database models.
+
 The foundation sequence is tracked in [Phase 1 Foundation](phase-1-foundation.md). The next domain sequence is tracked in [Phase 2 Domain Foundation](phase-2-domain-foundation.md). Shared API and event shapes are tracked in [Service Contracts](service-contracts.md).
 
 ## Service Package Layout
