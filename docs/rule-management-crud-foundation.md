@@ -24,6 +24,19 @@ All resources are in memory for now. This is intentional for the MVP contract ph
 - Contributors can review the resource boundaries before database migrations are added.
 - Multi-database support can be handled later through the shared persistence pattern.
 
+## Package Layout
+
+Rule Management now follows the same clean package shape expected for future services:
+
+| Package | Responsibility |
+| --- | --- |
+| `controller` | REST controllers and HTTP error handling. |
+| `dto` | Request payloads accepted by the REST API. |
+| `entity` | Service-owned domain records used by the admin configuration API. |
+| `enums` | Service-owned lifecycle and audit enums. |
+| `repository` | Repository contracts, in-memory repository adapters, and seed data. |
+| `service` | Business workflow, validation orchestration, approval flow, and audit writes. |
+
 ## Swagger Groups
 
 Run the Rule Management Service and open:

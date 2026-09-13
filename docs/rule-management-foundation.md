@@ -4,6 +4,19 @@ Rule Management now exposes the first configurable rule catalog for OEFMS.
 
 This slice provides shared rule contracts, seeded baseline rule definitions, validation, in-memory repositories, REST endpoints, and the first UI-facing configuration CRUD surface. It does not add rule persistence, authoring UI, or live Fraud Detection integration yet.
 
+## Code Layout
+
+The service code is separated by responsibility:
+
+| Package | Responsibility |
+| --- | --- |
+| `controller` | Versioned REST API endpoints and HTTP error mapping. |
+| `dto` | Create, update, approval, and audit request payloads. |
+| `entity` | Rule admin configuration records owned by Rule Management. |
+| `enums` | Approval and audit lifecycle values. |
+| `repository` | Repository ports, in-memory adapters, and baseline seed rules. |
+| `service` | Rule catalog workflow, maker-checker decisions, validation, and audit trail behavior. |
+
 ## Service Endpoint
 
 Rule Management Service exposes:
