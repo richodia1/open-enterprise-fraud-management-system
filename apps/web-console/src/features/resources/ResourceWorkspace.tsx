@@ -101,6 +101,7 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
   }, [area.preferredTypes, typesQuery.data])
 
   const selectedType = resourceType ?? localSelectedType ?? orderedTypes[0]?.resourceType ?? ''
+  const recordsQueryKey = ['resources', area.basePath, selectedType, tenantId, filterText, activeOnly] as const
 
   const recordsQuery = useQuery({
     enabled: Boolean(selectedType),
@@ -112,7 +113,7 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
           tenantId: tenantId || undefined,
         },
       }),
-    queryKey: ['resources', area.basePath, selectedType, tenantId, filterText, activeOnly],
+    queryKey: recordsQueryKey,
   })
 
   const saveMutation = useMutation({
@@ -124,10 +125,6 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
           method: record ? 'PUT' : 'POST',
         },
       ),
-    onSuccess: async () => {
-      setDialogOpen(false)
-      await queryClient.invalidateQueries({ queryKey: ['resources', area.basePath] })
-    },
   })
 
   const deleteMutation = useMutation({
@@ -143,9 +140,17 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
   const selectedDescriptor = orderedTypes.find((type) => type.resourceType === selectedType)
   const records = recordsQuery.data ?? []
 
+  function closeDialog() {
+    setDialogOpen(false)
+    setEditingRecord(null)
+    setFormError(null)
+    saveMutation.reset()
+  }
+
   function openCreateDialog() {
     setEditingRecord(null)
     setFormError(null)
+    saveMutation.reset()
     form.reset({ ...defaultFormValues, tenantId })
     setDialogOpen(true)
   }
@@ -153,6 +158,7 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
   function openEditDialog(record: ManagedResourceRecord) {
     setEditingRecord(record)
     setFormError(null)
+    saveMutation.reset()
     form.reset({
       active: record.active,
       attributesText: JSON.stringify(record.attributes ?? {}, null, 2),
@@ -175,18 +181,24 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
       return
     }
 
-    await saveMutation.mutateAsync({
-      payload: {
-        active: values.active,
-        attributes,
-        code: values.code.trim(),
-        description: values.description.trim(),
-        name: values.name.trim(),
-        tenantId: values.tenantId.trim(),
-        updatedBy: values.updatedBy.trim(),
-      },
-      record: editingRecord,
-    })
+    try {
+      await saveMutation.mutateAsync({
+        payload: {
+          active: values.active,
+          attributes,
+          code: values.code.trim(),
+          description: values.description.trim(),
+          name: values.name.trim(),
+          tenantId: values.tenantId.trim(),
+          updatedBy: values.updatedBy.trim(),
+        },
+        record: editingRecord,
+      })
+      closeDialog()
+      void queryClient.invalidateQueries({ queryKey: ['resources', area.basePath, selectedType] })
+    } catch {
+      // The mutation error is rendered in the dialog.
+    }
   }
 
   return (
@@ -307,7 +319,7 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
       ) : null}
       {!selectedType && !recordsQuery.isLoading ? <EmptyState label="No resource type selected." /> : null}
 
-      <Dialog fullWidth maxWidth="md" onClose={() => setDialogOpen(false)} open={dialogOpen}>
+      <Dialog fullWidth maxWidth="md" onClose={closeDialog} open={dialogOpen}>
         <DialogTitle>{editingRecord ? 'Edit Resource' : 'Add Resource'}</DialogTitle>
         <Box component="form" onSubmit={form.handleSubmit(onSubmit)}>
           <DialogContent>
@@ -379,7 +391,7 @@ export function ResourceWorkspace({ area }: { area: ResourceArea }) {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)} startIcon={<X size={18} />}>
+            <Button onClick={closeDialog} startIcon={<X size={18} />}>
               Cancel
             </Button>
             <Button disabled={saveMutation.isPending} startIcon={<Save size={18} />} type="submit" variant="contained">
