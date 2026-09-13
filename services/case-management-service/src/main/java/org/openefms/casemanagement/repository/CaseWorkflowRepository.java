@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.openefms.casemanagement.entity.AlertRecord;
+import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.entity.CaseWorkflowRecord;
 
@@ -17,4 +18,8 @@ public interface CaseWorkflowRepository {
     public Optional<CaseRecord> findCaseById(UUID caseId);
 
     public List<CaseRecord> findCasesByTenantId(String tenantId);
+
+    public CaseActionRecord saveCaseAction(CaseRecord caseFile, CaseActionRecord action);
+
+    public List<CaseActionRecord> findCaseActionsByCaseId(UUID caseId);
 }

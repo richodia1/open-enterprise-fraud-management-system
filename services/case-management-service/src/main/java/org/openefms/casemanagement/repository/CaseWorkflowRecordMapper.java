@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.openefms.casemanagement.entity.AlertRecord;
+import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.entity.FraudAlertEntity;
+import org.openefms.casemanagement.entity.FraudCaseActionEntity;
 import org.openefms.casemanagement.entity.FraudCaseEntity;
 import org.openefms.casemanagement.enums.AlertStatus;
 import org.openefms.casemanagement.enums.CaseStatus;
@@ -52,6 +54,10 @@ public class CaseWorkflowRecordMapper {
                 caseFile.title(),
                 caseFile.summary(),
                 caseFile.createdAt(),
+                null,
+                null,
+                caseFile.createdAt(),
+                null,
                 metadata.eventType(),
                 metadata.eventId(),
                 metadata.correlationId(),
@@ -93,6 +99,10 @@ public class CaseWorkflowRecordMapper {
         entity.title(record.title());
         entity.summary(record.summary());
         entity.createdAt(record.createdAt());
+        entity.assigneeId(record.assigneeId());
+        entity.assignedAt(record.assignedAt());
+        entity.updatedAt(record.updatedAt());
+        entity.closedAt(record.closedAt());
         entity.eventType(record.eventType());
         entity.eventId(record.eventId());
         entity.correlationId(record.correlationId());
@@ -134,11 +144,46 @@ public class CaseWorkflowRecordMapper {
                 entity.title(),
                 entity.summary(),
                 entity.createdAt(),
+                entity.assigneeId(),
+                entity.assignedAt(),
+                entity.updatedAt(),
+                entity.closedAt(),
                 entity.eventType(),
                 entity.eventId(),
                 entity.correlationId(),
                 entity.causationId(),
                 entity.traceId(),
+                fromText(entity.attributesText()));
+    }
+
+    public FraudCaseActionEntity toEntity(CaseActionRecord record) {
+        FraudCaseActionEntity entity = new FraudCaseActionEntity();
+        entity.caseActionId(record.caseActionId());
+        entity.caseId(record.caseId());
+        entity.tenantId(record.tenantId());
+        entity.actionType(record.actionType());
+        entity.actorId(record.actorId());
+        entity.note(record.note());
+        entity.fromStatus(record.fromStatus());
+        entity.toStatus(record.toStatus());
+        entity.assigneeId(record.assigneeId());
+        entity.occurredAt(record.occurredAt());
+        entity.attributesText(toText(record.attributes()));
+        return entity;
+    }
+
+    public CaseActionRecord toRecord(FraudCaseActionEntity entity) {
+        return new CaseActionRecord(
+                entity.caseActionId(),
+                entity.caseId(),
+                entity.tenantId(),
+                entity.actionType(),
+                entity.actorId(),
+                entity.note(),
+                entity.fromStatus(),
+                entity.toStatus(),
+                entity.assigneeId(),
+                entity.occurredAt(),
                 fromText(entity.attributesText()));
     }
 

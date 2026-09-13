@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.openefms.casemanagement.entity.AlertRecord;
+import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.entity.CaseWorkflowRecord;
 import org.springframework.stereotype.Repository;
@@ -12,14 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class JpaCaseWorkflowRepository implements CaseWorkflowRepository {
     private final SpringDataFraudAlertRepository alertRepository;
+    private final SpringDataFraudCaseActionRepository actionRepository;
     private final SpringDataFraudCaseRepository caseRepository;
     private final CaseWorkflowRecordMapper mapper;
 
     public JpaCaseWorkflowRepository(
             SpringDataFraudAlertRepository alertRepository,
+            SpringDataFraudCaseActionRepository actionRepository,
             SpringDataFraudCaseRepository caseRepository,
             CaseWorkflowRecordMapper mapper) {
         this.alertRepository = alertRepository;
+        this.actionRepository = actionRepository;
         this.caseRepository = caseRepository;
         this.mapper = mapper;
     }
@@ -56,6 +60,21 @@ public class JpaCaseWorkflowRepository implements CaseWorkflowRepository {
     @Transactional(readOnly = true)
     public List<CaseRecord> findCasesByTenantId(String tenantId) {
         return caseRepository.findByTenantIdOrderByCreatedAtDesc(tenantId).stream()
+                .map(mapper::toRecord)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public CaseActionRecord saveCaseAction(CaseRecord caseFile, CaseActionRecord action) {
+        caseRepository.save(mapper.toEntity(caseFile));
+        return mapper.toRecord(actionRepository.save(mapper.toEntity(action)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CaseActionRecord> findCaseActionsByCaseId(UUID caseId) {
+        return actionRepository.findByCaseIdOrderByOccurredAtAsc(caseId).stream()
                 .map(mapper::toRecord)
                 .toList();
     }

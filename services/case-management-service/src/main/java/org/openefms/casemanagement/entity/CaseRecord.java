@@ -18,6 +18,10 @@ public record CaseRecord(
         String title,
         String summary,
         OffsetDateTime createdAt,
+        String assigneeId,
+        OffsetDateTime assignedAt,
+        OffsetDateTime updatedAt,
+        OffsetDateTime closedAt,
         String eventType,
         UUID eventId,
         String correlationId,
@@ -36,6 +40,47 @@ public record CaseRecord(
         Objects.requireNonNull(title, "title must not be null");
         Objects.requireNonNull(createdAt, "createdAt must not be null");
         summary = summary == null ? "" : summary;
+        updatedAt = updatedAt == null ? createdAt : updatedAt;
         attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
+    }
+
+    public CaseRecord(
+            UUID caseId,
+            UUID alertId,
+            UUID transactionId,
+            UUID decisionId,
+            String tenantId,
+            CasePriority priority,
+            CaseStatus status,
+            String title,
+            String summary,
+            OffsetDateTime createdAt,
+            String eventType,
+            UUID eventId,
+            String correlationId,
+            String causationId,
+            String traceId,
+            Map<String, String> attributes) {
+        this(
+                caseId,
+                alertId,
+                transactionId,
+                decisionId,
+                tenantId,
+                priority,
+                status,
+                title,
+                summary,
+                createdAt,
+                null,
+                null,
+                createdAt,
+                null,
+                eventType,
+                eventId,
+                correlationId,
+                causationId,
+                traceId,
+                attributes);
     }
 }

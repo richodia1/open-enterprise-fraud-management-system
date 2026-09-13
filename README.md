@@ -178,7 +178,7 @@ Case Management Service presents the explanation to investigators
 Investigator confirms, rejects, or escalates the fraud outcome
 ```
 
-Ingestion Management transaction receipt persistence, Fraud Detection decision persistence, Case Management alert/case persistence, and Audit Logging event persistence have been added. Production fraud policy, full investigation workflow, durable explanation storage, and the frontend analyst console have not been added yet.
+Ingestion Management transaction receipt persistence, Fraud Detection decision persistence, Case Management alert/case persistence, first case lifecycle actions, Audit Logging event persistence, and the first frontend analyst console have been added. Production fraud policy, the full investigation workflow, durable explanation storage, and authenticated UI sessions have not been added yet.
 
 See [Explainable AI](docs/explainable-ai.md) for the planned decision-support boundary.
 
@@ -201,6 +201,8 @@ See [Explanation Decision Support](docs/explanation-decision-support.md) for the
 See [Case Alert Audit Flow](docs/case-alert-audit-flow.md) for the first investigator case handoff and audit event path.
 
 See [Case Alert Persistence Foundation](docs/case-alert-persistence-foundation.md) for the first durable alert and case records.
+
+See [Case Lifecycle Actions](docs/case-lifecycle-actions.md) for the first investigator assignment, status, final disposition, and lifecycle-history contracts.
 
 See [Audit Log Persistence Foundation](docs/audit-log-persistence-foundation.md) for the first durable audit event records.
 

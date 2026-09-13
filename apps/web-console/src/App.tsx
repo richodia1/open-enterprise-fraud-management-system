@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './app/AppShell'
 import { AlertsPage } from './features/cases/AlertsPage'
+import { CaseDetailPage } from './features/cases/CaseDetailPage'
 import { CasesPage } from './features/cases/CasesPage'
 import { AuditLogsPage } from './features/audit/AuditLogsPage'
 import { ConfigurationPage } from './features/configuration/ConfigurationPage'
@@ -17,6 +18,7 @@ function App() {
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
         <Route path="cases" element={<CasesPage />} />
+        <Route path="cases/:caseId" element={<CaseDetailPage />} />
         <Route path="alerts" element={<AlertsPage />} />
         <Route path="rules" element={<RulesPage />} />
         <Route path="configuration" element={<ConfigurationPage />} />

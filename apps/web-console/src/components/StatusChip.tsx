@@ -21,13 +21,13 @@ function labelFor(value?: boolean | string) {
 
 function colorFor(value: string): ChipColor {
   const normalized = value.toLowerCase()
-  if (['active', 'approved', 'allow', 'low', 'open', 'true', 'up'].includes(normalized)) {
+  if (['active', 'approved', 'allow', 'false_positive', 'low', 'open', 'true', 'up'].includes(normalized)) {
     return 'success'
   }
-  if (['block', 'blocked', 'critical', 'down', 'error', 'failed', 'fraud', 'high'].includes(normalized)) {
+  if (['block', 'blocked', 'critical', 'down', 'error', 'failed', 'fraud', 'fraud_confirmed', 'high'].includes(normalized)) {
     return 'error'
   }
-  if (['draft', 'medium', 'pending', 'review', 'warning'].includes(normalized)) {
+  if (['draft', 'escalated', 'in_review', 'medium', 'pending', 'review', 'warning'].includes(normalized)) {
     return 'warning'
   }
   if (['closed', 'disabled', 'inactive'].includes(normalized)) {

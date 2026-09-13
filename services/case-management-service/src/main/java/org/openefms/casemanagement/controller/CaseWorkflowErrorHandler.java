@@ -2,6 +2,7 @@ package org.openefms.casemanagement.controller;
 
 import org.openefms.casemanagement.service.CaseWorkflowPersistenceException;
 import org.openefms.casemanagement.service.CaseWorkflowRecordNotFoundException;
+import org.openefms.casemanagement.service.InvalidCaseLifecycleActionException;
 import org.openefms.casemanagement.service.InvalidCaseWorkflowQueryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -22,6 +23,14 @@ public class CaseWorkflowErrorHandler {
     public ResponseEntity<ProblemDetail> handleInvalidQuery(InvalidCaseWorkflowQueryException exception) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         problem.setTitle("Invalid case workflow query");
+        problem.setProperty("errors", exception.errors());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(InvalidCaseLifecycleActionException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidLifecycleAction(InvalidCaseLifecycleActionException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problem.setTitle("Invalid case lifecycle action");
         problem.setProperty("errors", exception.errors());
         return ResponseEntity.badRequest().body(problem);
     }
