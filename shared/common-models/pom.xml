@@ -13,4 +13,12 @@
 
     <artifactId>common-models</artifactId>
     <name>Common Models</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
