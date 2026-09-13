@@ -70,6 +70,17 @@ Auth variables belong to the Auth Service and are currently used for local boots
 | `OEFMS_AUTH_CLIENT_REQUIRE_PROOF_KEY` | Requires PKCE for supported flows. | `true` |
 | `OEFMS_AUTH_CLIENT_REQUIRE_AUTHORIZATION_CONSENT` | Requires user consent for authorization-code flows. | `true` |
 
+## Case Management Variables
+
+Case Management reads active assignees from Identity Service so investigators can assign or escalate cases to tenant users without duplicating identity records.
+
+| Variable | Purpose | Local Default |
+| --- | --- | --- |
+| `OEFMS_CASE_IDENTITY_SERVICE_URL` | Identity Service base URL used by Case Management. | `http://localhost:8087` |
+| `OEFMS_CASE_IDENTITY_USER_RESOURCE_TYPE` | Identity resource type used as the assignable user directory. | `CUSTOM_USERS` |
+| `OEFMS_CASE_IDENTITY_REQUEST_TIMEOUT` | Timeout for Identity directory calls. | `PT5S` |
+| `OEFMS_CASE_VALIDATE_ASSIGNEES` | Rejects assignment when `assigneeId` is not an active Identity user for the case tenant. | `true` |
+
 ## RabbitMQ Variables
 
 RabbitMQ is the default local broker for asynchronous events.

@@ -55,6 +55,7 @@ Management services expose their legacy CRUD contract foundation under `/api/v1/
 Case Management also exposes the first investigator lifecycle contracts:
 
 ```text
+GET   /api/v1/cases/assignees?tenantId=tenant-a
 GET   /api/v1/cases/{caseId}/actions
 PATCH /api/v1/cases/{caseId}/assignment
 PATCH /api/v1/cases/{caseId}/status

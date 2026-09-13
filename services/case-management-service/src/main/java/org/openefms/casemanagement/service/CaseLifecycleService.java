@@ -20,10 +20,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class CaseLifecycleService {
     private final CaseWorkflowRepository repository;
+    private final CaseAssignmentDirectory assignmentDirectory;
     private final Clock clock;
 
-    public CaseLifecycleService(CaseWorkflowRepository repository, Clock clock) {
+    public CaseLifecycleService(
+            CaseWorkflowRepository repository,
+            CaseAssignmentDirectory assignmentDirectory,
+            Clock clock) {
         this.repository = repository;
+        this.assignmentDirectory = assignmentDirectory;
         this.clock = clock;
     }
 
@@ -32,6 +37,7 @@ public class CaseLifecycleService {
         String assigneeId = requiredText(request == null ? null : request.assigneeId(), "assigneeId");
         String actorId = requiredText(request == null ? null : request.actorId(), "actorId");
         assertMutable(current);
+        assignmentDirectory.assertAssignable(current.tenantId(), assigneeId);
 
         OffsetDateTime occurredAt = OffsetDateTime.now(clock);
         CaseStatus nextStatus = current.status() == CaseStatus.OPEN ? CaseStatus.IN_REVIEW : current.status();

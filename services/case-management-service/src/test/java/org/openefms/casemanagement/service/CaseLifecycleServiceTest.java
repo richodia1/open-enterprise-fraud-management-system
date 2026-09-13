@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.openefms.casemanagement.dto.CaseAssignableUser;
 import org.openefms.casemanagement.dto.CaseAssignmentRequest;
 import org.openefms.casemanagement.dto.CaseStatusUpdateRequest;
 import org.openefms.casemanagement.entity.AlertRecord;
@@ -36,7 +37,7 @@ class CaseLifecycleServiceTest {
     @Test
     void assignsOpenCaseAndMovesItIntoReview() {
         CapturingCaseWorkflowRepository repository = new CapturingCaseWorkflowRepository(caseRecord(CaseStatus.OPEN));
-        CaseLifecycleService service = new CaseLifecycleService(repository, FIXED_CLOCK);
+        CaseLifecycleService service = new CaseLifecycleService(repository, assigneeDirectory(), FIXED_CLOCK);
 
         var response = service.assign(CASE_ID, new CaseAssignmentRequest(
                 " investigator-1 ",
@@ -60,7 +61,7 @@ class CaseLifecycleServiceTest {
     void recordsFinalFraudDispositionAndClosesCase() {
         CapturingCaseWorkflowRepository repository = new CapturingCaseWorkflowRepository(
                 caseRecord(CaseStatus.IN_REVIEW, "investigator-1", now().minusHours(1), now().minusHours(1), null));
-        CaseLifecycleService service = new CaseLifecycleService(repository, FIXED_CLOCK);
+        CaseLifecycleService service = new CaseLifecycleService(repository, assigneeDirectory(), FIXED_CLOCK);
 
         var response = service.updateStatus(CASE_ID, new CaseStatusUpdateRequest(
                 CaseStatus.FRAUD_CONFIRMED,
@@ -81,7 +82,10 @@ class CaseLifecycleServiceTest {
     @Test
     void rejectsBlankActorsAndTerminalCases() {
         CaseLifecycleService openCaseService =
-                new CaseLifecycleService(new CapturingCaseWorkflowRepository(caseRecord(CaseStatus.OPEN)), FIXED_CLOCK);
+                new CaseLifecycleService(
+                        new CapturingCaseWorkflowRepository(caseRecord(CaseStatus.OPEN)),
+                        assigneeDirectory(),
+                        FIXED_CLOCK);
 
         assertThrows(InvalidCaseLifecycleActionException.class, () -> openCaseService.assign(
                 CASE_ID,
@@ -97,6 +101,7 @@ class CaseLifecycleServiceTest {
                         now().minusHours(1),
                         now().minusMinutes(10),
                         now().minusMinutes(10))),
+                assigneeDirectory(),
                 FIXED_CLOCK);
 
         assertThrows(InvalidCaseLifecycleActionException.class, () -> closedCaseService.updateStatus(
@@ -106,9 +111,24 @@ class CaseLifecycleServiceTest {
 
     @Test
     void reportsMissingCaseBeforeReadingHistory() {
-        CaseLifecycleService service = new CaseLifecycleService(new CapturingCaseWorkflowRepository(null), FIXED_CLOCK);
+        CaseLifecycleService service = new CaseLifecycleService(
+                new CapturingCaseWorkflowRepository(null),
+                assigneeDirectory(),
+                FIXED_CLOCK);
 
         assertThrows(CaseWorkflowRecordNotFoundException.class, () -> service.history(CASE_ID));
+    }
+
+    @Test
+    void rejectsAssignmentWhenIdentityDirectoryDoesNotContainAssignee() {
+        CaseLifecycleService service = new CaseLifecycleService(
+                new CapturingCaseWorkflowRepository(caseRecord(CaseStatus.OPEN)),
+                new StaticCaseAssignmentDirectory(List.of()),
+                FIXED_CLOCK);
+
+        assertThrows(InvalidCaseLifecycleActionException.class, () -> service.assign(
+                CASE_ID,
+                new CaseAssignmentRequest("unknown-user", "lead-analyst", "", Map.of())));
     }
 
     private OffsetDateTime now() {
@@ -146,6 +166,25 @@ class CaseLifecycleServiceTest {
                 "causation-1",
                 "trace-1",
                 Map.of("riskBand", "HIGH"));
+    }
+
+    private CaseAssignmentDirectory assigneeDirectory() {
+        return new StaticCaseAssignmentDirectory(List.of(new CaseAssignableUser(
+                "investigator-1",
+                "tenant-a",
+                "investigator-1",
+                "Fraud Investigator One",
+                "investigator1@example.com",
+                List.of("FRAUD_ANALYST"),
+                true,
+                Map.of())));
+    }
+
+    private record StaticCaseAssignmentDirectory(List<CaseAssignableUser> users) implements CaseAssignmentDirectory {
+        @Override
+        public List<CaseAssignableUser> listAssignableUsers(String tenantId, String filterText) {
+            return users;
+        }
     }
 
     private static final class CapturingCaseWorkflowRepository implements CaseWorkflowRepository {

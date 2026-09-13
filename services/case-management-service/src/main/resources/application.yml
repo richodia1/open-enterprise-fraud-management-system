@@ -36,6 +36,12 @@ management:
         include: health,info
 
 oefms:
+  case-management:
+    identity:
+      base-url: "${OEFMS_CASE_IDENTITY_SERVICE_URL:http://localhost:8087}"
+      user-resource-type: "${OEFMS_CASE_IDENTITY_USER_RESOURCE_TYPE:CUSTOM_USERS}"
+      request-timeout: "${OEFMS_CASE_IDENTITY_REQUEST_TIMEOUT:PT5S}"
+      validate-assignees: "${OEFMS_CASE_VALIDATE_ASSIGNEES:true}"
   rabbitmq:
     exchange: "${OEFMS_RABBITMQ_EXCHANGE:oefms.events}"
     dead-letter-exchange: "${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:oefms.events.dlx}"

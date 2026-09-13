@@ -11,6 +11,7 @@ Swagger remains useful for contract inspection, but the product also needs a UI 
 - Dashboard for gateway health, case volume, alert volume, rules, and recent audit traceability.
 - Cases and alerts views backed by the current case-management contracts.
 - Case detail view with assignment, status, final disposition, and lifecycle history.
+- Identity-backed case assignee selector for investigator assignment and escalation.
 - Rule view backed by the current rule-management contract.
 - Generic CRUD workspaces for configuration, list, identity, and report-management resource contracts.
 - Identity provider visibility for tenant identity integrations.
