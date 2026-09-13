@@ -45,7 +45,7 @@ spring:
             - id: rule-management-service
               uri: "${OEFMS_GATEWAY_RULE_SERVICE_URL:http://localhost:8082}"
               predicates:
-                - Path=/api/v1/rules,/api/v1/rules/**
+                - Path=/api/v1/rules,/api/v1/rules/**,/api/v1/rule-categories,/api/v1/rule-categories/**,/api/v1/rule-escalation-users,/api/v1/rule-escalation-users/**,/api/v1/rule-definitions,/api/v1/rule-definitions/**,/api/v1/rule-audit-trails,/api/v1/rule-audit-trails/**,/api/v1/rule-approvals,/api/v1/rule-approvals/**
             - id: case-management-service-v1
               uri: "${OEFMS_GATEWAY_CASE_SERVICE_URL:http://localhost:8084}"
               predicates:

@@ -10,4 +10,6 @@ interface RuleDefinitionRepository {
     Optional<FraudRuleDefinition> findByTenantIdAndRuleCode(String tenantId, String ruleCode);
 
     FraudRuleDefinition save(FraudRuleDefinition definition);
+
+    void delete(String tenantId, String ruleCode);
 }

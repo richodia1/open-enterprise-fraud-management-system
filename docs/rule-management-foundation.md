@@ -2,7 +2,7 @@
 
 Rule Management now exposes the first configurable rule catalog for OEFMS.
 
-This slice is deliberately small. It provides shared rule contracts, seeded baseline rule definitions, validation, an in-memory repository, and REST endpoints. It does not add rule persistence, approval workflow, authoring UI, or live Fraud Detection integration yet.
+This slice provides shared rule contracts, seeded baseline rule definitions, validation, in-memory repositories, REST endpoints, and the first UI-facing configuration CRUD surface. It does not add rule persistence, authoring UI, or live Fraud Detection integration yet.
 
 ## Service Endpoint
 
@@ -14,6 +14,31 @@ GET /api/v1/rules/{ruleCode}
 POST /api/v1/rules
 PUT /api/v1/rules/{ruleCode}
 PATCH /api/v1/rules/{ruleCode}/status
+DELETE /api/v1/rules/{ruleCode}
+POST /api/v1/rules/{ruleCode}/submit-for-approval
+GET /api/v1/rule-approvals/pending
+POST /api/v1/rule-approvals/{approvalId}/approve
+POST /api/v1/rule-approvals/{approvalId}/reject
+GET /api/v1/rule-categories
+GET /api/v1/rule-categories/{id}
+POST /api/v1/rule-categories
+PUT /api/v1/rule-categories/{id}
+DELETE /api/v1/rule-categories/{id}
+GET /api/v1/rule-escalation-users
+GET /api/v1/rule-escalation-users/{id}
+POST /api/v1/rule-escalation-users
+PUT /api/v1/rule-escalation-users/{id}
+DELETE /api/v1/rule-escalation-users/{id}
+GET /api/v1/rule-definitions
+GET /api/v1/rule-definitions/{id}
+POST /api/v1/rule-definitions
+PUT /api/v1/rule-definitions/{id}
+DELETE /api/v1/rule-definitions/{id}
+GET /api/v1/rule-audit-trails
+GET /api/v1/rule-audit-trails/{id}
+POST /api/v1/rule-audit-trails
+PUT /api/v1/rule-audit-trails/{id}
+DELETE /api/v1/rule-audit-trails/{id}
 ```
 
 The default tenant is:
@@ -92,9 +117,89 @@ Updating only the status uses:
 }
 ```
 
+Submitting a rule into the maker-checker workflow uses:
+
+```json
+{
+  "tenantId": "global",
+  "requestedAction": "ACTIVATE",
+  "requestedBy": "maker",
+  "note": "Reactivate the threshold rule after governance review."
+}
+```
+
+Approving or rejecting a pending approval uses:
+
+```json
+{
+  "decidedBy": "checker",
+  "decisionNote": "Approved for monitoring."
+}
+```
+
+Rule category configuration uses:
+
+```json
+{
+  "tenantId": "global",
+  "name": "Sanctions",
+  "description": "Sanctions screening rules.",
+  "updatedBy": "analyst"
+}
+```
+
+Rule escalation user configuration uses:
+
+```json
+{
+  "tenantId": "global",
+  "ruleCode": "HIGH_VALUE_AMOUNT",
+  "email": "fraud.team@example.com",
+  "userId": "user-001",
+  "name": "Fraud Team",
+  "updatedBy": "analyst"
+}
+```
+
+Rule condition definitions map the older rule-builder condition rows into the Java API:
+
+```json
+{
+  "tenantId": "global",
+  "ruleCode": "HIGH_VALUE_AMOUNT",
+  "operator": "GREATER_THAN",
+  "datapointValue": "10000",
+  "groupId": "group-1",
+  "groupConnector": "AND",
+  "sourceDataPointId": "source-amount",
+  "sourceDataPointCode": "TRANSACTION_AMOUNT",
+  "destinationDataPointCode": "CONFIGURED_LIMIT",
+  "datapointDataType": "Number",
+  "destinationDataType": "Number",
+  "updatedBy": "analyst"
+}
+```
+
+Manual audit entries are available for parity with the original admin screens:
+
+```json
+{
+  "tenantId": "global",
+  "ruleCode": "HIGH_VALUE_AMOUNT",
+  "action": "UPDATED",
+  "fromStatus": "DRAFT",
+  "toStatus": "ACTIVE",
+  "note": "Imported from governance board.",
+  "correlationId": "corr-001",
+  "createdBy": "analyst"
+}
+```
+
 ## Current Boundaries
 
-- Rule definitions are in memory and reset on restart.
+- Rule definitions and admin configuration resources are in memory and reset on restart.
+- The CRUD surface is intended to unblock Swagger inspection, UI design, and contract review before the persistence model is locked.
+- Audit-trail write/update/delete endpoints exist only for initial parity with the original admin service. A production implementation should favour append-only audit storage.
 - Fraud Detection still uses its local rule configuration and baseline rule engine.
 - The next rule-related step is to let Fraud Detection read active rule definitions through a service boundary or cached catalog adapter.
 - Persistence should be added inside Rule Management Service with its own Flyway migrations when the lifecycle model is settled.
