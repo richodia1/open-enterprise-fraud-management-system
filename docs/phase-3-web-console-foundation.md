@@ -83,7 +83,7 @@ System Health
 | --- | --- |
 | Dashboard | Show open cases, high-risk alerts, recent decisions, and system health. |
 | Cases | List fraud cases and filter by tenant, priority, status, transaction id, and date. |
-| Case Detail | Show case summary, alert, transaction reference, explanation, audit trail, and investigator actions. |
+| Case Detail | Show case summary, alert, transaction reference, explanation, audit trail, and investigator actions with Configuration-filtered assignment and escalation users. |
 | Alerts | Show generated alerts and whether they have become cases. |
 | Rules | Manage rules, categories, condition definitions, escalation users, approvals, and audit trails. |
 | Configuration | Manage global data points, data points, channels, event types, fraud types, and payload properties. |

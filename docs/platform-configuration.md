@@ -72,10 +72,17 @@ Auth variables belong to the Auth Service and are currently used for local boots
 
 ## Case Management Variables
 
-Case Management reads active assignees from Identity Service so investigators can assign or escalate cases to tenant users without duplicating identity records.
+Case Management reads active assignees from Identity Service and role policy from Configuration Management Service so investigators can assign or escalate cases without duplicating user or policy records.
 
 | Variable | Purpose | Local Default |
 | --- | --- | --- |
+| `OEFMS_CASE_CONFIGURATION_SERVICE_URL` | Configuration Management Service base URL used by Case Management. | `http://localhost:8088` |
+| `OEFMS_CASE_ASSIGNMENT_POLICY_RESOURCE_TYPE` | Configuration resource type containing assignment and escalation role policy. | `CASE_ASSIGNMENT_POLICIES` |
+| `OEFMS_CASE_CONFIGURATION_REQUEST_TIMEOUT` | Timeout for Configuration policy calls. | `PT5S` |
+| `OEFMS_CASE_CONFIGURATION_ENABLED` | Enables Configuration-backed case assignment policy lookup. | `true` |
+| `OEFMS_CASE_REQUIRE_ASSIGNMENT_POLICY` | Fails assignment lookup when Configuration policy is unavailable instead of using fallback roles. | `false` |
+| `OEFMS_CASE_FALLBACK_ASSIGNMENT_ROLES` | Fallback roles allowed to receive ordinary case assignments. | `FRAUD_ANALYST,FRAUD_SUPERVISOR` |
+| `OEFMS_CASE_FALLBACK_ESCALATION_ROLES` | Fallback roles allowed to receive escalated cases. | `FRAUD_SUPERVISOR,FRAUD_ESCALATION_REVIEWER,COMPLIANCE_OFFICER` |
 | `OEFMS_CASE_IDENTITY_SERVICE_URL` | Identity Service base URL used by Case Management. | `http://localhost:8087` |
 | `OEFMS_CASE_IDENTITY_USER_RESOURCE_TYPE` | Identity resource type used as the assignable user directory. | `CUSTOM_USERS` |
 | `OEFMS_CASE_IDENTITY_REQUEST_TIMEOUT` | Timeout for Identity directory calls. | `PT5S` |

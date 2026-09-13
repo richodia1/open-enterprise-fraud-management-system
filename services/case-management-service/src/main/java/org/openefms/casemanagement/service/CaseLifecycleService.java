@@ -13,6 +13,7 @@ import org.openefms.casemanagement.dto.CaseStatusUpdateRequest;
 import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.enums.CaseActionType;
+import org.openefms.casemanagement.enums.CaseAssignmentPurpose;
 import org.openefms.casemanagement.enums.CaseStatus;
 import org.openefms.casemanagement.repository.CaseWorkflowRepository;
 import org.springframework.stereotype.Service;
@@ -36,11 +37,14 @@ public class CaseLifecycleService {
         CaseRecord current = caseFile(caseId);
         String assigneeId = requiredText(request == null ? null : request.assigneeId(), "assigneeId");
         String actorId = requiredText(request == null ? null : request.actorId(), "actorId");
+        CaseAssignmentPurpose purpose = request == null || request.purpose() == null
+                ? CaseAssignmentPurpose.ASSIGNMENT
+                : request.purpose();
         assertMutable(current);
-        assignmentDirectory.assertAssignable(current.tenantId(), assigneeId);
+        assignmentDirectory.assertAssignable(current.tenantId(), assigneeId, purpose);
 
         OffsetDateTime occurredAt = OffsetDateTime.now(clock);
-        CaseStatus nextStatus = current.status() == CaseStatus.OPEN ? CaseStatus.IN_REVIEW : current.status();
+        CaseStatus nextStatus = nextAssignmentStatus(current.status(), purpose);
         CaseRecord updatedCase = withLifecycle(
                 current,
                 nextStatus,
@@ -59,7 +63,7 @@ public class CaseLifecycleService {
                 nextStatus,
                 assigneeId,
                 occurredAt,
-                attributes(request == null ? null : request.attributes()));
+                actionAttributes(request == null ? null : request.attributes(), purpose));
 
         return new CaseActionResponse(updatedCase, repository.saveCaseAction(updatedCase, action));
     }
@@ -154,6 +158,19 @@ public class CaseLifecycleService {
             }
         });
         return attributes;
+    }
+
+    private Map<String, String> actionAttributes(Map<String, String> source, CaseAssignmentPurpose purpose) {
+        Map<String, String> attributes = new LinkedHashMap<>(attributes(source));
+        attributes.put("purpose", purpose.name());
+        return Map.copyOf(attributes);
+    }
+
+    private CaseStatus nextAssignmentStatus(CaseStatus currentStatus, CaseAssignmentPurpose purpose) {
+        if (purpose == CaseAssignmentPurpose.ESCALATION) {
+            return CaseStatus.ESCALATED;
+        }
+        return currentStatus == CaseStatus.OPEN ? CaseStatus.IN_REVIEW : currentStatus;
     }
 
     private CaseRecord withLifecycle(

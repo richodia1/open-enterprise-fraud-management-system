@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import org.openefms.casemanagement.enums.CaseAssignmentPurpose;
 import org.openefms.common.models.management.ManagedResourceRecord;
 
 public record CaseAssignableUser(
@@ -13,6 +15,7 @@ public record CaseAssignableUser(
         String displayName,
         String email,
         List<String> roles,
+        Set<CaseAssignmentPurpose> eligiblePurposes,
         boolean active,
         Map<String, String> attributes
 ) {
@@ -25,7 +28,21 @@ public record CaseAssignableUser(
                 resource.name(),
                 firstPresent(attributes, "email", "mail", "userPrincipalName"),
                 roles(attributes),
+                Set.of(),
                 resource.active(),
+                attributes);
+    }
+
+    public CaseAssignableUser withEligiblePurposes(Set<CaseAssignmentPurpose> eligiblePurposes) {
+        return new CaseAssignableUser(
+                id,
+                tenantId,
+                code,
+                displayName,
+                email,
+                roles,
+                Set.copyOf(eligiblePurposes),
+                active,
                 attributes);
     }
 

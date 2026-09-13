@@ -37,6 +37,14 @@ management:
 
 oefms:
   case-management:
+    configuration:
+      base-url: "${OEFMS_CASE_CONFIGURATION_SERVICE_URL:http://localhost:8088}"
+      assignment-policy-resource-type: "${OEFMS_CASE_ASSIGNMENT_POLICY_RESOURCE_TYPE:CASE_ASSIGNMENT_POLICIES}"
+      request-timeout: "${OEFMS_CASE_CONFIGURATION_REQUEST_TIMEOUT:PT5S}"
+      enabled: "${OEFMS_CASE_CONFIGURATION_ENABLED:true}"
+      require-policy: "${OEFMS_CASE_REQUIRE_ASSIGNMENT_POLICY:false}"
+      fallback-assignment-roles: "${OEFMS_CASE_FALLBACK_ASSIGNMENT_ROLES:FRAUD_ANALYST,FRAUD_SUPERVISOR}"
+      fallback-escalation-roles: "${OEFMS_CASE_FALLBACK_ESCALATION_ROLES:FRAUD_SUPERVISOR,FRAUD_ESCALATION_REVIEWER,COMPLIANCE_OFFICER}"
     identity:
       base-url: "${OEFMS_CASE_IDENTITY_SERVICE_URL:http://localhost:8087}"
       user-resource-type: "${OEFMS_CASE_IDENTITY_USER_RESOURCE_TYPE:CUSTOM_USERS}"

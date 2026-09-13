@@ -55,10 +55,18 @@ Management services expose their legacy CRUD contract foundation under `/api/v1/
 Case Management also exposes the first investigator lifecycle contracts:
 
 ```text
-GET   /api/v1/cases/assignees?tenantId=tenant-a
+GET   /api/v1/cases/assignees?tenantId=tenant-a&purpose=ASSIGNMENT
+GET   /api/v1/cases/assignees?tenantId=tenant-a&purpose=ESCALATION
 GET   /api/v1/cases/{caseId}/actions
 PATCH /api/v1/cases/{caseId}/assignment
 PATCH /api/v1/cases/{caseId}/status
+```
+
+Configuration Management owns the tenant role policy used by those assignee endpoints:
+
+```text
+GET /api/v1/configuration-management/resources/CASE_ASSIGNMENT_POLICIES?tenantId=tenant-a&active=true
+GET /api/v1/configuration-management/resources/CASE_ESCALATION_POLICIES?tenantId=tenant-a&active=true
 ```
 
 Explainable AI exposes decision explanation and combined transaction feedback contracts:

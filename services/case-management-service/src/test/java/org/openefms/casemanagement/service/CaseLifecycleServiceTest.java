@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.openefms.casemanagement.dto.CaseAssignableUser;
@@ -22,6 +23,7 @@ import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
 import org.openefms.casemanagement.entity.CaseWorkflowRecord;
 import org.openefms.casemanagement.enums.CaseActionType;
+import org.openefms.casemanagement.enums.CaseAssignmentPurpose;
 import org.openefms.casemanagement.enums.CaseStatus;
 import org.openefms.casemanagement.repository.CaseWorkflowRepository;
 import org.openefms.common.models.casefile.CasePriority;
@@ -54,7 +56,29 @@ class CaseLifecycleServiceTest {
         assertEquals(CaseStatus.IN_REVIEW, response.action().toStatus());
         assertEquals("lead-analyst", response.action().actorId());
         assertEquals("Taking ownership", response.action().note());
+        assertEquals("ASSIGNMENT", response.action().attributes().get("purpose"));
         assertEquals("manual-review", response.action().attributes().get("queue"));
+    }
+
+    @Test
+    void escalationAssignmentMovesCaseIntoEscalatedState() {
+        CapturingCaseWorkflowRepository repository = new CapturingCaseWorkflowRepository(
+                caseRecord(CaseStatus.IN_REVIEW, "investigator-1", now().minusHours(1), now().minusHours(1), null));
+        CaseLifecycleService service = new CaseLifecycleService(repository, assigneeDirectory(), FIXED_CLOCK);
+
+        var response = service.assign(CASE_ID, new CaseAssignmentRequest(
+                "supervisor-1",
+                "lead-analyst",
+                "Escalating to supervisor.",
+                Map.of("queue", "supervisor-review"),
+                CaseAssignmentPurpose.ESCALATION));
+
+        assertEquals(CaseStatus.ESCALATED, response.caseFile().status());
+        assertEquals("supervisor-1", response.caseFile().assigneeId());
+        assertEquals(CaseStatus.IN_REVIEW, response.action().fromStatus());
+        assertEquals(CaseStatus.ESCALATED, response.action().toStatus());
+        assertEquals("ESCALATION", response.action().attributes().get("purpose"));
+        assertEquals("supervisor-review", response.action().attributes().get("queue"));
     }
 
     @Test
@@ -176,6 +200,16 @@ class CaseLifecycleServiceTest {
                 "Fraud Investigator One",
                 "investigator1@example.com",
                 List.of("FRAUD_ANALYST"),
+                Set.of(CaseAssignmentPurpose.ASSIGNMENT),
+                true,
+                Map.of()), new CaseAssignableUser(
+                "supervisor-1",
+                "tenant-a",
+                "supervisor-1",
+                "Fraud Supervisor One",
+                "supervisor1@example.com",
+                List.of("FRAUD_SUPERVISOR"),
+                Set.of(CaseAssignmentPurpose.ASSIGNMENT, CaseAssignmentPurpose.ESCALATION),
                 true,
                 Map.of())));
     }
@@ -184,6 +218,16 @@ class CaseLifecycleServiceTest {
         @Override
         public List<CaseAssignableUser> listAssignableUsers(String tenantId, String filterText) {
             return users;
+        }
+
+        @Override
+        public List<CaseAssignableUser> listAssignableUsers(
+                String tenantId,
+                String filterText,
+                CaseAssignmentPurpose purpose) {
+            return users.stream()
+                    .filter(user -> user.eligiblePurposes().contains(purpose))
+                    .toList();
         }
     }
 

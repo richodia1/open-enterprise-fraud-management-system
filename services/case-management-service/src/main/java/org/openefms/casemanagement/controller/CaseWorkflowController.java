@@ -9,6 +9,7 @@ import org.openefms.casemanagement.dto.CaseStatusUpdateRequest;
 import org.openefms.casemanagement.entity.AlertRecord;
 import org.openefms.casemanagement.entity.CaseActionRecord;
 import org.openefms.casemanagement.entity.CaseRecord;
+import org.openefms.casemanagement.enums.CaseAssignmentPurpose;
 import org.openefms.casemanagement.service.CaseAssignmentDirectory;
 import org.openefms.casemanagement.service.CaseLifecycleService;
 import org.openefms.casemanagement.service.CaseWorkflowQueryService;
@@ -60,8 +61,10 @@ public class CaseWorkflowController {
     @GetMapping(path = "/cases/assignees", params = "tenantId", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CaseAssignableUser> caseAssignees(
             @RequestParam String tenantId,
+            @RequestParam(required = false) CaseAssignmentPurpose purpose,
             @RequestParam(required = false) String filterText) {
-        return assignmentDirectory.listAssignableUsers(tenantId, filterText);
+        CaseAssignmentPurpose resolvedPurpose = purpose == null ? CaseAssignmentPurpose.ASSIGNMENT : purpose;
+        return assignmentDirectory.listAssignableUsers(tenantId, filterText, resolvedPurpose);
     }
 
     @PatchMapping(

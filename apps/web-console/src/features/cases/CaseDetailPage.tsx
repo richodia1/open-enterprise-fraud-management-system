@@ -14,17 +14,20 @@ import type {
   CaseActionRecord,
   CaseActionResponse,
   CaseAssignableUser,
+  CaseAssignmentPurpose,
   CaseRecord,
 } from '../../types/api'
 
 const terminalStatuses = new Set(['CLOSED', 'FALSE_POSITIVE', 'FRAUD_CONFIRMED'])
 const statusOptions = ['IN_REVIEW', 'ESCALATED', 'FRAUD_CONFIRMED', 'FALSE_POSITIVE', 'CLOSED']
+const assignmentPurposeOptions: CaseAssignmentPurpose[] = ['ASSIGNMENT', 'ESCALATION']
 
 export function CaseDetailPage() {
   const { caseId = '' } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [assigneeId, setAssigneeId] = useState('')
+  const [assignmentPurpose, setAssignmentPurpose] = useState<CaseAssignmentPurpose>('ASSIGNMENT')
   const [assignmentActorId, setAssignmentActorId] = useState('web-console')
   const [assignmentNote, setAssignmentNote] = useState('')
   const [status, setStatus] = useState('IN_REVIEW')
@@ -47,9 +50,9 @@ export function CaseDetailPage() {
     enabled: Boolean(caseFile?.tenantId) && !isTerminal,
     queryFn: () =>
       apiRequest<CaseAssignableUser[]>('/api/v1/cases/assignees', {
-        searchParams: { tenantId: caseFile?.tenantId },
+        searchParams: { purpose: assignmentPurpose, tenantId: caseFile?.tenantId },
       }),
-    queryKey: ['case-assignees', caseFile?.tenantId],
+    queryKey: ['case-assignees', caseFile?.tenantId, assignmentPurpose],
   })
 
   const refresh = () => {
@@ -70,6 +73,7 @@ export function CaseDetailPage() {
           actorId: assignmentActorId,
           assigneeId,
           note: assignmentNote,
+          purpose: assignmentPurpose,
         },
         method: 'PATCH',
       }),
@@ -177,9 +181,26 @@ export function CaseDetailPage() {
               {assigneesQuery.isError ? <ErrorState error={assigneesQuery.error} /> : null}
               {isTerminal ? <Alert severity="info">Terminal cases cannot be reassigned.</Alert> : null}
               {!isTerminal && !assigneesQuery.isLoading && !assigneesQuery.isError && assignees.length === 0 ? (
-                <Alert severity="warning">No active Identity users found for this tenant.</Alert>
+                <Alert severity="warning">No active Identity users match this case policy.</Alert>
               ) : null}
               <Stack spacing={1.5}>
+                <TextField
+                  disabled={isTerminal}
+                  label="Purpose"
+                  onChange={(event) => {
+                    setAssignmentPurpose(event.target.value as CaseAssignmentPurpose)
+                    setAssigneeId('')
+                  }}
+                  select
+                  size="small"
+                  value={assignmentPurpose}
+                >
+                  {assignmentPurposeOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {formatEnum(option)}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   disabled={isTerminal || assigneesQuery.isLoading || assigneesQuery.isError}
                   label="Assignee"
