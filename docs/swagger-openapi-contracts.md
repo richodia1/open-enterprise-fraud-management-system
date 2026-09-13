@@ -49,3 +49,5 @@ docker compose --env-file .env.example down
 The current API Gateway also exposes its own local contract. Downstream service Swagger UIs are intentionally opened on their direct service ports so contributors can inspect each service boundary while the platform is still in early MVP development.
 
 Auth Service protects production OAuth/OIDC flows, but its local Swagger and OpenAPI endpoints are public so contributors can inspect the bootstrap contract without logging in.
+
+Management services expose their legacy CRUD contract foundation under `/api/v1/{service}/resources`. See [Legacy CRUD Contract Map](legacy-crud-contracts.md) for the old-system resources covered by the first Java pass.
