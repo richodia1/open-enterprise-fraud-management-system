@@ -55,3 +55,9 @@ API Gateway
 Fraud decisions should be traceable. The Explainable AI Service is intended to produce investigator-facing decision support from rule hits, model signals, feature contributions, historical context, and audit trails. It should explain why a transaction is risky before a user finally confirms or rejects a fraud outcome.
 
 Future modules may include ML scoring, graph intelligence, device intelligence, and external integration adapters.
+
+## Web Console Direction
+
+The OEFMS Web Console should live under `apps/web-console` as a separate frontend app. It should use the API Gateway as its backend entry point, not individual service ports.
+
+The first UI phase should focus on operational screens for dashboard, cases, alerts, explanations, rules, configuration, lists, identity, audit logs, and reports. Swagger remains useful for API inspection, but the Web Console is the user-facing product surface.
