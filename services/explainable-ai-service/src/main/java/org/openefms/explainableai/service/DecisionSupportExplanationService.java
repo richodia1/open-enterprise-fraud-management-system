@@ -85,12 +85,16 @@ public class DecisionSupportExplanationService {
 
     private String summary(ExplanationRequest request, List<EvidenceItem> evidence) {
         String outcome = request.context().getOrDefault("decisionOutcome", "UNKNOWN");
+        String recommendedAction = request.context().getOrDefault("recommendedAction", "UNKNOWN");
         String riskBand = request.context().getOrDefault("riskBand", "UNKNOWN");
         String riskScore = request.context().getOrDefault("riskScore", "0.00");
+        String actionText = "UNKNOWN".equalsIgnoreCase(recommendedAction)
+                ? ""
+                : " Recommended action: " + recommendedAction + ".";
 
         if (evidence.size() == 1 && "BASELINE_DECISION".equals(evidence.getFirst().evidenceType())) {
             return "Decision " + outcome + " with " + riskBand + " risk score " + riskScore
-                    + ". No elevated rule or model evidence was supplied.";
+                    + "." + actionText + " No elevated rule or model evidence was supplied.";
         }
 
         String topEvidence = evidence.stream()
@@ -99,7 +103,7 @@ public class DecisionSupportExplanationService {
                 .reduce((left, right) -> left + ", " + right)
                 .orElse("available evidence");
         return "Decision " + outcome + " with " + riskBand + " risk score " + riskScore
-                + ". Key evidence: " + topEvidence + ".";
+                + "." + actionText + " Key evidence: " + topEvidence + ".";
     }
 
     private BigDecimal contributionOrZero(BigDecimal contribution) {

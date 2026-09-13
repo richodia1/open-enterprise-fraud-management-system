@@ -44,7 +44,8 @@ class DecisionSupportExplanationServiceTest {
         assertEquals(EXPLANATION_ID, response.explanationId());
         assertEquals(DECISION_ID, response.decisionId());
         assertEquals(TRANSACTION_ID, response.transactionId());
-        assertEquals("Decision REVIEW with MEDIUM risk score 0.60. Key evidence: High value amount, xgboost-baseline.",
+        assertEquals("Decision REVIEW with MEDIUM risk score 0.60. Recommended action: HOLD_FOR_MANUAL_REVIEW. "
+                        + "Key evidence: High value amount, xgboost-baseline.",
                 response.summary());
         assertEquals(2, response.evidence().size());
         assertEquals("RULE", response.evidence().getFirst().evidenceType());

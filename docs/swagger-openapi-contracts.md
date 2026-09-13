@@ -59,3 +59,10 @@ GET   /api/v1/cases/{caseId}/actions
 PATCH /api/v1/cases/{caseId}/assignment
 PATCH /api/v1/cases/{caseId}/status
 ```
+
+Explainable AI exposes decision explanation and combined transaction feedback contracts:
+
+```text
+POST /api/v1/explanations/fraud-decisions
+POST /api/v1/explanations/fraud-decisions/feedback
+```

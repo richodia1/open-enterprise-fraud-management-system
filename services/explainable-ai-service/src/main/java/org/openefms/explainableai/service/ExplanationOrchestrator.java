@@ -14,6 +14,7 @@ import org.openefms.common.events.fraud.FraudDecisionProducedEvent;
 import org.openefms.common.events.rabbitmq.RabbitMqTopology;
 import org.openefms.common.models.explanation.ExplanationRequest;
 import org.openefms.common.models.explanation.ExplanationResponse;
+import org.openefms.common.models.feedback.TransactionFraudFeedbackResponse;
 import org.openefms.common.models.fraud.FraudDecisionResponse;
 import org.openefms.explainableai.messaging.ExplainableAiRabbitMqProperties;
 import org.openefms.explainableai.messaging.ExplanationMessage;
@@ -41,7 +42,7 @@ public class ExplanationOrchestrator {
         Objects.requireNonNull(fraudDecisionEvent, "fraudDecisionEvent must not be null");
         FraudDecisionResponse decision = fraudDecisionEvent.payload().decision();
         OffsetDateTime explainedAt = OffsetDateTime.now(clock);
-        ExplanationResponse explanation = explanationService.explain(request(decision), explainedAt);
+        ExplanationResponse explanation = explain(decision, explainedAt);
         EventEnvelope<ExplanationPreparedEvent> envelope = new EventEnvelope<>(
                 explanationMetadata(fraudDecisionEvent.metadata(), explainedAt),
                 new ExplanationPreparedEvent(explanation));
@@ -50,6 +51,20 @@ public class ExplanationOrchestrator {
                 rabbitMqProperties.exchange(),
                 RabbitMqTopology.routingKeyFor(EventTypes.EXPLANATION_PREPARED),
                 envelope);
+    }
+
+    public ExplanationResponse explain(FraudDecisionResponse decision) {
+        return explain(decision, OffsetDateTime.now(clock));
+    }
+
+    public TransactionFraudFeedbackResponse feedback(FraudDecisionResponse decision) {
+        ExplanationResponse explanation = explain(decision);
+        return TransactionFraudFeedbackResponse.from(decision, explanation);
+    }
+
+    private ExplanationResponse explain(FraudDecisionResponse decision, OffsetDateTime explainedAt) {
+        Objects.requireNonNull(decision, "decision must not be null");
+        return explanationService.explain(request(decision), explainedAt);
     }
 
     private ExplanationRequest request(FraudDecisionResponse decision) {
