@@ -52,6 +52,7 @@ class DecisionSupportExplanationServiceTest {
         assertEquals("MODEL_SIGNAL", response.evidence().get(1).evidenceType());
         assertEquals("0.82", response.evidence().get(1).attributes().get("score"));
         assertEquals("2", response.attributes().get("evidenceCount"));
+        assertEquals("HOLD_FOR_MANUAL_REVIEW", response.attributes().get("recommendedAction"));
         assertEquals(EXPLAINED_AT, response.explainedAt());
     }
 
@@ -78,6 +79,7 @@ class DecisionSupportExplanationServiceTest {
                 Map.of(
                         "decisionMode", "RULES",
                         "decisionOutcome", "REVIEW",
+                        "recommendedAction", "HOLD_FOR_MANUAL_REVIEW",
                         "riskBand", "MEDIUM",
                         "riskScore", "0.60"));
     }

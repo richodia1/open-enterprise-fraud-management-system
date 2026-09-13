@@ -56,6 +56,7 @@ public class ExplanationOrchestrator {
         Map<String, String> context = new LinkedHashMap<>(decision.attributes());
         context.put("decisionMode", decision.mode().name());
         context.put("decisionOutcome", decision.outcome().name());
+        context.put("recommendedAction", decision.recommendedAction().name());
         context.put("riskBand", decision.riskScore().band().name());
         context.put("riskScore", decision.riskScore().value().toPlainString());
         if (decision.riskScore().reason() != null && !decision.riskScore().reason().isBlank()) {

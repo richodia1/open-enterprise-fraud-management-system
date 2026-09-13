@@ -31,6 +31,7 @@ public class FraudDecisionRecordMapper {
                 decision.tenantId(),
                 decision.mode(),
                 decision.outcome(),
+                decision.recommendedAction(),
                 decision.riskScore().value(),
                 decision.riskScore().band(),
                 decision.riskScore().reason(),
@@ -54,6 +55,7 @@ public class FraudDecisionRecordMapper {
         entity.tenantId(record.tenantId());
         entity.mode(record.mode());
         entity.outcome(record.outcome());
+        entity.recommendedAction(record.recommendedAction());
         entity.riskScoreValue(record.riskScoreValue());
         entity.riskBand(record.riskBand());
         entity.riskReason(record.riskReason());
@@ -78,6 +80,7 @@ public class FraudDecisionRecordMapper {
                 entity.tenantId(),
                 entity.mode(),
                 entity.outcome(),
+                entity.recommendedAction(),
                 entity.riskScoreValue(),
                 entity.riskBand(),
                 entity.riskReason(),

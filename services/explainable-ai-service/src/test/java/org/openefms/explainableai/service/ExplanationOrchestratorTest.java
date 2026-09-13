@@ -20,6 +20,7 @@ import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
 import org.openefms.common.models.fraud.FraudDecisionResponse;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.fraud.RiskBand;
 import org.openefms.common.models.fraud.RiskScore;
 import org.openefms.common.models.fraud.RuleHit;
@@ -52,6 +53,9 @@ class ExplanationOrchestratorTest {
         assertEquals(OffsetDateTime.parse("2026-09-11T10:00:00Z"), message.envelope().metadata().occurredAt());
         assertEquals(DECISION_ID, message.envelope().payload().explanation().decisionId());
         assertEquals(TRANSACTION_ID, message.envelope().payload().explanation().transactionId());
+        assertEquals(
+                RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW.name(),
+                message.envelope().payload().explanation().attributes().get("recommendedAction"));
         assertEquals("RULE", message.envelope().payload().explanation().evidence().getFirst().evidenceType());
     }
 

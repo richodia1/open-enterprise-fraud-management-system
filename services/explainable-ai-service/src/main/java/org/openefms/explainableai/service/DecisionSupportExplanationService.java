@@ -20,6 +20,7 @@ public class DecisionSupportExplanationService {
         Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("decisionMode", request.context().getOrDefault("decisionMode", "UNKNOWN"));
         attributes.put("decisionOutcome", request.context().getOrDefault("decisionOutcome", "UNKNOWN"));
+        attributes.put("recommendedAction", request.context().getOrDefault("recommendedAction", "UNKNOWN"));
         attributes.put("riskBand", request.context().getOrDefault("riskBand", "UNKNOWN"));
         attributes.put("riskScore", request.context().getOrDefault("riskScore", "0.00"));
         attributes.put("evidenceCount", Integer.toString(evidence.size()));

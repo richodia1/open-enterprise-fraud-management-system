@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.UUID;
 import org.openefms.common.models.fraud.DecisionMode;
 import org.openefms.common.models.fraud.DecisionOutcome;
+import org.openefms.common.models.fraud.RecommendedTransactionAction;
 import org.openefms.common.models.fraud.RiskBand;
 
 public record FraudDecisionRecord(
@@ -15,6 +16,7 @@ public record FraudDecisionRecord(
         String tenantId,
         DecisionMode mode,
         DecisionOutcome outcome,
+        RecommendedTransactionAction recommendedAction,
         BigDecimal riskScoreValue,
         RiskBand riskBand,
         String riskReason,
@@ -36,6 +38,9 @@ public record FraudDecisionRecord(
         Objects.requireNonNull(tenantId, "tenantId must not be null");
         Objects.requireNonNull(mode, "mode must not be null");
         Objects.requireNonNull(outcome, "outcome must not be null");
+        recommendedAction = recommendedAction == null
+                ? RecommendedTransactionAction.fromOutcome(outcome)
+                : recommendedAction;
         Objects.requireNonNull(riskScoreValue, "riskScoreValue must not be null");
         Objects.requireNonNull(riskBand, "riskBand must not be null");
         Objects.requireNonNull(decidedAt, "decidedAt must not be null");
