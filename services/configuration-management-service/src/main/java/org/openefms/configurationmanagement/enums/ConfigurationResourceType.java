@@ -11,6 +11,14 @@ public enum ConfigurationResourceType implements ManagedResourceKind {
             "Bank Fraud Desk Emails",
             "configuration-management:BankFraudDeskEmails",
             "Fraud desk email recipients and resolution settings."),
+    CASE_ASSIGNMENT_POLICIES(
+            "Case Assignment Policies",
+            "configuration-management:CaseAssignmentPolicies",
+            "Tenant role policies that control who can receive fraud case assignments."),
+    CASE_ESCALATION_POLICIES(
+            "Case Escalation Policies",
+            "configuration-management:CaseEscalationPolicies",
+            "Tenant role policies that control who can receive escalated fraud cases."),
     CHANNELS(
             "Channels",
             "configuration-management:Channels",

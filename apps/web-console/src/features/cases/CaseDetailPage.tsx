@@ -10,16 +10,24 @@ import { SectionPanel } from '../../components/SectionPanel'
 import { StatusChip } from '../../components/StatusChip'
 import { apiRequest } from '../../lib/apiClient'
 import { formatDateTime, formatEnum } from '../../lib/formatters'
-import type { CaseActionRecord, CaseActionResponse, CaseRecord } from '../../types/api'
+import type {
+  CaseActionRecord,
+  CaseActionResponse,
+  CaseAssignableUser,
+  CaseAssignmentPurpose,
+  CaseRecord,
+} from '../../types/api'
 
 const terminalStatuses = new Set(['CLOSED', 'FALSE_POSITIVE', 'FRAUD_CONFIRMED'])
 const statusOptions = ['IN_REVIEW', 'ESCALATED', 'FRAUD_CONFIRMED', 'FALSE_POSITIVE', 'CLOSED']
+const assignmentPurposeOptions: CaseAssignmentPurpose[] = ['ASSIGNMENT', 'ESCALATION']
 
 export function CaseDetailPage() {
   const { caseId = '' } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [assigneeId, setAssigneeId] = useState('')
+  const [assignmentPurpose, setAssignmentPurpose] = useState<CaseAssignmentPurpose>('ASSIGNMENT')
   const [assignmentActorId, setAssignmentActorId] = useState('web-console')
   const [assignmentNote, setAssignmentNote] = useState('')
   const [status, setStatus] = useState('IN_REVIEW')
@@ -35,6 +43,16 @@ export function CaseDetailPage() {
     enabled: Boolean(caseId),
     queryFn: () => apiRequest<CaseActionRecord[]>(`/api/v1/cases/${caseId}/actions`),
     queryKey: ['case-actions', caseId],
+  })
+  const caseFile = caseQuery.data
+  const isTerminal = terminalStatuses.has(caseFile?.status ?? '')
+  const assigneesQuery = useQuery({
+    enabled: Boolean(caseFile?.tenantId) && !isTerminal,
+    queryFn: () =>
+      apiRequest<CaseAssignableUser[]>('/api/v1/cases/assignees', {
+        searchParams: { purpose: assignmentPurpose, tenantId: caseFile?.tenantId },
+      }),
+    queryKey: ['case-assignees', caseFile?.tenantId, assignmentPurpose],
   })
 
   const refresh = () => {
@@ -55,6 +73,7 @@ export function CaseDetailPage() {
           actorId: assignmentActorId,
           assigneeId,
           note: assignmentNote,
+          purpose: assignmentPurpose,
         },
         method: 'PATCH',
       }),
@@ -80,8 +99,9 @@ export function CaseDetailPage() {
     },
   })
 
-  const caseFile = caseQuery.data
-  const isTerminal = terminalStatuses.has(caseFile?.status ?? '')
+  const assignees = assigneesQuery.data ?? []
+  const selectedAssigneeKnown = assignees.some((assignee) => assignee.id === assigneeId)
+  const canAssign = !isTerminal && !assignMutation.isPending && !assigneesQuery.isLoading && Boolean(assigneeId)
 
   return (
     <>
@@ -158,15 +178,49 @@ export function CaseDetailPage() {
           >
             <SectionPanel eyebrow="Workflow" title="Assignment">
               {assignMutation.isError ? <ErrorState error={assignMutation.error} /> : null}
+              {assigneesQuery.isError ? <ErrorState error={assigneesQuery.error} /> : null}
               {isTerminal ? <Alert severity="info">Terminal cases cannot be reassigned.</Alert> : null}
+              {!isTerminal && !assigneesQuery.isLoading && !assigneesQuery.isError && assignees.length === 0 ? (
+                <Alert severity="warning">No active Identity users match this case policy.</Alert>
+              ) : null}
               <Stack spacing={1.5}>
                 <TextField
                   disabled={isTerminal}
+                  label="Purpose"
+                  onChange={(event) => {
+                    setAssignmentPurpose(event.target.value as CaseAssignmentPurpose)
+                    setAssigneeId('')
+                  }}
+                  select
+                  size="small"
+                  value={assignmentPurpose}
+                >
+                  {assignmentPurposeOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {formatEnum(option)}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  disabled={isTerminal || assigneesQuery.isLoading || assigneesQuery.isError}
                   label="Assignee"
                   onChange={(event) => setAssigneeId(event.target.value)}
+                  select
                   size="small"
                   value={assigneeId}
-                />
+                >
+                  <MenuItem value="">Select user</MenuItem>
+                  {assigneeId && !selectedAssigneeKnown ? (
+                    <MenuItem value={assigneeId}>{assigneeId}</MenuItem>
+                  ) : null}
+                  {assignees.map((assignee) => (
+                    <MenuItem key={assignee.id} value={assignee.id}>
+                      {assignee.email
+                        ? `${assignee.displayName} - ${assignee.email}`
+                        : assignee.displayName}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   disabled={isTerminal}
                   label="Actor"
@@ -183,7 +237,7 @@ export function CaseDetailPage() {
                   value={assignmentNote}
                 />
                 <Button
-                  disabled={isTerminal || assignMutation.isPending}
+                  disabled={!canAssign}
                   onClick={() => assignMutation.mutate()}
                   startIcon={<UserCheck size={18} />}
                   variant="contained"

@@ -1,5 +1,6 @@
 package org.openefms.casemanagement.controller;
 
+import org.openefms.casemanagement.client.CaseAssignmentDirectoryUnavailableException;
 import org.openefms.casemanagement.service.CaseWorkflowPersistenceException;
 import org.openefms.casemanagement.service.CaseWorkflowRecordNotFoundException;
 import org.openefms.casemanagement.service.InvalidCaseLifecycleActionException;
@@ -33,6 +34,16 @@ public class CaseWorkflowErrorHandler {
         problem.setTitle("Invalid case lifecycle action");
         problem.setProperty("errors", exception.errors());
         return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(CaseAssignmentDirectoryUnavailableException.class)
+    public ResponseEntity<ProblemDetail> handleAssignmentDirectoryUnavailable(
+            CaseAssignmentDirectoryUnavailableException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage());
+        problem.setTitle("Case assignment directory is unavailable");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(problem);
     }
 
     @ExceptionHandler(CaseWorkflowPersistenceException.class)

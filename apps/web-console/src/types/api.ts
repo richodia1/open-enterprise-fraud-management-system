@@ -80,6 +80,20 @@ export type CaseActionResponse = {
   caseFile: CaseRecord
 }
 
+export type CaseAssignmentPurpose = 'ASSIGNMENT' | 'ESCALATION'
+
+export type CaseAssignableUser = {
+  active: boolean
+  attributes: Record<string, string>
+  code: string
+  displayName: string
+  email?: string
+  eligiblePurposes: CaseAssignmentPurpose[]
+  id: string
+  roles: string[]
+  tenantId: string
+}
+
 export type AuditLogRecord = {
   action: string
   actorId: string
