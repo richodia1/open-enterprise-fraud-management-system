@@ -2,6 +2,8 @@
 
 The RabbitMQ event spine defines the first broker conventions for Phase 1 and the early Phase 2 event flow.
 
+RabbitMQ remains the default transport. Kafka is also available for the same active MVP event chain when `OEFMS_EVENT_TRANSPORT=kafka`; see [Kafka Event Spine](kafka-event-spine.md).
+
 ## Exchange Names
 
 | Exchange | Purpose |

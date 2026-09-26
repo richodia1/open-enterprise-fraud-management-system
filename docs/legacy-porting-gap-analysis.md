@@ -49,7 +49,7 @@ The current Java project has:
 | Local Docker infrastructure | Present. |
 | PostgreSQL local provider | Present. |
 | RabbitMQ event spine | Present. |
-| Kafka alternative direction | Planned, not fully implemented. |
+| Kafka alternative event transport | Present for the MVP event spine behind `OEFMS_EVENT_TRANSPORT=kafka`. |
 | Shared models/events/persistence modules | Present. |
 | Clean service package shape | Present. |
 | Contract-first management CRUD | Present for the main old management resources. |

@@ -56,6 +56,12 @@ Run the full MVP event-flow probe through the API Gateway:
 ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
 ```
 
+RabbitMQ is the default event transport. To run the same flow through Kafka:
+
+```bash
+OEFMS_EVENT_TRANSPORT=kafka ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
+
 Run a readable demo flow that prints the generated decision, case, alert, and audit details:
 
 ```bash
@@ -107,7 +113,7 @@ Install `ml/requirements.txt` only when you want to train the local XGBoost mode
 docker compose up --build
 ```
 
-The stack uses health checks for PostgreSQL, RabbitMQ, and Redis. See [Platform Configuration](platform-configuration.md) for local environment variables and service ownership rules.
+The stack uses health checks for PostgreSQL, RabbitMQ, Kafka, and Redis. See [Platform Configuration](platform-configuration.md) for local environment variables and service ownership rules.
 
 If you previously started local infrastructure before database, RabbitMQ, or Redis settings changed, reset the local volumes once:
 

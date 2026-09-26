@@ -10,9 +10,11 @@ import org.openefms.common.events.EventTypes;
 import org.openefms.common.events.audit.AuditEventRecordedEvent;
 import org.openefms.common.events.rabbitmq.RabbitMqQueues;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "oefms.event-transport", havingValue = "rabbitmq", matchIfMissing = true)
 public class AuditEventRecordedEventListener {
     private static final int SUPPORTED_EVENT_VERSION = 1;
 

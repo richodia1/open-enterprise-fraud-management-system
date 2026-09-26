@@ -30,11 +30,14 @@ gateway_rule_path="${OEFMS_SMOKE_GATEWAY_RULE_PATH:-/api/v1/rules}"
 gateway_case_path="${OEFMS_SMOKE_GATEWAY_CASE_PATH:-/api/v1/cases}"
 gateway_alert_path="${OEFMS_SMOKE_GATEWAY_ALERT_PATH:-/api/v1/alerts}"
 gateway_audit_path="${OEFMS_SMOKE_GATEWAY_AUDIT_PATH:-/api/v1/audit-events}"
+event_transport="${OEFMS_EVENT_TRANSPORT:-rabbitmq}"
 
-core_services=(
+infrastructure_services=(
   postgres
-  rabbitmq
   redis
+)
+
+domain_services=(
   auth-service
   ingestion-management-service
   fraud-detection-service
@@ -53,7 +56,7 @@ Options:
   --live          Probe an already-running local stack.
   --start-stack   Start the core local stack, then run live probes.
   --gateway       Include API Gateway health and optional route probes.
-  --event-flow    Submit a reviewable transaction and wait for RabbitMQ workflow records.
+  --event-flow    Submit a reviewable transaction and wait for event workflow records.
   --mvp-flow      Alias for --event-flow.
   -h, --help      Show this help text.
 
@@ -80,6 +83,7 @@ Environment:
   OEFMS_SMOKE_GATEWAY_ALERT_PATH           Gateway alert list path. Default: /api/v1/alerts
   OEFMS_SMOKE_GATEWAY_AUDIT_PATH           Gateway audit event list path. Default: /api/v1/audit-events
   OEFMS_SMOKE_REVIEW_TRANSACTION_ID        Optional transaction id for --event-flow. Default: generated UUID
+  OEFMS_EVENT_TRANSPORT                    Event broker implementation. Supported: rabbitmq, kafka. Default: rabbitmq
   OEFMS_SMOKE_HEALTH_TIMEOUT_SECONDS       Health wait timeout. Default: 180
   OEFMS_SMOKE_HEALTH_INTERVAL_SECONDS      Health poll interval. Default: 3
 USAGE
@@ -224,6 +228,23 @@ wait_for_http() {
   until curl -fsS "$url" >/dev/null 2>&1; do
     if [ "$SECONDS" -ge "$deadline" ]; then
       fail "${name} did not become healthy within ${health_timeout_seconds}s"
+    fi
+    sleep "$health_interval_seconds"
+  done
+  log "${name} is healthy"
+}
+
+wait_for_container_healthy() {
+  local name="$1"
+  local deadline
+  local status
+  deadline=$((SECONDS + health_timeout_seconds))
+
+  log "Waiting for container health: ${name}"
+  until status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$name" 2>/dev/null)" \
+    && [ "$status" = "healthy" ]; do
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      fail "Container ${name} did not become healthy within ${health_timeout_seconds}s"
     fi
     sleep "$health_interval_seconds"
   done
@@ -574,13 +595,35 @@ run_live_checks() {
   require_command curl
 
   if [ "$start_stack" = true ]; then
-    local services_to_start=("${core_services[@]}")
+    local broker_service
+    local broker_container
+    case "$event_transport" in
+      rabbitmq)
+        broker_service="rabbitmq"
+        broker_container="openefms-rabbitmq"
+        ;;
+      kafka)
+        broker_service="kafka"
+        broker_container="openefms-kafka"
+        ;;
+      *)
+        fail "Unsupported OEFMS_EVENT_TRANSPORT: ${event_transport}. Use rabbitmq or kafka."
+        ;;
+    esac
+
+    local services_to_start=("${domain_services[@]}")
     if [ "$gateway_checks" = true ]; then
       services_to_start+=(api-gateway)
     fi
 
     docker info >/dev/null 2>&1 || fail "Docker daemon is not running; start Docker before using --start-stack"
     run_docker_runtime_preflight
+    log "Starting local smoke-test infrastructure with ${event_transport}"
+    compose up -d --build "${infrastructure_services[@]}" "$broker_service"
+    wait_for_container_healthy openefms-postgres
+    wait_for_container_healthy "$broker_container"
+    wait_for_container_healthy openefms-redis
+
     log "Starting local smoke-test services"
     compose up -d --build "${services_to_start[@]}"
   fi

@@ -10,9 +10,11 @@ import org.openefms.common.events.rabbitmq.RabbitMqQueues;
 import org.openefms.explainableai.service.ExplanationOrchestrator;
 import org.openefms.explainableai.service.InvalidFraudDecisionProducedEventException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(name = "oefms.event-transport", havingValue = "rabbitmq", matchIfMissing = true)
 public class FraudDecisionProducedEventListener {
     private static final int SUPPORTED_EVENT_VERSION = 1;
 

@@ -13,8 +13,16 @@ x-rabbitmq-service-environment: &rabbitmq-service-environment
   OEFMS_RABBITMQ_EXCHANGE: ${OEFMS_RABBITMQ_EXCHANGE:-oefms.events}
   OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE: ${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:-oefms.events.dlx}
 
-x-postgres-rabbitmq-service-environment: &postgres-rabbitmq-service-environment
-  <<: [*postgres-service-environment, *rabbitmq-service-environment]
+x-kafka-service-environment: &kafka-service-environment
+  OEFMS_EVENT_TRANSPORT: ${OEFMS_EVENT_TRANSPORT:-rabbitmq}
+  OEFMS_KAFKA_BOOTSTRAP_SERVERS: ${OEFMS_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+  OEFMS_KAFKA_FRAUD_CONSUMER_GROUP: ${OEFMS_KAFKA_FRAUD_CONSUMER_GROUP:-oefms.fraud-detection}
+  OEFMS_KAFKA_EXPLAINABLE_AI_CONSUMER_GROUP: ${OEFMS_KAFKA_EXPLAINABLE_AI_CONSUMER_GROUP:-oefms.explainable-ai}
+  OEFMS_KAFKA_CASE_CONSUMER_GROUP: ${OEFMS_KAFKA_CASE_CONSUMER_GROUP:-oefms.case-management}
+  OEFMS_KAFKA_AUDIT_CONSUMER_GROUP: ${OEFMS_KAFKA_AUDIT_CONSUMER_GROUP:-oefms.audit-logging}
+
+x-event-service-environment: &event-service-environment
+  <<: [*postgres-service-environment, *rabbitmq-service-environment, *kafka-service-environment]
 
 services:
   postgres:
@@ -52,6 +60,31 @@ services:
       start_period: 180s
       interval: 10s
       timeout: 30s
+      retries: 12
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: openefms-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:${OEFMS_KAFKA_HOST_PORT:-9094}
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "${OEFMS_KAFKA_HOST_PORT:-9094}:9094"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      start_period: 60s
+      interval: 10s
+      timeout: 10s
       retries: 12
 
   redis:
@@ -185,12 +218,10 @@ services:
     ports:
       - "8089:8089"
     environment:
-      <<: *postgres-rabbitmq-service-environment
+      <<: *event-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_ingestion
     depends_on:
       postgres:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   fraud-detection-service:
@@ -202,7 +233,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      <<: *postgres-rabbitmq-service-environment
+      <<: *event-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_fraud
       OEFMS_FRAUD_DECISION_MODE: ${OEFMS_FRAUD_DECISION_MODE:-rules}
       OEFMS_FRAUD_RULE_HIGH_VALUE_AMOUNT_THRESHOLD: ${OEFMS_FRAUD_RULE_HIGH_VALUE_AMOUNT_THRESHOLD:-10000.00}
@@ -218,8 +249,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -232,12 +261,10 @@ services:
     ports:
       - "8094:8094"
     environment:
-      <<: *postgres-rabbitmq-service-environment
+      <<: *event-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_explainable_ai
     depends_on:
       postgres:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   rule-management-service:
@@ -279,7 +306,7 @@ services:
     ports:
       - "8084:8084"
     environment:
-      <<: *postgres-rabbitmq-service-environment
+      <<: *event-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_cases
       OEFMS_CASE_CONFIGURATION_SERVICE_URL: ${OEFMS_CASE_CONFIGURATION_SERVICE_URL:-http://configuration-management-service:8088}
       OEFMS_CASE_ASSIGNMENT_POLICY_RESOURCE_TYPE: ${OEFMS_CASE_ASSIGNMENT_POLICY_RESOURCE_TYPE:-CASE_ASSIGNMENT_POLICIES}
@@ -295,8 +322,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
       configuration-management-service:
         condition: service_started
       identity-service:
@@ -311,12 +336,10 @@ services:
     ports:
       - "8090:8090"
     environment:
-      <<: *postgres-rabbitmq-service-environment
+      <<: *event-service-environment
       OEFMS_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openefms_audit
     depends_on:
       postgres:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   notification-management-service:
@@ -360,4 +383,5 @@ services:
 volumes:
   postgres-data:
   rabbitmq-data:
+  kafka-data:
   redis-data:

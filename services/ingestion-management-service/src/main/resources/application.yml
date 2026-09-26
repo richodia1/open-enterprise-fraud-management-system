@@ -22,6 +22,11 @@ spring:
     username: "${OEFMS_RABBITMQ_USERNAME:openefms}"
     password: "${OEFMS_RABBITMQ_PASSWORD:openefms}"
     virtual-host: "${OEFMS_RABBITMQ_VHOST:openefms}"
+  kafka:
+    bootstrap-servers: "${OEFMS_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
   port: 8089
@@ -33,6 +38,7 @@ management:
         include: health,info
 
 oefms:
+  event-transport: "${OEFMS_EVENT_TRANSPORT:rabbitmq}"
   rabbitmq:
     exchange: "${OEFMS_RABBITMQ_EXCHANGE:oefms.events}"
     dead-letter-exchange: "${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:oefms.events.dlx}"
