@@ -2,7 +2,7 @@
 
 This branch prepares the first full local MVP run.
 
-The normal live smoke path checks service health and individual APIs. The MVP event-flow probe goes further: it submits a reviewable transaction through Ingestion Management and waits for downstream records created by the RabbitMQ workflow.
+The normal live smoke path checks service health and individual APIs. The MVP event-flow probe goes further: it submits a reviewable transaction through Ingestion Management and waits for downstream records created by the configured event workflow. RabbitMQ remains the default transport; Kafka can be selected with `OEFMS_EVENT_TRANSPORT=kafka`.
 
 ## Recommended First Run
 
@@ -16,6 +16,12 @@ Start the stack and run the Gateway-backed MVP probe:
 
 ```bash
 ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
+
+Run the same flow on Kafka:
+
+```bash
+OEFMS_EVENT_TRANSPORT=kafka ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
 ```
 
 The script first checks that Docker can start and finish a tiny `hello-world` container. If that preflight fails, restart Docker Desktop and verify `docker run --rm hello-world` before rerunning the MVP probe.
@@ -33,26 +39,26 @@ API Gateway
 Ingestion Management Service
         |
         v
-RabbitMQ transaction.received
+Event transport transaction.received
         |
         v
 Fraud Detection Service
         |
         v
-RabbitMQ fraud.decision.produced
+Event transport fraud.decision.produced
         |
         v
 Explainable AI Service
         |
         v
-RabbitMQ explanation.prepared
+Event transport explanation.prepared
         |
         v
 Case Management Service
         |
         +--> fraud_alerts
         +--> fraud_cases
-        +--> RabbitMQ audit.event.recorded
+        +--> Event transport audit.event.recorded
                  |
                  v
           Audit Logging Service

@@ -6,7 +6,7 @@ public class TransactionEventPublicationException extends RuntimeException {
     private final String routingKey;
 
     public TransactionEventPublicationException(TransactionIngestionMessage message, Throwable cause) {
-        super("Unable to publish transaction event to RabbitMQ.", cause);
+        super("Unable to publish transaction event to the configured event transport.", cause);
         this.eventType = message.envelope().metadata().eventType();
         this.exchangeName = message.exchangeName();
         this.routingKey = message.routingKey();

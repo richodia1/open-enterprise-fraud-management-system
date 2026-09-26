@@ -13,7 +13,7 @@ API Gateway
 Ingestion Management Service
         |
         v
-RabbitMQ transaction.received
+Event transport transaction.received
         |
         v
 Fraud Detection Service
@@ -37,6 +37,12 @@ From the repository root:
 
 ```bash
 ./scripts/run-mvp-demo-flow.sh --start-stack
+```
+
+RabbitMQ is the default transport. To run the same demo flow through Kafka:
+
+```bash
+OEFMS_EVENT_TRANSPORT=kafka ./scripts/run-mvp-demo-flow.sh --start-stack
 ```
 
 `--start-stack` starts only the infrastructure and domain services needed for the MVP event flow. It starts the Spring services one at a time, then starts the API Gateway for the public routes. Use the full smoke command when you want every service and every route checked.

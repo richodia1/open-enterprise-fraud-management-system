@@ -40,7 +40,7 @@ To start the core services and then probe them:
 
 Before creating the Compose stack, `--start-stack` runs a tiny Docker runtime preflight with `hello-world`. This catches local Docker Desktop issues where the daemon responds to `docker info` but containers remain stuck in `Created`.
 
-RabbitMQ gets an extended startup grace period in Compose because a clean local volume can spend close to a minute initializing metadata, feature flags, and the default OEFMS virtual host before it can answer its health probe. The probe runs as the `rabbitmq` user so Docker health checks do not create an unreadable Erlang cookie on new volumes.
+RabbitMQ gets an extended startup grace period in Compose because a clean local volume can spend close to a minute initializing metadata, feature flags, and the default OEFMS virtual host before it can answer its health probe. The probe runs as the `rabbitmq` user so Docker health checks do not create an unreadable Erlang cookie on new volumes. When `OEFMS_EVENT_TRANSPORT=kafka` is supplied, the local stack starts Kafka instead of RabbitMQ for the event-flow broker.
 
 When `--gateway` is also supplied, the script starts and probes `api-gateway` as well.
 
@@ -50,7 +50,11 @@ For the full MVP readiness path, add `--event-flow`:
 ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
 ```
 
-This submits a reviewable transaction and waits for records produced by the RabbitMQ event chain.
+This submits a reviewable transaction and waits for records produced by the configured event chain. RabbitMQ is the default; run the same probe on Kafka with:
+
+```bash
+OEFMS_EVENT_TRANSPORT=kafka ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
 
 The core live checks cover:
 
@@ -80,7 +84,7 @@ status=RECEIVED
 eventType=transaction.received
 ```
 
-Because ingestion now publishes to RabbitMQ, this probe requires the broker to be reachable.
+Because ingestion now publishes to the configured event transport, this probe requires the selected broker to be reachable.
 
 The persisted receipt probe expects:
 

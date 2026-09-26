@@ -88,9 +88,15 @@ Case Management reads active assignees from Identity Service and role policy fro
 | `OEFMS_CASE_IDENTITY_REQUEST_TIMEOUT` | Timeout for Identity directory calls. | `PT5S` |
 | `OEFMS_CASE_VALIDATE_ASSIGNEES` | Rejects assignment when `assigneeId` is not an active Identity user for the case tenant. | `true` |
 
-## RabbitMQ Variables
+## Event Transport Variables
 
-RabbitMQ is the default local broker for asynchronous events.
+RabbitMQ is the default local broker for asynchronous events. Kafka is also available for the active MVP event spine. Event-facing services select the active transport with `OEFMS_EVENT_TRANSPORT`.
+
+| Variable | Purpose | Local Default |
+| --- | --- | --- |
+| `OEFMS_EVENT_TRANSPORT` | Event transport used by event-facing services. Supported values are `rabbitmq` and `kafka`. | `rabbitmq` |
+
+## RabbitMQ Variables
 
 | Variable | Purpose | Local Default |
 | --- | --- | --- |
@@ -111,6 +117,29 @@ The RabbitMQ Management UI runs on:
 ```text
 http://localhost:${OEFMS_RABBITMQ_MANAGEMENT_HOST_PORT:-15672}
 ```
+
+## Kafka Variables
+
+Kafka is optional locally and is started by Docker Compose so contributors can switch transports without changing the service list.
+
+| Variable | Purpose | Local Default |
+| --- | --- | --- |
+| `OEFMS_KAFKA_BOOTSTRAP_SERVERS` | Kafka bootstrap servers used by event-facing services. | `localhost:9094` |
+| `OEFMS_KAFKA_HOST_PORT` | Host port exposed by the local Kafka external listener. | `9094` |
+| `OEFMS_KAFKA_FRAUD_CONSUMER_GROUP` | Fraud Detection consumer group for `transaction.received`. | `oefms.fraud-detection` |
+| `OEFMS_KAFKA_EXPLAINABLE_AI_CONSUMER_GROUP` | Explainable AI consumer group for `fraud.decision.produced`. | `oefms.explainable-ai` |
+| `OEFMS_KAFKA_CASE_CONSUMER_GROUP` | Case Management consumer group for `explanation.prepared`. | `oefms.case-management` |
+| `OEFMS_KAFKA_AUDIT_CONSUMER_GROUP` | Audit Logging consumer group for `audit.event.recorded`. | `oefms.audit-logging` |
+
+Use the Kafka event spine with:
+
+```bash
+OEFMS_EVENT_TRANSPORT=kafka ./scripts/smoke-local.sh --skip-build --start-stack --gateway --event-flow
+```
+
+See [Kafka Event Spine](kafka-event-spine.md) for topic names and header conventions.
+
+Docker Compose passes `kafka:9092` to containers. The direct JVM default is `localhost:9094`, matching the host port exposed by the Compose Kafka external listener.
 
 ## Fraud Decision Variables
 

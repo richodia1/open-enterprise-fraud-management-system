@@ -4,10 +4,12 @@ import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name = "oefms.event-transport", havingValue = "rabbitmq", matchIfMissing = true)
 public class RabbitMqPublisherConfiguration {
     private final IngestionRabbitMqProperties properties;
 

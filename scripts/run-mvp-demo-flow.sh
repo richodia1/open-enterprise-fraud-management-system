@@ -13,11 +13,12 @@ interval_seconds="${OEFMS_DEMO_INTERVAL_SECONDS:-3}"
 startup_timeout_seconds="${OEFMS_DEMO_STARTUP_TIMEOUT_SECONDS:-360}"
 python_cmd="${PYTHON_CMD:-python3}"
 env_file="${OEFMS_DEMO_ENV_FILE:-.env.example}"
+event_transport="${OEFMS_EVENT_TRANSPORT:-rabbitmq}"
 start_stack=false
 stop_stack=false
 show_json=false
 
-infrastructure_services=(postgres rabbitmq redis)
+infrastructure_services=(postgres redis)
 
 domain_services=(
   "ingestion-management-service|Ingestion Management Service|http://localhost:8089/actuator/health"
@@ -47,6 +48,7 @@ Environment:
   OEFMS_DEMO_INTERVAL_SECONDS  Poll interval for event-driven records. Default: 3
   OEFMS_DEMO_OUTPUT_DIR        Output directory for captured JSON. Default: target/mvp-demo-flow/<transaction-id>
   OEFMS_DEMO_ENV_FILE          Compose env file used with --stop-stack. Default: .env.example
+  OEFMS_EVENT_TRANSPORT        Event broker implementation. Default in .env.example: rabbitmq
   PYTHON_CMD                   Python executable used for JSON parsing. Default: python3
 USAGE
 }
@@ -277,17 +279,33 @@ wait_for_audit_action() {
 
 start_local_stack() {
   require_command docker
+  local broker_service
+  local broker_container
   local service_entry
   local service_name
   local service_label
   local service_health_url
 
+  case "$event_transport" in
+    rabbitmq)
+      broker_service="rabbitmq"
+      broker_container="openefms-rabbitmq"
+      ;;
+    kafka)
+      broker_service="kafka"
+      broker_container="openefms-kafka"
+      ;;
+    *)
+      fail "Unsupported OEFMS_EVENT_TRANSPORT: ${event_transport}. Use rabbitmq or kafka."
+      ;;
+  esac
+
   docker info >/dev/null 2>&1 || fail "Docker daemon is not running; start Docker before using --start-stack"
 
-  log "Starting MVP infrastructure"
-  compose up -d --build "${infrastructure_services[@]}"
+  log "Starting MVP infrastructure with ${event_transport}"
+  compose up -d --build "${infrastructure_services[@]}" "$broker_service"
   wait_for_container_healthy openefms-postgres
-  wait_for_container_healthy openefms-rabbitmq
+  wait_for_container_healthy "$broker_container"
   wait_for_container_healthy openefms-redis
 
   log "Starting MVP event-flow services one at a time"

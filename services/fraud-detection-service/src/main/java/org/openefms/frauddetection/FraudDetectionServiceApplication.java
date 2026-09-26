@@ -8,9 +8,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.annotation.EnableKafka;
 
 @SpringBootApplication
 @EnableRabbit
+@EnableKafka
 @EnableConfigurationProperties({FraudDecisionProperties.class, FraudRabbitMqProperties.class})
 public class FraudDetectionServiceApplication {
 

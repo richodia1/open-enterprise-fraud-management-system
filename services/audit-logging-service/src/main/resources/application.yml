@@ -25,6 +25,12 @@ spring:
     listener:
       simple:
         default-requeue-rejected: "${OEFMS_RABBITMQ_DEFAULT_REQUEUE_REJECTED:false}"
+  kafka:
+    bootstrap-servers: "${OEFMS_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}"
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 server:
   port: 8090
@@ -36,6 +42,10 @@ management:
         include: health,info
 
 oefms:
+  event-transport: "${OEFMS_EVENT_TRANSPORT:rabbitmq}"
+  kafka:
+    consumer-groups:
+      audit-logging: "${OEFMS_KAFKA_AUDIT_CONSUMER_GROUP:oefms.audit-logging}"
   rabbitmq:
     exchange: "${OEFMS_RABBITMQ_EXCHANGE:oefms.events}"
     dead-letter-exchange: "${OEFMS_RABBITMQ_DEAD_LETTER_EXCHANGE:oefms.events.dlx}"
