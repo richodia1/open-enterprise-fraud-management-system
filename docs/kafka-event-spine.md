@@ -17,6 +17,7 @@ Topic names are exposed in `KafkaTopics`.
 | `transaction.received` | `oefms.transaction.received` |
 | `fraud.decision.produced` | `oefms.fraud.decision.produced` |
 | `explanation.prepared` | `oefms.explanation.prepared` |
+| `fraud.feedback.ready` | `oefms.fraud.feedback.ready` |
 | `alert.created` | `oefms.alert.created` |
 | `case.created` | `oefms.case.created` |
 | `audit.event.recorded` | `oefms.audit.event.recorded` |
@@ -95,6 +96,8 @@ Explainable AI Service
         |
         v
 Kafka oefms.explanation.prepared
+        |
+        +--> Kafka oefms.fraud.feedback.ready
         |
         v
 Case Management Service

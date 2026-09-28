@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.openefms.common.events.EventEnvelope;
 import org.openefms.common.events.EventMetadata;
 import org.openefms.common.events.EventTypes;
+import org.openefms.common.events.explanation.ExplanationPreparedEvent;
+import org.openefms.common.events.feedback.FraudFeedbackReadyEvent;
 import org.openefms.common.events.fraud.FraudDecisionProducedEvent;
 import org.openefms.common.events.rabbitmq.RabbitMqExchanges;
 import org.openefms.common.events.rabbitmq.RabbitMqRoutingKeys;
@@ -42,7 +44,7 @@ class ExplanationOrchestratorTest {
                 new ExplainableAiRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
                 FIXED_CLOCK);
 
-        ExplanationMessage message = orchestrator.explain(fraudDecisionEvent());
+        ExplanationMessage<ExplanationPreparedEvent> message = orchestrator.explain(fraudDecisionEvent());
 
         assertEquals(RabbitMqExchanges.DOMAIN_EVENTS, message.exchangeName());
         assertEquals(RabbitMqRoutingKeys.EXPLANATION_PREPARED, message.routingKey());
@@ -58,6 +60,34 @@ class ExplanationOrchestratorTest {
                 RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW.name(),
                 message.envelope().payload().explanation().attributes().get("recommendedAction"));
         assertEquals("RULE", message.envelope().payload().explanation().evidence().getFirst().evidenceType());
+    }
+
+    @Test
+    void preparesExplanationAndTransactionCoreFeedbackEventsFromFraudDecisionEvent() {
+        ExplanationOrchestrator orchestrator = new ExplanationOrchestrator(
+                new DecisionSupportExplanationService(),
+                new ExplainableAiRabbitMqProperties(RabbitMqExchanges.DOMAIN_EVENTS, RabbitMqExchanges.DEAD_LETTER),
+                FIXED_CLOCK);
+
+        List<ExplanationMessage<?>> messages = orchestrator.prepare(fraudDecisionEvent());
+
+        assertEquals(2, messages.size());
+        ExplanationMessage<?> explanationMessage = messages.getFirst();
+        ExplanationMessage<?> feedbackMessage = messages.get(1);
+        assertEquals(RabbitMqRoutingKeys.EXPLANATION_PREPARED, explanationMessage.routingKey());
+        assertEquals(EventTypes.EXPLANATION_PREPARED, explanationMessage.envelope().metadata().eventType());
+        assertEquals(RabbitMqRoutingKeys.FRAUD_FEEDBACK_READY, feedbackMessage.routingKey());
+        assertEquals(EventTypes.FRAUD_FEEDBACK_READY, feedbackMessage.envelope().metadata().eventType());
+        assertEquals(explanationMessage.envelope().metadata().eventId().toString(),
+                feedbackMessage.envelope().metadata().causationId());
+        assertEquals("correlation-1", feedbackMessage.envelope().metadata().correlationId());
+        assertEquals("trace-1", feedbackMessage.envelope().metadata().traceId());
+
+        FraudFeedbackReadyEvent event = (FraudFeedbackReadyEvent) feedbackMessage.envelope().payload();
+        assertEquals(TRANSACTION_ID, event.feedback().transactionId());
+        assertEquals(DECISION_ID, event.feedback().decisionId());
+        assertEquals(RecommendedTransactionAction.HOLD_FOR_MANUAL_REVIEW, event.feedback().recommendedAction());
+        assertEquals("RULE", event.feedback().evidence().getFirst().evidenceType());
     }
 
     @Test

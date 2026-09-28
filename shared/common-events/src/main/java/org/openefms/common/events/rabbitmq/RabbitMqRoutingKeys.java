@@ -15,6 +15,7 @@ public final class RabbitMqRoutingKeys {
     public static final String CASE_CREATED = EventTypes.CASE_CREATED;
     public static final String EXPLANATION_PREPARED = EventTypes.EXPLANATION_PREPARED;
     public static final String FRAUD_DECISION_PRODUCED = EventTypes.FRAUD_DECISION_PRODUCED;
+    public static final String FRAUD_FEEDBACK_READY = EventTypes.FRAUD_FEEDBACK_READY;
     public static final String TRANSACTION_RECEIVED = EventTypes.TRANSACTION_RECEIVED;
 
     private static final Map<String, String> ROUTING_KEYS_BY_EVENT_TYPE = routingKeysByEventType();
@@ -40,6 +41,7 @@ public final class RabbitMqRoutingKeys {
         routingKeys.put(EventTypes.TRANSACTION_RECEIVED, TRANSACTION_RECEIVED);
         routingKeys.put(EventTypes.FRAUD_DECISION_PRODUCED, FRAUD_DECISION_PRODUCED);
         routingKeys.put(EventTypes.EXPLANATION_PREPARED, EXPLANATION_PREPARED);
+        routingKeys.put(EventTypes.FRAUD_FEEDBACK_READY, FRAUD_FEEDBACK_READY);
         routingKeys.put(EventTypes.ALERT_CREATED, ALERT_CREATED);
         routingKeys.put(EventTypes.CASE_CREATED, CASE_CREATED);
         routingKeys.put(EventTypes.AUDIT_EVENT_RECORDED, AUDIT_EVENT_RECORDED);

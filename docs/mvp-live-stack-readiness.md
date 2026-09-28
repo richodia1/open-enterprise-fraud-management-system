@@ -53,6 +53,8 @@ Explainable AI Service
         v
 Event transport explanation.prepared
         |
+        +--> Event transport fraud.feedback.ready
+        |
         v
 Case Management Service
         |

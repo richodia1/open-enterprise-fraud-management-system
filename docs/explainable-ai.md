@@ -33,6 +33,7 @@ The first implementation is deterministic decision support:
 - Adds baseline evidence when no elevated rule or model evidence is present.
 - Preserves tenant, correlation, causation, and trace metadata.
 - Publishes `explanation.prepared` for downstream case and audit workflows.
+- Publishes `fraud.feedback.ready` for transaction-core consumers.
 
 This is not production ML explainability yet. It is the first clear explanation boundary that later SHAP, counterfactual, model-card, and feature-contribution work can extend.
 

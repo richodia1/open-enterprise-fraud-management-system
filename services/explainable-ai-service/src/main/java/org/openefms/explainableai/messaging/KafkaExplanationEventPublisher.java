@@ -23,12 +23,12 @@ public class KafkaExplanationEventPublisher implements ExplanationMessageSink {
     }
 
     @Override
-    public void accept(ExplanationMessage message) {
+    public void accept(ExplanationMessage<?> message) {
         try {
             EventMetadata metadata = message.envelope().metadata();
             ProducerRecord<String, String> record = new ProducerRecord<>(
                     KafkaTopics.forEventType(metadata.eventType()),
-                    message.envelope().payload().explanation().transactionId().toString(),
+                    metadata.eventId().toString(),
                     objectMapper.writeValueAsString(message.envelope()));
             enrichHeaders(record, metadata);
             kafkaTemplate.send(record).join();

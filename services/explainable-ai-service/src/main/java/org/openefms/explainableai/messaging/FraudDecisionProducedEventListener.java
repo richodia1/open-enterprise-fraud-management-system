@@ -32,8 +32,7 @@ public class FraudDecisionProducedEventListener {
     public void handle(EventEnvelope<FraudDecisionProducedEvent> event) {
         validate(event);
 
-        ExplanationMessage explanationMessage = orchestrator.explain(event);
-        messageSink.accept(explanationMessage);
+        orchestrator.prepare(event).forEach(messageSink::accept);
     }
 
     private void validate(EventEnvelope<FraudDecisionProducedEvent> event) {

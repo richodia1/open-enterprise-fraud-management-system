@@ -21,6 +21,8 @@ Fraud Detection Service
         v
 Explainable AI Service
         |
+        +--> transaction-core feedback event
+        |
         v
 Case Management Service
         |

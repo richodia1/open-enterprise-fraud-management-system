@@ -21,7 +21,7 @@ public class RabbitMqExplanationEventPublisher implements ExplanationMessageSink
     }
 
     @Override
-    public void accept(ExplanationMessage message) {
+    public void accept(ExplanationMessage<?> message) {
         try {
             rabbitTemplate.convertAndSend(
                     message.exchangeName(),

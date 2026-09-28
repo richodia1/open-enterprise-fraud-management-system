@@ -82,6 +82,7 @@ Initial event names are exposed through `EventTypes`.
 | `TRANSACTION_RECEIVED` | `transaction.received` |
 | `FRAUD_DECISION_PRODUCED` | `fraud.decision.produced` |
 | `EXPLANATION_PREPARED` | `explanation.prepared` |
+| `FRAUD_FEEDBACK_READY` | `fraud.feedback.ready` |
 | `ALERT_CREATED` | `alert.created` |
 | `CASE_CREATED` | `case.created` |
 | `AUDIT_EVENT_RECORDED` | `audit.event.recorded` |
@@ -110,4 +111,4 @@ Fraud Detection Service now exposes an `MlScoringClient` boundary backed by shar
 
 `FraudDecisionResponse.recommendedAction` tells an upstream transaction core whether to proceed, hold, reject, or escalate. OEFMS recommends the action, but the transaction core remains the source of truth for transaction status and settlement. See [Transaction Core Feedback Contract](transaction-core-feedback.md).
 
-Explainable AI Service can now package a fraud decision and its investigator-facing explanation into `TransactionFraudFeedbackResponse`. This is the preferred payload shape for future bank-owned callback, queue, or topic adapters because it contains both the machine action and the human-readable reason.
+Explainable AI Service now packages a fraud decision and its investigator-facing explanation into `TransactionFraudFeedbackResponse` and publishes it as `fraud.feedback.ready`. This is the preferred payload shape for bank-owned transaction-core consumers because it contains both the machine action and the human-readable reason.

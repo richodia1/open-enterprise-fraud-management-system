@@ -44,8 +44,7 @@ public class KafkaFraudDecisionProducedEventListener {
         EventEnvelope<FraudDecisionProducedEvent> event = readEvent(payload);
         validate(event);
 
-        ExplanationMessage explanationMessage = orchestrator.explain(event);
-        messageSink.accept(explanationMessage);
+        orchestrator.prepare(event).forEach(messageSink::accept);
     }
 
     private EventEnvelope<FraudDecisionProducedEvent> readEvent(String payload) {

@@ -31,7 +31,7 @@ class RabbitMqExplanationEventPublisherTest {
     void publishesExplanationEventWithBrokerHeaders() {
         CapturingRabbitTemplate rabbitTemplate = new CapturingRabbitTemplate();
         RabbitMqExplanationEventPublisher publisher = new RabbitMqExplanationEventPublisher(rabbitTemplate);
-        ExplanationMessage message = explanationMessage();
+        ExplanationMessage<ExplanationPreparedEvent> message = explanationMessage();
 
         publisher.accept(message);
 
@@ -65,7 +65,7 @@ class RabbitMqExplanationEventPublisherTest {
         assertEquals(RabbitMqRoutingKeys.EXPLANATION_PREPARED, exception.routingKey());
     }
 
-    private ExplanationMessage explanationMessage() {
+    private ExplanationMessage<ExplanationPreparedEvent> explanationMessage() {
         ExplanationResponse explanation = new ExplanationResponse(
                 UUID.fromString("d88154d9-5246-43ec-bb65-fcdfd38f64a3"),
                 UUID.fromString("325dc0f5-775d-4858-89be-1992e52fe2f0"),
@@ -89,7 +89,7 @@ class RabbitMqExplanationEventPublisherTest {
                         Map.of("causedByEventType", EventTypes.FRAUD_DECISION_PRODUCED)),
                 new ExplanationPreparedEvent(explanation));
 
-        return new ExplanationMessage(
+        return new ExplanationMessage<>(
                 RabbitMqExchanges.DOMAIN_EVENTS,
                 RabbitMqRoutingKeys.EXPLANATION_PREPARED,
                 envelope);

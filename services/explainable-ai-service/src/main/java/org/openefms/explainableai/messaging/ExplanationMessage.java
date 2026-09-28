@@ -2,12 +2,11 @@ package org.openefms.explainableai.messaging;
 
 import java.util.Objects;
 import org.openefms.common.events.EventEnvelope;
-import org.openefms.common.events.explanation.ExplanationPreparedEvent;
 
-public record ExplanationMessage(
+public record ExplanationMessage<T>(
         String exchangeName,
         String routingKey,
-        EventEnvelope<ExplanationPreparedEvent> envelope
+        EventEnvelope<T> envelope
 ) {
     public ExplanationMessage {
         if (exchangeName == null || exchangeName.isBlank()) {

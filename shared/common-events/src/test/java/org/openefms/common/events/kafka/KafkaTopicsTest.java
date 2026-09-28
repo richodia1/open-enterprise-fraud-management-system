@@ -14,6 +14,7 @@ class KafkaTopicsTest {
         assertEquals(KafkaTopics.TRANSACTION_RECEIVED, KafkaTopics.forEventType(EventTypes.TRANSACTION_RECEIVED));
         assertEquals(KafkaTopics.FRAUD_DECISION_PRODUCED, KafkaTopics.forEventType(EventTypes.FRAUD_DECISION_PRODUCED));
         assertEquals(KafkaTopics.EXPLANATION_PREPARED, KafkaTopics.forEventType(EventTypes.EXPLANATION_PREPARED));
+        assertEquals(KafkaTopics.FRAUD_FEEDBACK_READY, KafkaTopics.forEventType(EventTypes.FRAUD_FEEDBACK_READY));
         assertEquals(KafkaTopics.ALERT_CREATED, KafkaTopics.forEventType(EventTypes.ALERT_CREATED));
         assertEquals(KafkaTopics.CASE_CREATED, KafkaTopics.forEventType(EventTypes.CASE_CREATED));
         assertEquals(KafkaTopics.AUDIT_EVENT_RECORDED, KafkaTopics.forEventType(EventTypes.AUDIT_EVENT_RECORDED));

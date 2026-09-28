@@ -13,6 +13,7 @@ public final class KafkaTopics {
     public static final String TRANSACTION_RECEIVED = "oefms.transaction.received";
     public static final String FRAUD_DECISION_PRODUCED = "oefms.fraud.decision.produced";
     public static final String EXPLANATION_PREPARED = "oefms.explanation.prepared";
+    public static final String FRAUD_FEEDBACK_READY = "oefms.fraud.feedback.ready";
     public static final String ALERT_CREATED = "oefms.alert.created";
     public static final String CASE_CREATED = "oefms.case.created";
     public static final String AUDIT_EVENT_RECORDED = "oefms.audit.event.recorded";
@@ -39,6 +40,7 @@ public final class KafkaTopics {
         topics.put(EventTypes.TRANSACTION_RECEIVED, TRANSACTION_RECEIVED);
         topics.put(EventTypes.FRAUD_DECISION_PRODUCED, FRAUD_DECISION_PRODUCED);
         topics.put(EventTypes.EXPLANATION_PREPARED, EXPLANATION_PREPARED);
+        topics.put(EventTypes.FRAUD_FEEDBACK_READY, FRAUD_FEEDBACK_READY);
         topics.put(EventTypes.ALERT_CREATED, ALERT_CREATED);
         topics.put(EventTypes.CASE_CREATED, CASE_CREATED);
         topics.put(EventTypes.AUDIT_EVENT_RECORDED, AUDIT_EVENT_RECORDED);

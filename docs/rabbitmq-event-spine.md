@@ -24,6 +24,7 @@ Routing keys mirror the event names in `EventTypes`.
 | `transaction.received` | `transaction.received` |
 | `fraud.decision.produced` | `fraud.decision.produced` |
 | `explanation.prepared` | `explanation.prepared` |
+| `fraud.feedback.ready` | `fraud.feedback.ready` |
 | `alert.created` | `alert.created` |
 | `case.created` | `case.created` |
 | `audit.event.recorded` | `audit.event.recorded` |
@@ -37,6 +38,7 @@ Use `EventMetadata.eventVersion` for versioning instead of embedding a version s
 | Fraud Detection Service | `oefms.fraud-detection.transaction-received` | `transaction.received` |
 | Explainable AI Service | `oefms.explainable-ai.fraud-decision-produced` | `fraud.decision.produced` |
 | Case Management Service | `oefms.case-management.explanation-prepared` | `explanation.prepared` |
+| Transaction Core Adapter | `oefms.transaction-core.fraud-feedback-ready` | `fraud.feedback.ready` |
 | Notification Management Service | `oefms.notification-management.alert-created` | `alert.created` |
 | Notification Management Service | `oefms.notification-management.case-created` | `case.created` |
 | Audit Logging Service | `oefms.audit-logging.audit-event-recorded` | `audit.event.recorded` |
@@ -119,6 +121,7 @@ The first explanation consumer:
 - Validates event type and event version before processing.
 - Builds a deterministic `ExplanationResponse` from rule hits and model signals.
 - Publishes `explanation.prepared` to the shared event exchange.
+- Publishes `fraud.feedback.ready` with `TransactionFraudFeedbackResponse` for core-banking consumers.
 - Preserves correlation metadata and uses the source fraud decision event id as causation id.
 
 The Case Management Service now consumes `explanation.prepared` events from `oefms.case-management.explanation-prepared`.

@@ -37,11 +37,19 @@ public class RabbitMqConsumerConfiguration {
                 .durable(RabbitMqQueues.EXPLAINABLE_AI_FRAUD_DECISION_PRODUCED)
                 .withArgument("x-dead-letter-exchange", properties.deadLetterExchange())
                 .build();
+        Queue transactionCoreFeedbackQueue = QueueBuilder
+                .durable(RabbitMqQueues.TRANSACTION_CORE_FRAUD_FEEDBACK_READY)
+                .withArgument("x-dead-letter-exchange", properties.deadLetterExchange())
+                .build();
         Queue deadLetterQueue = QueueBuilder.durable(RabbitMqQueues.DEAD_LETTER).build();
         Binding fraudDecisionBinding = BindingBuilder
                 .bind(fraudDecisionQueue)
                 .to(domainExchange)
                 .with(RabbitMqRoutingKeys.FRAUD_DECISION_PRODUCED);
+        Binding transactionCoreFeedbackBinding = BindingBuilder
+                .bind(transactionCoreFeedbackQueue)
+                .to(domainExchange)
+                .with(RabbitMqRoutingKeys.FRAUD_FEEDBACK_READY);
         Binding deadLetterBinding = BindingBuilder
                 .bind(deadLetterQueue)
                 .to(deadLetterExchange)
@@ -51,8 +59,10 @@ public class RabbitMqConsumerConfiguration {
                 domainExchange,
                 deadLetterExchange,
                 fraudDecisionQueue,
+                transactionCoreFeedbackQueue,
                 deadLetterQueue,
                 fraudDecisionBinding,
+                transactionCoreFeedbackBinding,
                 deadLetterBinding);
     }
 }

@@ -39,7 +39,7 @@ POST /api/v1/explanations/fraud-decisions/feedback
 
 The first endpoint returns an `ExplanationResponse`. The second returns a `TransactionFraudFeedbackResponse`, combining the fraud decision, recommended action, explanation summary, and evidence items.
 
-## Published Event
+## Published Events
 
 | Field | Value |
 | --- | --- |
@@ -49,7 +49,19 @@ The first endpoint returns an `ExplanationResponse`. The second returns a `Trans
 | Event version | `1` |
 | Source service | `explainable-ai-service` |
 
+| Field | Value |
+| --- | --- |
+| Exchange | `oefms.events` |
+| Routing key | `fraud.feedback.ready` |
+| RabbitMQ queue | `oefms.transaction-core.fraud-feedback-ready` |
+| Kafka topic | `oefms.fraud.feedback.ready` |
+| Payload | `EventEnvelope<FraudFeedbackReadyEvent>` |
+| Event version | `1` |
+| Source service | `explainable-ai-service` |
+
 `ExplanationOrchestrator` preserves the source fraud decision event correlation id and trace id. It sets the explanation event causation id to the source `fraud.decision.produced` event id.
+
+The feedback event causation id is the generated `explanation.prepared` event id, so a core-banking adapter can trace the chain from transaction ingestion to fraud decision, explanation, and final transaction-core recommendation.
 
 ## Processing Path
 
@@ -67,11 +79,12 @@ ExplanationOrchestrator
         v
 RabbitMqExplanationEventPublisher
         |
-        v
-RabbitMQ explanation.prepared event
+        +--> RabbitMQ explanation.prepared event
         |
-        v
-Future integration adapter publishes feedback to the transaction core
+        +--> RabbitMQ fraud.feedback.ready event
+                 |
+                 v
+          Transaction core or bank-owned adapter consumes feedback
 ```
 
 ## Still To Add
@@ -81,5 +94,5 @@ Future integration adapter publishes feedback to the transaction core
 - Outbox-backed publication.
 - SHAP or feature-contribution support for real ML models.
 - Durable explanation storage before publishing `explanation.prepared`.
-- Transaction-core callback, queue, or topic adapters using `TransactionFraudFeedbackResponse`.
+- Bank-specific callback adapters when a core cannot consume broker events directly.
 - Broader audit events across ingestion, decision, explanation, and investigator actions.

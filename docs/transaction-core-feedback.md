@@ -57,11 +57,35 @@ transaction.received
         |
         v
 fraud.decision.produced
+        |
+        v
+explanation.prepared
+        |
+        v
+fraud.feedback.ready
 ```
 
-The consuming core or integration adapter should subscribe to `fraud.decision.produced`, read `recommendedAction`, and update the source transaction.
+The consuming core or integration adapter can subscribe to `fraud.decision.produced` when it only needs the machine decision. The preferred full-feedback event is now `fraud.feedback.ready`, which carries the decision, recommended action, explanation summary, and evidence in one payload.
 
-For a richer response, the integration adapter should wait for `explanation.prepared` and send a `TransactionFraudFeedbackResponse` to the transaction core. That payload includes:
+For RabbitMQ, OEFMS declares a default durable integration queue:
+
+```text
+oefms.transaction-core.fraud-feedback-ready
+```
+
+For Kafka, consume:
+
+```text
+oefms.fraud.feedback.ready
+```
+
+The event payload is:
+
+```text
+EventEnvelope<FraudFeedbackReadyEvent>
+```
+
+`FraudFeedbackReadyEvent.feedback` is a `TransactionFraudFeedbackResponse`. That payload includes:
 
 - the transaction id and decision id
 - the fraud outcome
@@ -70,7 +94,7 @@ For a richer response, the integration adapter should wait for `explanation.prep
 - the explanation summary
 - the evidence items behind the decision
 
-The same response can be generated through the Explainable AI REST contract:
+The same response can also be generated through the Explainable AI REST contract:
 
 ```text
 POST /api/v1/explanations/fraud-decisions/feedback

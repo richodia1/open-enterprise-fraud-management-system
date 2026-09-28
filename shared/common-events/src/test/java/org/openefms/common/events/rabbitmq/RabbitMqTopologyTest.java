@@ -16,6 +16,7 @@ class RabbitMqTopologyTest {
                 EventTypes.FRAUD_DECISION_PRODUCED,
                 RabbitMqTopology.routingKeyFor(EventTypes.FRAUD_DECISION_PRODUCED));
         assertEquals(EventTypes.EXPLANATION_PREPARED, RabbitMqTopology.routingKeyFor(EventTypes.EXPLANATION_PREPARED));
+        assertEquals(EventTypes.FRAUD_FEEDBACK_READY, RabbitMqTopology.routingKeyFor(EventTypes.FRAUD_FEEDBACK_READY));
         assertEquals(EventTypes.ALERT_CREATED, RabbitMqTopology.routingKeyFor(EventTypes.ALERT_CREATED));
         assertEquals(EventTypes.CASE_CREATED, RabbitMqTopology.routingKeyFor(EventTypes.CASE_CREATED));
         assertEquals(EventTypes.AUDIT_EVENT_RECORDED, RabbitMqTopology.routingKeyFor(EventTypes.AUDIT_EVENT_RECORDED));
@@ -25,7 +26,7 @@ class RabbitMqTopologyTest {
     void declaresInitialConsumerBindings() {
         List<RabbitMqBinding> bindings = RabbitMqTopology.domainEventBindings();
 
-        assertEquals(6, bindings.size());
+        assertEquals(7, bindings.size());
         assertTrue(bindings.contains(RabbitMqBinding.domainEvent(
                 RabbitMqQueues.FRAUD_DETECTION_TRANSACTION_RECEIVED,
                 RabbitMqRoutingKeys.TRANSACTION_RECEIVED)));
@@ -35,6 +36,9 @@ class RabbitMqTopologyTest {
         assertTrue(bindings.contains(RabbitMqBinding.domainEvent(
                 RabbitMqQueues.CASE_MANAGEMENT_EXPLANATION_PREPARED,
                 RabbitMqRoutingKeys.EXPLANATION_PREPARED)));
+        assertTrue(bindings.contains(RabbitMqBinding.domainEvent(
+                RabbitMqQueues.TRANSACTION_CORE_FRAUD_FEEDBACK_READY,
+                RabbitMqRoutingKeys.FRAUD_FEEDBACK_READY)));
         assertTrue(bindings.contains(RabbitMqBinding.domainEvent(
                 RabbitMqQueues.NOTIFICATION_MANAGEMENT_ALERT_CREATED,
                 RabbitMqRoutingKeys.ALERT_CREATED)));

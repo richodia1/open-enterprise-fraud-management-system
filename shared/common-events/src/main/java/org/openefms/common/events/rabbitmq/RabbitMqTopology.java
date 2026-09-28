@@ -17,6 +17,9 @@ public final class RabbitMqTopology {
                     RabbitMqQueues.CASE_MANAGEMENT_EXPLANATION_PREPARED,
                     RabbitMqRoutingKeys.EXPLANATION_PREPARED),
             RabbitMqBinding.domainEvent(
+                    RabbitMqQueues.TRANSACTION_CORE_FRAUD_FEEDBACK_READY,
+                    RabbitMqRoutingKeys.FRAUD_FEEDBACK_READY),
+            RabbitMqBinding.domainEvent(
                     RabbitMqQueues.NOTIFICATION_MANAGEMENT_ALERT_CREATED,
                     RabbitMqRoutingKeys.ALERT_CREATED),
             RabbitMqBinding.domainEvent(

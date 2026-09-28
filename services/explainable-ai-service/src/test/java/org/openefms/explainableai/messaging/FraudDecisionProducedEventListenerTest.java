@@ -42,12 +42,17 @@ class FraudDecisionProducedEventListenerTest {
 
         listener.handle(fraudDecisionEvent(EventTypes.FRAUD_DECISION_PRODUCED, 1));
 
-        assertEquals(1, sink.messages.size());
-        ExplanationMessage message = sink.messages.getFirst();
-        assertEquals(RabbitMqRoutingKeys.EXPLANATION_PREPARED, message.routingKey());
-        assertEquals(EventTypes.EXPLANATION_PREPARED, message.envelope().metadata().eventType());
-        assertEquals("correlation-1", message.envelope().metadata().correlationId());
-        assertEquals(SOURCE_EVENT_ID.toString(), message.envelope().metadata().causationId());
+        assertEquals(2, sink.messages.size());
+        ExplanationMessage<?> explanationMessage = sink.messages.getFirst();
+        ExplanationMessage<?> feedbackMessage = sink.messages.get(1);
+        assertEquals(RabbitMqRoutingKeys.EXPLANATION_PREPARED, explanationMessage.routingKey());
+        assertEquals(EventTypes.EXPLANATION_PREPARED, explanationMessage.envelope().metadata().eventType());
+        assertEquals("correlation-1", explanationMessage.envelope().metadata().correlationId());
+        assertEquals(SOURCE_EVENT_ID.toString(), explanationMessage.envelope().metadata().causationId());
+        assertEquals(RabbitMqRoutingKeys.FRAUD_FEEDBACK_READY, feedbackMessage.routingKey());
+        assertEquals(EventTypes.FRAUD_FEEDBACK_READY, feedbackMessage.envelope().metadata().eventType());
+        assertEquals(explanationMessage.envelope().metadata().eventId().toString(),
+                feedbackMessage.envelope().metadata().causationId());
     }
 
     @Test
@@ -114,10 +119,10 @@ class FraudDecisionProducedEventListenerTest {
     }
 
     private static final class CapturingExplanationMessageSink implements ExplanationMessageSink {
-        private final List<ExplanationMessage> messages = new ArrayList<>();
+        private final List<ExplanationMessage<?>> messages = new ArrayList<>();
 
         @Override
-        public void accept(ExplanationMessage message) {
+        public void accept(ExplanationMessage<?> message) {
             messages.add(message);
         }
     }
