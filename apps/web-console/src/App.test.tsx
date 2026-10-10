@@ -140,4 +140,28 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Explainability' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Generate Feedback' })).toBeInTheDocument()
   })
+
+  it('renders the management questions view', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/management-questions']}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </ThemeProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Management Q&A' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Question' })).toBeInTheDocument()
+  })
 })

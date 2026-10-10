@@ -35,9 +35,10 @@ Explainable AI Service also exposes REST contracts for Swagger inspection and fu
 ```text
 POST /api/v1/explanations/fraud-decisions
 POST /api/v1/explanations/fraud-decisions/feedback
+POST /api/v1/explanations/management/questions
 ```
 
-The first endpoint returns an `ExplanationResponse`. The second returns a `TransactionFraudFeedbackResponse`, combining the fraud decision, recommended action, explanation summary, and evidence items.
+The first endpoint returns an `ExplanationResponse`. The second returns a `TransactionFraudFeedbackResponse`, combining the fraud decision, recommended action, explanation summary, and evidence items. The management question endpoint classifies management-style fraud questions and returns a safe answer status plus the structured query plan needed to ground counts, latest-case lookups, trend summaries, or case explanations.
 
 ## Published Events
 
