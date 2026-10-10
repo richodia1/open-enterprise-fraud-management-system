@@ -68,4 +68,28 @@ describe('App', () => {
     expect(screen.getByText('fraud.feedback.ready')).toBeInTheDocument()
     expect(screen.getByText('oefms.transaction-core.fraud-feedback-ready')).toBeInTheDocument()
   })
+
+  it('renders the transaction ingestion view', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/transactions']}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </ThemeProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Submit Transaction' })).toBeInTheDocument()
+  })
 })

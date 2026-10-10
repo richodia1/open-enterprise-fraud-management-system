@@ -12,12 +12,14 @@ import { ListsPage } from './features/lists/ListsPage'
 import { ReportsPage } from './features/reports/ReportsPage'
 import { RulesPage } from './features/rules/RulesPage'
 import { SystemHealthPage } from './features/system/SystemHealthPage'
+import { TransactionsPage } from './features/transactions/TransactionsPage'
 
 function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
+        <Route path="transactions" element={<TransactionsPage />} />
         <Route path="transaction-feedback" element={<TransactionFeedbackPage />} />
         <Route path="cases" element={<CasesPage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />

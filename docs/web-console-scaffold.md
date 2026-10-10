@@ -9,6 +9,7 @@ Swagger remains useful for contract inspection, but the product also needs a UI 
 ## Initial Scope
 
 - Dashboard for gateway health, case volume, alert volume, rules, and recent audit traceability.
+- Transactions view for submitting demo transaction ingestion requests and inspecting receipts.
 - Transaction feedback view for the event-driven core banking consumption contract.
 - Cases and alerts views backed by the current case-management contracts.
 - Case detail view with assignment, status, final disposition, and lifecycle history.
