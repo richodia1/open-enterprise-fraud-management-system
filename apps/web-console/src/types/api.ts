@@ -106,6 +106,89 @@ export type AuditLogRecord = {
   tenantId: string
 }
 
+export type TransactionType =
+  | 'ACCOUNT_OPENING'
+  | 'BILL_PAYMENT'
+  | 'CARD_PAYMENT'
+  | 'CASH_DEPOSIT'
+  | 'CASH_WITHDRAWAL'
+  | 'LOAN_DISBURSEMENT'
+  | 'REVERSAL'
+  | 'TRANSFER'
+  | 'OTHER'
+
+export type TransactionChannel =
+  | 'API'
+  | 'ATM'
+  | 'BRANCH'
+  | 'CARD'
+  | 'CORE_BANKING'
+  | 'INTERNET_BANKING'
+  | 'MOBILE'
+  | 'PAYMENT_SWITCH'
+  | 'POS'
+  | 'OTHER'
+
+export type TransactionDirection = 'INBOUND' | 'OUTBOUND' | 'INTERNAL'
+
+export type TransactionParty = {
+  accountNumberHash?: string
+  accountReference?: string
+  attributes?: Record<string, string>
+  countryCode?: string
+  customerReference?: string
+  institutionCode?: string
+  partyReference?: string
+}
+
+export type TransactionIngestionRequest = {
+  amount: {
+    currency: string
+    value: number
+  }
+  attributes?: Record<string, string>
+  beneficiary?: TransactionParty
+  channel: TransactionChannel
+  direction: TransactionDirection
+  externalReference?: string
+  initiatedAt: string
+  originator?: TransactionParty
+  tenantId: string
+  transactionId: string
+  transactionType: TransactionType
+}
+
+export type TransactionIngestionResponse = {
+  acceptedAt: string
+  attributes: Record<string, string>
+  correlationId: string
+  eventType: string
+  externalReference?: string
+  status: string
+  tenantId: string
+  transactionId: string
+}
+
+export type TransactionReceiptRecord = {
+  acceptedAt: string
+  amount: number | string
+  attributes: Record<string, string>
+  channel: TransactionChannel
+  correlationId: string
+  currency: string
+  direction: TransactionDirection
+  eventId: string
+  eventType: string
+  externalReference?: string
+  initiatedAt: string
+  publishedAt?: string
+  status: string
+  tenantId: string
+  traceId?: string
+  transactionId: string
+  transactionType: TransactionType
+}
+
 export type RuleDefinition = {
   active?: boolean
   category?: string
