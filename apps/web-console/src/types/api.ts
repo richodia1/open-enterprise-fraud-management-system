@@ -261,6 +261,41 @@ export type FraudDecisionRecord = {
   transactionId: string
 }
 
+export type EvidenceItem = {
+  attributes: Record<string, string>
+  contribution?: number | string
+  description?: string
+  evidenceType: string
+  title: string
+}
+
+export type ExplanationResponse = {
+  attributes: Record<string, string>
+  decisionId: string
+  evidence: EvidenceItem[]
+  explainedAt: string
+  explanationId: string
+  summary: string
+  tenantId: string
+  transactionId: string
+}
+
+export type TransactionFraudFeedbackResponse = {
+  attributes: Record<string, string>
+  decidedAt: string
+  decisionId: string
+  evidence: EvidenceItem[]
+  explainedAt: string
+  explanationId: string
+  explanationSummary: string
+  mode: DecisionMode
+  outcome: DecisionOutcome
+  recommendedAction: RecommendedTransactionAction
+  riskScore: RiskScore
+  tenantId: string
+  transactionId: string
+}
+
 export type MlRuntimeState = 'DISABLED' | 'CONTRACT_ONLY' | 'READY'
 
 export type MlRuntimeStatus = {

@@ -11,6 +11,7 @@ Swagger remains useful for contract inspection, but the product also needs a UI 
 - Dashboard for gateway health, case volume, alert volume, rules, and recent audit traceability.
 - Transactions view for submitting demo transaction ingestion requests and inspecting receipts.
 - Fraud decisions view for running sample decisions, checking ML runtime status, and reviewing tenant decisions.
+- Explainability view for generating investigator explanations and core-banking feedback payloads.
 - Transaction feedback view for the event-driven core banking consumption contract.
 - Cases and alerts views backed by the current case-management contracts.
 - Case detail view with assignment, status, final disposition, and lifecycle history.
