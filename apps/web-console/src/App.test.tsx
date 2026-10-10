@@ -43,4 +43,29 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'Configuration' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Configuration Management' })).toBeInTheDocument()
   })
+
+  it('renders the transaction feedback integration view', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/transaction-feedback']}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </ThemeProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Transaction Feedback' })).toBeInTheDocument()
+    expect(screen.getByText('fraud.feedback.ready')).toBeInTheDocument()
+    expect(screen.getByText('oefms.transaction-core.fraud-feedback-ready')).toBeInTheDocument()
+  })
 })
