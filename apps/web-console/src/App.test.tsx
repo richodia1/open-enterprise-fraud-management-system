@@ -116,4 +116,28 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Fraud Decisions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Run Decision' })).toBeInTheDocument()
   })
+
+  it('renders the explainability view', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/explainability']}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </ThemeProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Explainability' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Generate Feedback' })).toBeInTheDocument()
+  })
 })
