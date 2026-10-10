@@ -10,6 +10,7 @@ import {
   ListChecks,
   MessageSquareReply,
   Settings2,
+  ShieldAlert,
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
@@ -24,6 +25,7 @@ export type NavigationItem = {
 export const navigationItems: NavigationItem[] = [
   { label: 'Dashboard', href: '/', icon: Gauge, group: 'Operations' },
   { label: 'Transactions', href: '/transactions', icon: CreditCard, group: 'Operations' },
+  { label: 'Fraud Decisions', href: '/fraud-decisions', icon: ShieldAlert, group: 'Operations' },
   { label: 'Transaction Feedback', href: '/transaction-feedback', icon: MessageSquareReply, group: 'Operations' },
   { label: 'Cases', href: '/cases', icon: ClipboardList, group: 'Operations' },
   { label: 'Alerts', href: '/alerts', icon: AlertTriangle, group: 'Operations' },

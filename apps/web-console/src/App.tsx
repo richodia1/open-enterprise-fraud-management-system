@@ -7,6 +7,7 @@ import { AuditLogsPage } from './features/audit/AuditLogsPage'
 import { ConfigurationPage } from './features/configuration/ConfigurationPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TransactionFeedbackPage } from './features/feedback/TransactionFeedbackPage'
+import { FraudDecisionsPage } from './features/fraud/FraudDecisionsPage'
 import { IdentityPage } from './features/identity/IdentityPage'
 import { ListsPage } from './features/lists/ListsPage'
 import { ReportsPage } from './features/reports/ReportsPage'
@@ -20,6 +21,7 @@ function App() {
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
         <Route path="transactions" element={<TransactionsPage />} />
+        <Route path="fraud-decisions" element={<FraudDecisionsPage />} />
         <Route path="transaction-feedback" element={<TransactionFeedbackPage />} />
         <Route path="cases" element={<CasesPage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />
