@@ -23,6 +23,7 @@ These modules should stay small. Do not add repositories, JPA annotations, servi
 | `org.openefms.common.models.ml` | ML scoring requests, scoring responses, feature contributions, and runtime status. |
 | `org.openefms.common.models.explanation` | Explanation request, explanation response, and evidence items. |
 | `org.openefms.common.models.feedback` | Combined fraud-feedback payloads for transaction-core and operator integrations. |
+| `org.openefms.common.models.intelligence` | Management question-answering contracts and structured query plans. |
 | `org.openefms.common.models.alert` | Alert creation request and priority. |
 | `org.openefms.common.models.casefile` | Case creation request and priority. |
 | `org.openefms.common.models.audit` | Audit event record and audit action. |

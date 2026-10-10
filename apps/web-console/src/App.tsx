@@ -10,6 +10,7 @@ import { TransactionFeedbackPage } from './features/feedback/TransactionFeedback
 import { ExplainabilityPage } from './features/explainability/ExplainabilityPage'
 import { FraudDecisionsPage } from './features/fraud/FraudDecisionsPage'
 import { IdentityPage } from './features/identity/IdentityPage'
+import { ManagementQuestionsPage } from './features/intelligence/ManagementQuestionsPage'
 import { ListsPage } from './features/lists/ListsPage'
 import { ReportsPage } from './features/reports/ReportsPage'
 import { RulesPage } from './features/rules/RulesPage'
@@ -24,6 +25,7 @@ function App() {
         <Route path="transactions" element={<TransactionsPage />} />
         <Route path="fraud-decisions" element={<FraudDecisionsPage />} />
         <Route path="explainability" element={<ExplainabilityPage />} />
+        <Route path="management-questions" element={<ManagementQuestionsPage />} />
         <Route path="transaction-feedback" element={<TransactionFeedbackPage />} />
         <Route path="cases" element={<CasesPage />} />
         <Route path="cases/:caseId" element={<CaseDetailPage />} />

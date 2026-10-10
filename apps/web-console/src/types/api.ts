@@ -296,6 +296,51 @@ export type TransactionFraudFeedbackResponse = {
   transactionId: string
 }
 
+export type ManagementQuestionIntent =
+  | 'LATEST_FRAUD_CASE'
+  | 'FRAUD_CASE_COUNT_BY_CHANNEL'
+  | 'FRAUD_CASE_COUNT_BY_CAUSE'
+  | 'FRAUD_CASE_EXPLANATION'
+  | 'FRAUD_TREND_SUMMARY'
+  | 'UNKNOWN'
+
+export type ManagementQuestionAnswerStatus =
+  | 'ANSWERED_FROM_CONTEXT'
+  | 'NEEDS_STRUCTURED_DATA'
+  | 'NEEDS_CASE_CONTEXT'
+  | 'UNKNOWN'
+
+export type ManagementQuestionRequest = {
+  audience?: string
+  context?: Record<string, string>
+  filters?: Record<string, string>
+  periodEnd?: string
+  periodStart?: string
+  question: string
+  tenantId: string
+}
+
+export type ManagementQuestionQueryPlan = {
+  endpoint: string
+  parameters: Record<string, string>
+  purpose: string
+  sourceService: string
+}
+
+export type ManagementQuestionAnswerResponse = {
+  answer: string
+  answeredAt: string
+  answerId: string
+  attributes: Record<string, string>
+  intent: ManagementQuestionIntent
+  liveDataRequired: boolean
+  queryPlan: ManagementQuestionQueryPlan[]
+  question: string
+  status: ManagementQuestionAnswerStatus
+  supportingEvidence: EvidenceItem[]
+  tenantId: string
+}
+
 export type MlRuntimeState = 'DISABLED' | 'CONTRACT_ONLY' | 'READY'
 
 export type MlRuntimeStatus = {
