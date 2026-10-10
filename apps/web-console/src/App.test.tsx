@@ -92,4 +92,28 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Submit Transaction' })).toBeInTheDocument()
   })
+
+  it('renders the fraud decisions view', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={['/fraud-decisions']}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </ThemeProvider>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Fraud Decisions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Run Decision' })).toBeInTheDocument()
+  })
 })

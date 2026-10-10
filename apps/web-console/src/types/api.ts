@@ -189,6 +189,90 @@ export type TransactionReceiptRecord = {
   transactionType: TransactionType
 }
 
+export type DecisionMode = 'RULES' | 'ML' | 'HYBRID'
+
+export type DecisionOutcome = 'APPROVE' | 'REVIEW' | 'BLOCK' | 'ESCALATE'
+
+export type RecommendedTransactionAction =
+  | 'PROCEED_TO_COMPLETION'
+  | 'HOLD_FOR_MANUAL_REVIEW'
+  | 'REJECT_TRANSACTION'
+  | 'ESCALATE_FOR_INVESTIGATION'
+
+export type RiskBand = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+
+export type RiskScore = {
+  band: RiskBand
+  reason?: string
+  value: number | string
+}
+
+export type RuleHit = {
+  attributes: Record<string, string>
+  contribution: number | string
+  explanation?: string
+  ruleCode: string
+  ruleName?: string
+  severity: RiskBand
+}
+
+export type ModelSignal = {
+  contribution?: number | string
+  featureValues: Record<string, string>
+  modelName: string
+  modelVersion?: string
+  score: number | string
+}
+
+export type FraudDecisionResponse = {
+  attributes: Record<string, string>
+  decidedAt: string
+  decisionId: string
+  mode: DecisionMode
+  modelSignals: ModelSignal[]
+  outcome: DecisionOutcome
+  recommendedAction: RecommendedTransactionAction
+  riskScore: RiskScore
+  ruleHits: RuleHit[]
+  tenantId: string
+  transactionId: string
+}
+
+export type FraudDecisionRecord = {
+  attributes: Record<string, string>
+  causationId?: string
+  correlationId?: string
+  decidedAt: string
+  decisionId: string
+  eventId?: string
+  eventType?: string
+  mode: DecisionMode
+  modelSignalCount: number
+  modelSignalSummary: string
+  outcome: DecisionOutcome
+  recommendedAction: RecommendedTransactionAction
+  riskBand: RiskBand
+  riskReason: string
+  riskScoreValue: number | string
+  ruleEvidenceSummary: string
+  ruleHitCount: number
+  tenantId: string
+  traceId?: string
+  transactionId: string
+}
+
+export type MlRuntimeState = 'DISABLED' | 'CONTRACT_ONLY' | 'READY'
+
+export type MlRuntimeStatus = {
+  attributes: Record<string, string>
+  checkedAt: string
+  modelName: string
+  provider: string
+  reason: string
+  state: MlRuntimeState
+  supportedModes: DecisionMode[]
+}
+
 export type RuleDefinition = {
   active?: boolean
   category?: string
